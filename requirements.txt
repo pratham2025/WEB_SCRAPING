@@ -1,0 +1,10 @@
+# requirements.txt
+
+fastapi
+uvicorn[standard]
+selenium
+webdriver-manager
+beautifulsoup4
+streamlit
+requests
+pandas

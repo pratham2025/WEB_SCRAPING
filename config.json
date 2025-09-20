@@ -1,0 +1,21 @@
+{
+	"sources": [
+		{
+			"name": "MAHACET",
+			"url": "https://cetcell.mahacet.org/"
+		},
+		{
+			"name": "NTA",
+			"url": "https://www.nta.ac.in/"
+		},
+		{
+			"name": "CBSE",
+			"url": "https://www.cbse.gov.in/cbsenew/cbse.html"
+		},
+		{
+			"name": "NEET",
+			"url": "https://neet.nta.nic.in/public-notices/"
+		}
+	]
+}
+
