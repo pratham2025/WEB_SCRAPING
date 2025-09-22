@@ -15,6 +15,10 @@
 		{
 			"name": "NEET",
 			"url": "https://neet.nta.nic.in/public-notices/"
+		},
+		{
+			"name": "JEE",
+			"url": "https://jeemain.nta.ac.in/public-notices/"
 		}
 	]
 }

@@ -30,6 +30,7 @@ class SourceEnum(str, Enum):
     nta = "NTA"
     cbse = "CBSE"
     neet = "NEET"
+    jee = "JEE" # JEE source added back here
 
 # --- Helper Functions ---
 def dict_factory(cursor, row):
