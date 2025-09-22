@@ -34,7 +34,9 @@ class SourceEnum(str, Enum):
     nta = "NTA"
     cbse = "CBSE"
     neet = "NEET"
-    jee = "JEE" # JEE source added back here
+    jee = "JEE"
+    gate = "GATE" # <-- ADDED: GATE source is now valid for the API
+
 
 # --- Helper Functions ---
 def dict_factory(cursor, row):
@@ -82,4 +84,3 @@ async def get_source_data(source: SourceEnum):
     results = cursor.fetchall()
     conn.close()
     return {"source": source.value, "data": results}
-
