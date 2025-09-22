@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ExamDoor — Notifications</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css"/>
+  <meta name="description" content="Glassdoor-inspired green UI for exam announcements from CBSE, JEE, MHT-CET, NEET, NTA, etc."/>
+</head>
+<body>
+  <!-- subtle green doodles -->
+  <svg class="doodle doodle-1" viewBox="0 0 200 200" aria-hidden="true">
+    <path d="M100 10 C140 10 190 40 190 100 C190 160 140 190 100 190 C60 190 10 160 10 100 C10 40 60 10 100 10 Z"
+          fill="none" stroke="rgba(0,165,98,0.15)" stroke-width="4"/>
+    <circle cx="140" cy="60" r="8" fill="rgba(0,165,98,0.15)"/>
+  </svg>
+  <svg class="doodle doodle-2" viewBox="0 0 200 200" aria-hidden="true">
+    <path d="M20 100 Q100 10 180 100 Q100 190 20 100 Z"
+          fill="none" stroke="rgba(0,165,98,0.10)" stroke-width="3" stroke-dasharray="6 8"/>
+  </svg>
+
+  <header class="topbar">
+    <div class="brand">
+      <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true" class="logo">
+        <defs>
+          <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0%" stop-color="#00A562"/>
+            <stop offset="100%" stop-color="#12B76A"/>
+          </linearGradient>
+        </defs>
+        <path fill="url(#g)" d="M12 2a10 10 0 100 20 10 10 0 000-20Zm3.5 14.5H8.5a1.5 1.5 0 110-3h7a1.5 1.5 0 110 3Zm0-6H8.5a1.5 1.5 0 110-3h7a1.5 1.5 0 110 3Z"/>
+      </svg>
+      <span>ExamDoor</span>
+    </div>
+
+    <!-- Global search (filters the current tab list) -->
+    <form class="searchbar" id="globalSearch">
+      <div class="field">
+        <input id="q" type="text" placeholder="Search announcements (e.g., admit card, schedule, result)"/>
+        <label for="q">Search</label>
+      </div>
+      <div class="divider" aria-hidden="true"></div>
+      <div class="field">
+        <input id="org" type="text" placeholder="Filter by source (e.g., CBSE, NTA)"/>
+        <label for="org">By Source</label>
+      </div>
+      <button class="btn primary" type="submit">Search</button>
+    </form>
+
+    <!-- Update the navigation section -->
+    <nav class="actions">
+        <a class="link" href="home.html">Home</a>
+        <a class="link active" href="index.html">Notifications</a>
+        <a class="link" href="syllabus.html">Syllabus</a>
+        <a class="link" href="answer-keys.html">Answer Keys</a>
+        <a class="btn ghost" href="home.html#subscribe">Subscribe Alerts</a>
+    </nav>
+  </header>
+
+  <!-- Tabs created from /sources -->
+  <nav class="exam-tabs" id="examTabs" aria-label="Sources"></nav>
+
+  <main class="container">
+    <!-- Left panel (sort + status) -->
+    <aside class="filters" aria-label="Panel">
+      <h2 class="filters-title">Panel</h2>
+      <div class="filter-group">
+        <span class="filter-label">Sort</span>
+        <div class="chipset">
+          <button class="chip" data-sort="default">Default (Newest First)</button>
+          <button class="chip" data-sort="az">Alphabetical (A–Z)</button>
+        </div>
+      </div>
+      <div class="status" id="connStatus" aria-live="polite">Checking API…</div>
+    </aside>
+
+    <!-- Results -->
+    <section class="results" aria-label="Announcements">
+      <div class="results-header">
+        <h2><span id="resultCount">0</span> announcements</h2>
+      </div>
+      <ul id="examList" class="card-list" role="list"></ul>
+      <div class="pagination" id="pagination" aria-label="Pagination"></div>
+    </section>
+
+    <!-- Details -->
+    <aside class="details" aria-live="polite" aria-atomic="true">
+      <div id="examDetail" class="detail empty">
+        <div class="empty-state">
+          <svg viewBox="0 0 200 200" class="empty-art" aria-hidden="true">
+            <rect x="20" y="40" width="160" height="100" rx="12" fill="rgba(0,165,98,0.08)"/>
+            <circle cx="50" cy="70" r="10" fill="rgba(0,165,98,0.20)"/>
+            <rect x="70" y="62" width="90" height="8" rx="4" fill="rgba(0,165,98,0.20)"/>
+            <rect x="40" y="90" width="110" height="8" rx="4" fill="rgba(0,165,98,0.12)"/>
+            <rect x="40" y="108" width="80" height="8" rx="4" fill="rgba(0,165,98,0.12)"/>
+          </svg>
+          <p>Select an announcement to see details</p>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-grid">
+      <div>
+        <h4>About</h4>
+        <a href="#">Our Story</a>
+        <a href="#">Press</a>
+        <a href="#">Careers</a>
+      </div>
+      <div>
+        <h4>Discover</h4>
+        <a href="#">Upcoming Exams</a>
+        <a href="#">Results</a>
+        <a href="#">Admit Cards</a>
+      </div>
+      <div>
+        <h4>Resources</h4>
+        <a href="#">Help Center</a>
+        <a href="#">Guidelines</a>
+        <a href="#">Terms & Privacy</a>
+      </div>
+      <div>
+        <h4>Stay in the loop</h4>
+        <form id="newsForm" class="newsletter">
+          <input type="email" placeholder="Your email" aria-label="Email"/>
+          <button class="btn primary" type="submit">Subscribe</button>
+        </form>
+      </div>
+    </div>
+    <p class="copyright">© <span id="year"></span> ExamDoor. Built with ❤️ in green.</p>
+  </footer>
+
+  <script src="./app.js"></script>
+</body>
+</html>
