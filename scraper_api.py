@@ -1,4 +1,5 @@
-import sqlite3
+import psycopg2
+from psycopg2 import extras # <-- The fix is here
 from enum import Enum
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -24,29 +25,29 @@ app.add_middleware(
 )
 
 # --- UPDATED ENUM ---
-# This tells the API which sources are valid.
 class SourceEnum(str, Enum):
     mahacet = "MAHACET"
     nta = "NTA"
     cbse = "CBSE"
     neet = "NEET"
     jee = "JEE"
-    gate = "GATE" # <-- ADDED: GATE source is now valid for the API
+    gate = "GATE"
 
 
 # --- Helper Functions ---
-def dict_factory(cursor, row):
-    # ... (this function is unchanged)
-    fields = [column[0] for column in cursor.description]
-    return {key: value for key, value in zip(fields, row)}
-
 def get_db_connection():
-    """Establishes a connection to the database."""
+    """Establishes a connection to the PostgreSQL database."""
+    conn_params = {
+        "host": "localhost",
+        "dbname": "announcements_db",
+        "user": "notifyme",
+        "password": "Pratham@2025",
+        "port": "5432"
+    }
     try:
-        conn = sqlite3.connect("data.db")
-        conn.row_factory = dict_factory
+        conn = psycopg2.connect(**conn_params)
         return conn
-    except sqlite3.Error as e:
+    except psycopg2.Error as e:
         logging.error(f"Database connection error: {e}")
         raise HTTPException(status_code=500, detail="Database connection error")
 
@@ -59,9 +60,11 @@ async def get_sources():
     that have data in the announcements table.
     """
     conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT DISTINCT source FROM announcements")
+    # Use RealDictCursor to get results as dictionaries
+    cursor = conn.cursor(cursor_factory=extras.RealDictCursor) 
+    cursor.execute("SELECT DISTINCT source FROM announcements ORDER BY source ASC")
     sources = [row['source'] for row in cursor.fetchall()]
+    cursor.close()
     conn.close()
     return {"sources": sources}
 
@@ -72,11 +75,13 @@ async def get_source_data(source: SourceEnum):
     Instantly fetches announcement data for a specified source from the database.
     """
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(cursor_factory=extras.RealDictCursor)
+    # IMPORTANT: Use %s for placeholders
     cursor.execute(
-        "SELECT id, source, text, link FROM announcements WHERE source = ? ORDER BY id DESC",
+        "SELECT id, source, text, link FROM announcements WHERE source = %s ORDER BY id DESC",
         (source.value,),
     )
     results = cursor.fetchall()
+    cursor.close()
     conn.close()
     return {"source": source.value, "data": results}

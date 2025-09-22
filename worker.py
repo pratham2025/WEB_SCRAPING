@@ -1,4 +1,5 @@
-import sqlite3
+import psycopg2 # <-- ADD THIS
+import os # <-- ADD THIS for environment variables
 import time
 import logging
 import json
@@ -230,7 +231,7 @@ def scrape_gate(driver):
 def save_to_db(source_name, results):
     """
     De-duplicates scraped results, clears old announcements for the source,
-    and saves the new, fresh list.
+    and saves the new, fresh list to POSTGRESQL.
     """
     if not results:
         logging.warning(f"No results to save for {source_name}.")
@@ -247,28 +248,46 @@ def save_to_db(source_name, results):
     if len(results) != len(unique_results):
         logging.warning(f"Filtered {len(results) - len(unique_results)} duplicate-link items for {source_name}.")
 
-    conn = sqlite3.connect('data.db')
-    cursor = conn.cursor()
+    # --- NEW: PostgreSQL Connection ---
+    # It's best practice to load these from environment variables
+    # For example: os.environ.get('DB_HOST', 'localhost')
+    conn_params = {
+        "host": "localhost",
+        "dbname": "announcements_db",
+        "user": "notifyme",
+        "password": "Pratham@2025",
+        "port": "5432"
+    }
 
     try:
-        # Delete all previous entries for this source
+        conn = psycopg2.connect(**conn_params)
+        cursor = conn.cursor()
+
+        # Use a transaction to ensure atomicity
+        # If any step fails, the whole block is rolled back.
         logging.info(f"Clearing old data for {source_name}...")
-        cursor.execute("DELETE FROM announcements WHERE source = ?", (source_name,))
+        cursor.execute("DELETE FROM announcements WHERE source = %s", (source_name,))
         
-        # Insert all the newly scraped and de-duplicated items
+        logging.info(f"Inserting {len(unique_results)} new items for {source_name}...")
         # Using reversed to keep the latest announcements at the end (higher ID)
         for item in reversed(unique_results):
-            cursor.execute("INSERT INTO announcements (source, text, link) VALUES (?, ?, ?)",
-                           (source_name, item['text'], item['link']))
+            # IMPORTANT: Use %s for placeholders, NOT ?. psycopg2 handles sanitization.
+            cursor.execute(
+                "INSERT INTO announcements (source, text, link) VALUES (%s, %s, %s)",
+                (source_name, item['text'], item['link'])
+            )
         
         conn.commit()
         logging.info(f"Database operation for {source_name} complete. Saved {len(unique_results)} fresh items.")
 
-    except Exception as e:
+    except psycopg2.Error as e:
         logging.error(f"Database error for {source_name}: {e}")
-        conn.rollback()
+        # conn.rollback() is handled automatically when 'with' block exits on error
     finally:
-        conn.close()
+        if 'conn' in locals() and conn:
+            cursor.close()
+            conn.close()
+
 
 
 # --- Main Worker Loop ---
