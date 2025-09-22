@@ -19,7 +19,10 @@
 		{
 			"name": "JEE",
 			"url": "https://jeemain.nta.ac.in/public-notices/"
+		},
+		{
+			"name": "GATE",
+			"url": "https://gate2026.iitg.ac.in/notifications.html"
 		}
 	]
 }
-

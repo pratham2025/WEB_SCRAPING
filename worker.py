@@ -15,7 +15,7 @@ import requests
 
 # --- Configuration ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - [%(filename)s] - %(message)s')
-SCRAPE_INTERVAL_SECONDS = 3600  # Scrape every 1 hour
+SCRAPE_INTERVAL_SECONDS = 3600
 
 # --- Selenium Setup ---
 def setup_driver():
@@ -40,12 +40,8 @@ def setup_driver():
     return driver
 
 # --- Site-Specific Scraper Functions ---
-
+# (All scraper functions remain unchanged)
 def scrape_mahacet(driver):
-    """
-    Scrapes announcements from the MAHACET website.
-    Uses the user's original, proven logic.
-    """
     logging.info("Using original, user-provided logic for MAHACET.")
     wait = WebDriverWait(driver, 20)
     wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'educms-download-marquee-content-items')))
@@ -66,7 +62,6 @@ def scrape_mahacet(driver):
     return results
 
 def scrape_nta(driver):
-    """Scrapes announcements from the NTA website."""
     wait = WebDriverWait(driver, 15)
     wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'latestPart')))
     soup = BeautifulSoup(driver.page_source, 'html.parser')
@@ -83,10 +78,25 @@ def scrape_nta(driver):
                 results.append({"text": text_tag.text.strip(), "link": link})
     return results
 
+def scrape_cbse_selenium(driver):
+    logging.warning("CBSE: Requests method failed, falling back to Selenium.")
+    try:
+        wait = WebDriverWait(driver, 15)
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "li.list-new a")))
+        time.sleep(2)
+        soup = BeautifulSoup(driver.page_source, "html.parser")
+        results = []
+        for item in soup.select("li.list-new a"):
+            text = item.text.strip()
+            link = urljoin(driver.current_url, item.get("href", "#"))
+            results.append({"text": text, "link": link})
+        return results
+    except Exception as e:
+        logging.error(f"Error during Selenium fallback for CBSE: {e}")
+        return []
 
-def scrape_cbse_requests():
-    """Scrape CBSE using requests (fallback when Selenium is blocked)."""
-    logging.info("CBSE: Using requests fallback method.")
+def scrape_cbse(driver):
+    logging.info("CBSE: Attempting to scrape using requests method.")
     url = "https://www.cbse.gov.in/cbsenew/cbse.html"
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -95,8 +105,8 @@ def scrape_cbse_requests():
         res = requests.get(url, headers=headers, timeout=20)
         res.raise_for_status()
         if "Access Denied" in res.text:
-            logging.error("CBSE blocked requests method as well.")
-            return []
+            logging.error("CBSE blocked requests method.")
+            return scrape_cbse_selenium(driver)
         soup = BeautifulSoup(res.text, "html.parser")
         results = []
         for item in soup.select("li.list-new a"):
@@ -106,40 +116,14 @@ def scrape_cbse_requests():
         return results
     except requests.RequestException as e:
         logging.error(f"Requests failed for CBSE: {e}")
-        return []
-
-def scrape_cbse(driver):
-    """Scrapes announcements from the CBSE website using Selenium, with a built-in fallback."""
-    try:
-        wait = WebDriverWait(driver, 10)
-        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "div#box1")))
-        time.sleep(4)
-
-        if "Access Denied" in driver.page_source:
-            logging.warning("CBSE blocked Selenium, falling back to requests.")
-            return scrape_cbse_requests()
-
-        soup = BeautifulSoup(driver.page_source, "html.parser")
-        results = []
-        for item in soup.select("li.list-new a"):
-            text = item.text.strip()
-            link = urljoin(driver.current_url, item.get("href", "#"))
-            results.append({"text": text, "link": link})
-        return results
-    except Exception as e:
-        logging.error(f"Error during Selenium scrape for CBSE: {e}")
-        return scrape_cbse_requests()
+        return scrape_cbse_selenium(driver)
 
 def scrape_neet(driver):
-    """Scrapes public notices from the NEET website."""
     logging.info("Scraping NEET website.")
     wait = WebDriverWait(driver, 20)
-    
     wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".wpb_wrapper ul li a")))
-    
     soup = BeautifulSoup(driver.page_source, 'html.parser')
     results = []
-    
     notice_list = soup.select_one(".wpb_wrapper ul")
     if notice_list:
         for item in notice_list.find_all('li'):
@@ -150,13 +134,32 @@ def scrape_neet(driver):
                 if not link.startswith('http'):
                     link = urljoin(driver.current_url, link)
                 results.append({"text": text, "link": link})
-    
     logging.info(f"Found {len(results)} announcements for NEET.")
     return results
 
-def scrape_jee_requests():
-    """Scrape JEE Main using requests fallback."""
-    logging.info("JEE: Using requests fallback method.")
+def scrape_jee_selenium(driver):
+    logging.warning("JEE: Requests method failed, falling back to Selenium.")
+    try:
+        wait = WebDriverWait(driver, 25)
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".wpb_wrapper .gen-list ul li a")))
+        time.sleep(2)
+        soup = BeautifulSoup(driver.page_source, "html.parser")
+        results = []
+        for item in soup.select(".wpb_wrapper .gen-list ul li a"):
+            text = item.get_text(strip=True)
+            link = item.get("href", "#")
+            if text:
+                if not link.startswith("http"):
+                    link = urljoin(driver.current_url, link)
+                results.append({"text": text, "link": link})
+        logging.info(f"Found {len(results)} announcements for JEE (selenium).")
+        return results
+    except Exception as e:
+        logging.error(f"Error during Selenium fallback for JEE: {e}")
+        return []
+
+def scrape_jee(driver):
+    logging.info("JEE: Attempting to scrape using requests method.")
     url = "https://jeemain.nta.nic.in/public-notices/"
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -179,54 +182,94 @@ def scrape_jee_requests():
         return results
     except Exception as e:
         logging.error(f"Requests failed for JEE: {e}")
-        return []
+        return scrape_jee_selenium(driver)
 
-
-def scrape_jee(driver):
-    """Scrapes public notices from the JEE Main website using Selenium, with fallback."""
-    logging.info("Scraping JEE Main website.")
+def scrape_gate(driver):
+    """Scrapes announcements from the GATE 2026 website, creating unique placeholders for items without links."""
+    logging.info("Scraping GATE 2026 website.")
+    results = []
     try:
-        wait = WebDriverWait(driver, 25)
-        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".wpb_wrapper .gen-list ul li a")))
-        time.sleep(5)
+        wait = WebDriverWait(driver, 20)
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "table.table-bordered")))
+        time.sleep(2)
+        soup = BeautifulSoup(driver.page_source, 'html.parser')
+        notification_table = soup.find('table', class_='table-bordered')
+        if not notification_table:
+            logging.warning("GATE: Could not find the notification table.")
+            return []
+        for row in notification_table.find_all('tr'):
+            cell = row.find('td', class_='text-left')
+            if not cell:
+                continue
+            
+            text = cell.get_text(strip=True)
+            link_tag = cell.find('a')
 
-        soup = BeautifulSoup(driver.page_source, "html.parser")
-        results = []
-        for item in soup.select(".wpb_wrapper .gen-list ul li a"):
-            text = item.get_text(strip=True)
-            link = item.get("href", "#")
+            if link_tag and link_tag.get('href', '#') != '#':
+                # Use the real link if one exists and is not just '#'
+                link = link_tag.get('href')
+            else:
+                # --- IMPROVEMENT: Create a unique placeholder link ---
+                # This makes items without a real URL unique, e.g., "#Registration-Opens-on-August-28-2025"
+                placeholder = text.replace(' ', '-').replace('.', '')
+                link = f"#{placeholder}"
+
             if text:
-                if not link.startswith("http"):
+                if not link.startswith('http') and not link.startswith('#'):
                     link = urljoin(driver.current_url, link)
                 results.append({"text": text, "link": link})
 
-        logging.info(f"Found {len(results)} announcements for JEE (selenium).")
-        return results
+    except TimeoutException:
+        logging.error("GATE: Timed out waiting for the notifications table to load.")
     except Exception as e:
-        logging.error(f"Error scraping JEE: {e}")
-        return scrape_jee_requests()
-
-
-# --- Database Operations ---
+        logging.error(f"An unexpected error occurred while scraping GATE: {e}")
+        
+    logging.info(f"Found {len(results)} announcements for GATE.")
+    return results
+# --- FINAL, ROBUST DATABASE OPERATIONS ---
 def save_to_db(source_name, results):
+    """
+    De-duplicates scraped results, clears old announcements for the source,
+    and saves the new, fresh list.
+    """
     if not results:
         logging.warning(f"No results to save for {source_name}.")
         return
 
+    # Filter out items with duplicate links before DB operations
+    unique_results = []
+    seen_links = set()
+    for item in results:
+        if item['link'] not in seen_links:
+            unique_results.append(item)
+            seen_links.add(item['link'])
+    
+    if len(results) != len(unique_results):
+        logging.warning(f"Filtered {len(results) - len(unique_results)} duplicate-link items for {source_name}.")
+
     conn = sqlite3.connect('data.db')
     cursor = conn.cursor()
-    new_items_count = 0
-    for item in reversed(results):
-        try:
-            cursor.execute("INSERT OR IGNORE INTO announcements (source, text, link) VALUES (?, ?, ?)",
+
+    try:
+        # Delete all previous entries for this source
+        logging.info(f"Clearing old data for {source_name}...")
+        cursor.execute("DELETE FROM announcements WHERE source = ?", (source_name,))
+        
+        # Insert all the newly scraped and de-duplicated items
+        # Using reversed to keep the latest announcements at the end (higher ID)
+        for item in reversed(unique_results):
+            cursor.execute("INSERT INTO announcements (source, text, link) VALUES (?, ?, ?)",
                            (source_name, item['text'], item['link']))
-            if cursor.rowcount > 0:
-                new_items_count += 1
-        except Exception as e:
-            logging.error(f"Database error for {source_name}: {e} - Item: {item}")
-    conn.commit()
-    conn.close()
-    logging.info(f"Finished database operation for {source_name}. Added {new_items_count} new items.")
+        
+        conn.commit()
+        logging.info(f"Database operation for {source_name} complete. Saved {len(unique_results)} fresh items.")
+
+    except Exception as e:
+        logging.error(f"Database error for {source_name}: {e}")
+        conn.rollback()
+    finally:
+        conn.close()
+
 
 # --- Main Worker Loop ---
 def main():
@@ -250,6 +293,7 @@ def main():
         "CBSE": scrape_cbse,
         "NEET": scrape_neet,
         "JEE": scrape_jee,
+        "GATE": scrape_gate,
     }
 
     driver = setup_driver()
@@ -268,7 +312,8 @@ def main():
                 
                 logging.info(f"Processing source: '{source_name}'")
                 try:
-                    driver.get(url)
+                    if source_name not in ["CBSE", "JEE"]:
+                         driver.get(url)
                     scraped_data = scraper_function(driver)
                     save_to_db(source_name, scraped_data)
                 except Exception as e:
@@ -285,4 +330,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
