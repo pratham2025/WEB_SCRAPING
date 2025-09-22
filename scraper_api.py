@@ -11,9 +11,13 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - [%
 
 
 # --- CORS Configuration ---
+# Update the origins list to include all necessary frontend URLs
 origins = [
     "http://localhost:5173",
     "http://localhost:8501",
+    "http://localhost:5500",  # Add this for live server
+    "http://127.0.0.1:5500",  # Add this for live server alternative URL
+    "*"  # Allow all origins for testing (remove in production)
 ]
 app.add_middleware(
     CORSMiddleware,
