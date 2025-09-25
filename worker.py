@@ -280,65 +280,82 @@ def scrape_upsc(driver):
 # worker.py (new scrape_mpsc function)
 
 def scrape_mpsc(driver):
-    """Clicks the 2nd 'View All' button, scrolls the modal to load all data, then scrapes."""
-    logging.info("Scraping MPSC 'Important Notices' modal, handling lazy-loading.")
+    """Scrapes the MPSC advertisements page using Selenium (ensures unique text)."""
+    logging.info("Scraping MPSC advertisements page using Selenium.")
     results = []
-    base_url = "https://mpsc.gov.in/"
-    try:
-        WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, "button.viewUpdatesbtn")))
-        time.sleep(2)
-        view_all_buttons = driver.find_elements(By.CSS_SELECTOR, "button.viewUpdatesbtn")
-        if len(view_all_buttons) > 1:
-            button_to_click = view_all_buttons[1]
-            logging.info("Clicking the second 'View All' button ('Important Notices')...")
-            driver.execute_script("arguments[0].click();", button_to_click)
-            
-            wait = WebDriverWait(driver, 10)
-            modal_body_selector = (By.CSS_SELECTOR, "div.modal-body")
-            modal_body = wait.until(EC.visibility_of_element_located(modal_body_selector))
-            
-            # --- NEW SCROLLING LOGIC ---
-            last_height = 0
-            while True:
-                driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", modal_body)
-                time.sleep(2) # Wait for new content to load
-                new_height = driver.execute_script("return arguments[0].scrollHeight", modal_body)
-                if new_height == last_height:
-                    logging.info("MPSC: Reached the bottom of the scrollable list.")
-                    break
-                last_height = new_height
+    base_url = "https://mpsc.gov.in"
 
-            # Now that all items are loaded, parse the final HTML
-            soup = BeautifulSoup(driver.page_source, 'html.parser')
-            modal_content = soup.find('div', class_='modal-content')
-            if modal_content:
-                table_rows = modal_content.select("tbody tr")
-                for row in table_rows:
-                    cell = row.select_one("td:nth-of-type(2)")
-                    if cell:
-                        text = cell.get_text(strip=True)
-                        if text:
-                            placeholder = text.replace(' ', '-').replace('.', '').replace('(', '').replace(')', '').replace('/', '')
-                            link = f"https://mpsc.gov.in/home#{placeholder}"
-                            results.append({"text": text, "link": link})
-            driver.find_element(By.TAG_NAME, 'body').send_keys(Keys.ESCAPE)
-            time.sleep(1)
-        else:
-            logging.warning("MPSC: Could not find the second 'View All' button.")
+    try:
+        # Wait for table to load
+        wait = WebDriverWait(driver, 20)
+        wait.until(EC.presence_of_element_located((By.ID, "datatable")))
+        time.sleep(2)
+
+        # Get all rows from Selenium
+        rows = driver.find_elements(By.CSS_SELECTOR, "#datatable tbody tr")
+
+        seen_texts = set()  # Keep track of unique text
+
+        for row in rows:
+            cols = row.find_elements(By.TAG_NAME, "td")
+            if len(cols) < 5:
+                continue
+
+            adv_no = cols[1].text.strip()       # 2nd column
+            subject_text = cols[2].text.strip() # 3rd column
+            pub_date = cols[3].text.strip()     # 4th column
+
+            # PDF link (5th column)
+            try:
+                pdf_tag = cols[4].find_element(By.TAG_NAME, "a")
+                pdf_link = pdf_tag.get_attribute("href")
+            except:
+                pdf_link = None
+
+            if not subject_text:
+                continue
+
+            # Create clean text for uniqueness
+            clean_text = f"{adv_no} | {subject_text} | {pub_date}".replace('\n', ' ').strip()
+
+            if clean_text in seen_texts:
+                continue  # Skip duplicate text in same batch
+
+            seen_texts.add(clean_text)
+
+            # If link is missing, create a placeholder
+            link = pdf_link if pdf_link else f"#{adv_no}-{pub_date}"
+
+            results.append({
+                "text": clean_text,
+                "link": link
+            })
+
+    except TimeoutException:
+        logging.error("MPSC: Timed out waiting for table.")
+        driver.save_screenshot("mpsc_error_screenshot.png")
     except Exception as e:
-        logging.error(f"An unexpected error occurred while scraping MPSC: {e}")
-    logging.info(f"Found {len(results)} announcements from the 'Important Notices' modal.")
+        logging.error(f"MPSC: Unexpected error - {e}")
+
+    logging.info(f"Found {len(results)} announcements for MPSC.")
     return results
+
+
 
 
 # --- DATABASE OPERATIONS (Notification Style) ---
 def save_to_db(source_name, results):
-    """
-    Saves only new announcements to the database, ignoring duplicates.
-    """
     if not results:
         logging.warning(f"No results to save for {source_name}.")
         return
+
+    # Filter duplicates in the current batch by text
+    unique_results = []
+    seen_texts = set()
+    for item in results:
+        if item['text'] not in seen_texts:
+            unique_results.append(item)
+            seen_texts.add(item['text'])
 
     conn_params = {
         "host": "localhost",
@@ -347,29 +364,26 @@ def save_to_db(source_name, results):
         "password": "Pratham@2025",
         "port": "5432"
     }
-    
+
     conn = None
     cursor = None
     try:
         conn = psycopg2.connect(**conn_params)
         cursor = conn.cursor()
         new_items_count = 0
-        
-        # We no longer delete old items.
-        # Instead, we try to insert and let the DB ignore duplicates.
-        for item in results:
+
+        for item in unique_results:
             cursor.execute(
                 """
                 INSERT INTO announcements (source, text, link) 
-                VALUES (%s, %s, %s) 
-                ON CONFLICT (source, link) DO NOTHING
+                VALUES (%s, %s, %s)
+                ON CONFLICT (source, text) DO NOTHING
                 """,
                 (source_name, item['text'], item['link'])
             )
-            # cursor.rowcount will be 1 if a new row was inserted, 0 otherwise.
             if cursor.rowcount > 0:
                 new_items_count += 1
-        
+
         conn.commit()
         logging.info(f"Database operation for {source_name} complete. Added {new_items_count} new items.")
 
@@ -384,8 +398,10 @@ def save_to_db(source_name, results):
             conn.close()
 
 
+
 # --- Main Worker Loop ---
 def main():
+    """Main worker loop to run scrapers at a set interval."""
     logging.info("Worker process starting.")
     
     try:
@@ -408,7 +424,7 @@ def main():
         "JEE": scrape_jee,
         "GATE": scrape_gate,
         "UPSC": scrape_upsc,
-        "MPSC": scrape_mpsc, # MPSC now uses the driver again
+        "MPSC": scrape_mpsc,
     }
 
     driver = setup_driver()
@@ -427,14 +443,15 @@ def main():
                 
                 logging.info(f"Processing source: '{source_name}'")
                 try:
-                    # Always get the URL first for Selenium-based scrapers.
-                    # CBSE and JEE may operate differently, adjust if needed, but for MPSC this is correct.
-                    if source_name not in ["CBSE", "JEE"]: # Keep this condition if these two are special
+                    # Logic for scrapers that use Selenium to navigate
+                    # CBSE & JEE use a 'requests-first' approach inside their functions
+                    if source_name not in ["CBSE", "JEE"]:
                         driver.get(url)
                     
-                    # All current scrapers need the driver, so pass it.
+                    # Call the appropriate scraper function, passing the driver
                     scraped_data = scraper_function(driver)
                     
+                    # Save the results to the database
                     save_to_db(source_name, scraped_data)
                 except Exception as e:
                     logging.error(f"A critical, unhandled error occurred for '{source_name}': {e}")
