@@ -18,11 +18,19 @@
 		},
 		{
 			"name": "JEE",
-			"url": "https://jeemain.nta.ac.in/public-notices/"
+			"url": "https://jeemain.nta.nic.in/public-notices/"
 		},
 		{
 			"name": "GATE",
 			"url": "https://gate2026.iitg.ac.in/notifications.html"
+		},
+		{
+			"name": "UPSC",
+			"url": "https://upsconline.nic.in/"
+		},
+		{
+			"name": "MPSC",
+			"url": "https://mpsc.gov.in/home"
 		}
 	]
 }

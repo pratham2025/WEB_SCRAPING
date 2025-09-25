@@ -1,5 +1,5 @@
 import psycopg2
-from psycopg2 import extras # <-- The fix is here
+from psycopg2 import extras
 from enum import Enum
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,13 +12,12 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - [%
 
 
 # --- CORS Configuration ---
-# Update the origins list to include all necessary frontend URLs
 origins = [
     "http://localhost:5173",
     "http://localhost:8501",
-    "http://localhost:5500",  # Add this for live server
-    "http://127.0.0.1:5500",  # Add this for live server alternative URL
-    "*"  # Allow all origins for testing (remove in production)
+    "http://localhost:5500",
+    "http://127.0.0.1:5500",
+    "*"
 ]
 app.add_middleware(
     CORSMiddleware,
@@ -36,6 +35,8 @@ class SourceEnum(str, Enum):
     neet = "NEET"
     jee = "JEE"
     gate = "GATE"
+    upsc = "UPSC" 
+    mpsc = "MPSC"
 
 
 # --- Helper Functions ---
@@ -64,7 +65,6 @@ async def get_sources():
     that have data in the announcements table.
     """
     conn = get_db_connection()
-    # Use RealDictCursor to get results as dictionaries
     cursor = conn.cursor(cursor_factory=extras.RealDictCursor) 
     cursor.execute("SELECT DISTINCT source FROM announcements ORDER BY source ASC")
     sources = [row['source'] for row in cursor.fetchall()]
@@ -80,7 +80,6 @@ async def get_source_data(source: SourceEnum):
     """
     conn = get_db_connection()
     cursor = conn.cursor(cursor_factory=extras.RealDictCursor)
-    # IMPORTANT: Use %s for placeholders
     cursor.execute(
         "SELECT id, source, text, link FROM announcements WHERE source = %s ORDER BY id DESC",
         (source.value,),

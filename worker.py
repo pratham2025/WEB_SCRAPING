@@ -1,5 +1,5 @@
-import psycopg2 # <-- ADD THIS
-import os # <-- ADD THIS for environment variables
+import psycopg2
+import os
 import time
 import logging
 import json
@@ -13,7 +13,7 @@ from selenium.common.exceptions import TimeoutException
 from webdriver_manager.chrome import ChromeDriverManager
 from urllib.parse import urljoin
 import requests
-
+from selenium.webdriver.common.keys import Keys
 # --- Configuration ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - [%(filename)s] - %(message)s')
 SCRAPE_INTERVAL_SECONDS = 3600
@@ -207,11 +207,8 @@ def scrape_gate(driver):
             link_tag = cell.find('a')
 
             if link_tag and link_tag.get('href', '#') != '#':
-                # Use the real link if one exists and is not just '#'
                 link = link_tag.get('href')
             else:
-                # --- IMPROVEMENT: Create a unique placeholder link ---
-                # This makes items without a real URL unique, e.g., "#Registration-Opens-on-August-28-2025"
                 placeholder = text.replace(' ', '-').replace('.', '')
                 link = f"#{placeholder}"
 
@@ -227,30 +224,122 @@ def scrape_gate(driver):
         
     logging.info(f"Found {len(results)} announcements for GATE.")
     return results
-# --- FINAL, ROBUST DATABASE OPERATIONS ---
+
+
+def scrape_upsc(driver):
+    """Scrapes all announcements from UPSC, including those without links."""
+    logging.info("Scraping UPSC website.")
+    results = []
+    try:
+        wait = WebDriverWait(driver, 20)
+        target_div_selector = (By.CSS_SELECTOR, "div.scroll-content")
+        wait.until(EC.presence_of_element_located(target_div_selector))
+        time.sleep(3) # Extra wait for all JS to render
+
+        soup = BeautifulSoup(driver.page_source, 'html.parser')
+        
+        announcement_div = soup.find('div', class_='scroll-content')
+        if not announcement_div:
+            logging.warning("UPSC: Could not find the announcement container.")
+            return []
+
+        # Find all span tags, which act as containers for each announcement
+        for item_span in announcement_div.find_all('span'):
+            # Get the full text from the span, skipping any empty/styling spans
+            full_text = item_span.get_text(strip=True)
+            if not full_text:
+                continue
+
+            link_tag = item_span.find('a')
+            
+            if link_tag:
+                # If a link tag exists, use its text and href
+                text = link_tag.get_text(strip=True)
+                link = link_tag.get('href', '#')
+            else:
+                # If NO link tag, use the span's full text and create a placeholder
+                text = full_text
+                # This makes the item unique so it can be saved to the database
+                placeholder = text.replace(' ', '-').replace('.', '').replace('(', '').replace(')', '')
+                link = f"#{placeholder}"
+            
+            # Make the link absolute if it's a real URL
+            if not link.startswith('http') and not link.startswith('#'):
+                link = urljoin(driver.current_url, link)
+            
+            results.append({"text": text, "link": link})
+    
+    except TimeoutException:
+        logging.error("UPSC: Timed out waiting for the announcements to load.")
+    except Exception as e:
+        logging.error(f"An unexpected error occurred while scraping UPSC: {e}")
+        
+    logging.info(f"Found {len(results)} announcements for UPSC.")
+    return results
+
+# worker.py (new scrape_mpsc function)
+
+def scrape_mpsc(driver):
+    """Clicks the 2nd 'View All' button, scrolls the modal to load all data, then scrapes."""
+    logging.info("Scraping MPSC 'Important Notices' modal, handling lazy-loading.")
+    results = []
+    base_url = "https://mpsc.gov.in/"
+    try:
+        WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, "button.viewUpdatesbtn")))
+        time.sleep(2)
+        view_all_buttons = driver.find_elements(By.CSS_SELECTOR, "button.viewUpdatesbtn")
+        if len(view_all_buttons) > 1:
+            button_to_click = view_all_buttons[1]
+            logging.info("Clicking the second 'View All' button ('Important Notices')...")
+            driver.execute_script("arguments[0].click();", button_to_click)
+            
+            wait = WebDriverWait(driver, 10)
+            modal_body_selector = (By.CSS_SELECTOR, "div.modal-body")
+            modal_body = wait.until(EC.visibility_of_element_located(modal_body_selector))
+            
+            # --- NEW SCROLLING LOGIC ---
+            last_height = 0
+            while True:
+                driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", modal_body)
+                time.sleep(2) # Wait for new content to load
+                new_height = driver.execute_script("return arguments[0].scrollHeight", modal_body)
+                if new_height == last_height:
+                    logging.info("MPSC: Reached the bottom of the scrollable list.")
+                    break
+                last_height = new_height
+
+            # Now that all items are loaded, parse the final HTML
+            soup = BeautifulSoup(driver.page_source, 'html.parser')
+            modal_content = soup.find('div', class_='modal-content')
+            if modal_content:
+                table_rows = modal_content.select("tbody tr")
+                for row in table_rows:
+                    cell = row.select_one("td:nth-of-type(2)")
+                    if cell:
+                        text = cell.get_text(strip=True)
+                        if text:
+                            placeholder = text.replace(' ', '-').replace('.', '').replace('(', '').replace(')', '').replace('/', '')
+                            link = f"https://mpsc.gov.in/home#{placeholder}"
+                            results.append({"text": text, "link": link})
+            driver.find_element(By.TAG_NAME, 'body').send_keys(Keys.ESCAPE)
+            time.sleep(1)
+        else:
+            logging.warning("MPSC: Could not find the second 'View All' button.")
+    except Exception as e:
+        logging.error(f"An unexpected error occurred while scraping MPSC: {e}")
+    logging.info(f"Found {len(results)} announcements from the 'Important Notices' modal.")
+    return results
+
+
+# --- DATABASE OPERATIONS (Notification Style) ---
 def save_to_db(source_name, results):
     """
-    De-duplicates scraped results, clears old announcements for the source,
-    and saves the new, fresh list to POSTGRESQL.
+    Saves only new announcements to the database, ignoring duplicates.
     """
     if not results:
         logging.warning(f"No results to save for {source_name}.")
         return
 
-    # Filter out items with duplicate links before DB operations
-    unique_results = []
-    seen_links = set()
-    for item in results:
-        if item['link'] not in seen_links:
-            unique_results.append(item)
-            seen_links.add(item['link'])
-    
-    if len(results) != len(unique_results):
-        logging.warning(f"Filtered {len(results) - len(unique_results)} duplicate-link items for {source_name}.")
-
-    # --- NEW: PostgreSQL Connection ---
-    # It's best practice to load these from environment variables
-    # For example: os.environ.get('DB_HOST', 'localhost')
     conn_params = {
         "host": "localhost",
         "dbname": "announcements_db",
@@ -258,36 +347,41 @@ def save_to_db(source_name, results):
         "password": "Pratham@2025",
         "port": "5432"
     }
-
+    
+    conn = None
+    cursor = None
     try:
         conn = psycopg2.connect(**conn_params)
         cursor = conn.cursor()
-
-        # Use a transaction to ensure atomicity
-        # If any step fails, the whole block is rolled back.
-        logging.info(f"Clearing old data for {source_name}...")
-        cursor.execute("DELETE FROM announcements WHERE source = %s", (source_name,))
+        new_items_count = 0
         
-        logging.info(f"Inserting {len(unique_results)} new items for {source_name}...")
-        # Using reversed to keep the latest announcements at the end (higher ID)
-        for item in reversed(unique_results):
-            # IMPORTANT: Use %s for placeholders, NOT ?. psycopg2 handles sanitization.
+        # We no longer delete old items.
+        # Instead, we try to insert and let the DB ignore duplicates.
+        for item in results:
             cursor.execute(
-                "INSERT INTO announcements (source, text, link) VALUES (%s, %s, %s)",
+                """
+                INSERT INTO announcements (source, text, link) 
+                VALUES (%s, %s, %s) 
+                ON CONFLICT (source, link) DO NOTHING
+                """,
                 (source_name, item['text'], item['link'])
             )
+            # cursor.rowcount will be 1 if a new row was inserted, 0 otherwise.
+            if cursor.rowcount > 0:
+                new_items_count += 1
         
         conn.commit()
-        logging.info(f"Database operation for {source_name} complete. Saved {len(unique_results)} fresh items.")
+        logging.info(f"Database operation for {source_name} complete. Added {new_items_count} new items.")
 
     except psycopg2.Error as e:
         logging.error(f"Database error for {source_name}: {e}")
-        # conn.rollback() is handled automatically when 'with' block exits on error
+        if conn:
+            conn.rollback()
     finally:
-        if 'conn' in locals() and conn:
+        if cursor:
             cursor.close()
+        if conn:
             conn.close()
-
 
 
 # --- Main Worker Loop ---
@@ -313,6 +407,8 @@ def main():
         "NEET": scrape_neet,
         "JEE": scrape_jee,
         "GATE": scrape_gate,
+        "UPSC": scrape_upsc,
+        "MPSC": scrape_mpsc, # MPSC now uses the driver again
     }
 
     driver = setup_driver()
@@ -331,9 +427,14 @@ def main():
                 
                 logging.info(f"Processing source: '{source_name}'")
                 try:
-                    if source_name not in ["CBSE", "JEE"]:
-                         driver.get(url)
+                    # Always get the URL first for Selenium-based scrapers.
+                    # CBSE and JEE may operate differently, adjust if needed, but for MPSC this is correct.
+                    if source_name not in ["CBSE", "JEE"]: # Keep this condition if these two are special
+                        driver.get(url)
+                    
+                    # All current scrapers need the driver, so pass it.
                     scraped_data = scraper_function(driver)
+                    
                     save_to_db(source_name, scraped_data)
                 except Exception as e:
                     logging.error(f"A critical, unhandled error occurred for '{source_name}': {e}")
@@ -346,6 +447,7 @@ def main():
     finally:
         driver.quit()
         logging.info("WebDriver closed. Worker process finished.")
+
 
 if __name__ == '__main__':
     main()
