@@ -37,6 +37,7 @@ class SourceEnum(str, Enum):
     gate = "GATE"
     upsc = "UPSC" 
     mpsc = "MPSC"
+    rrbmumbai = "RRBMumbai"
 
 
 # --- Helper Functions ---
