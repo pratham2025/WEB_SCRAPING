@@ -38,6 +38,8 @@ class SourceEnum(str, Enum):
     upsc = "UPSC" 
     mpsc = "MPSC"
     rrbmumbai = "RRBMumbai"
+    isro = "ISRO"
+    rrbkolkata = "RRBKolkata"
 
 
 # --- Helper Functions ---

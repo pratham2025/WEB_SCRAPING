@@ -7,6 +7,7 @@ import concurrent.futures
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
+import undetected_chromedriver as uc
 
 # --- Configuration ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - [%(filename)s] - %(message)s')
@@ -14,8 +15,8 @@ SCRAPE_INTERVAL_SECONDS = 3600
 
 # --- Selenium Setup ---
 def setup_driver():
-    """Initializes a headless Chrome WebDriver."""
-    options = webdriver.ChromeOptions()
+    """Initializes an UNDETECTED headless Chrome WebDriver."""
+    options = uc.ChromeOptions()
     options.add_argument("--headless=new")
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_argument("--disable-gpu")
