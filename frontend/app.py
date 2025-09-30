@@ -1,12 +1,15 @@
+# frontend/app.py (Updated with Summaries)
+
 import streamlit as st
 import requests
 from datetime import datetime
 import logging
+import time # Added for the refresh button delay
 
 # --- Page Configuration ---
 st.set_page_config(
-    page_title="Education Announcements Hub",
-    page_icon="📢",
+    page_title="ExamDoor Announcements Hub",
+    page_icon="🔔",
     layout="wide",
 )
 
@@ -37,7 +40,6 @@ def render_announcements_tab(source_name):
     
     with st.spinner(f"Fetching latest {source_name} data..."):
         response_data = fetch_api_data(endpoint)
-        # We add a timestamp here after the data is fetched.
         last_updated = datetime.now()
 
     if response_data and "data" in response_data:
@@ -48,7 +50,7 @@ def render_announcements_tab(source_name):
             search_term = st.text_input(
                 "Search announcements",
                 key=f"search_{source_name}",
-                placeholder=f"Search in {source_name}..."
+                placeholder=f"Search in {source_name} summaries..."
             ).lower()
         with col2:
             sort_option = st.selectbox(
@@ -61,22 +63,31 @@ def render_announcements_tab(source_name):
         st.markdown("---")
 
         if sort_option == "Alphabetical (A-Z)":
-            announcements.sort(key=lambda x: x['text'])
+            announcements.sort(key=lambda x: x.get('summary', x['text'])) # Sort by summary
         
+        # --- MODIFIED: Search in both summary and original text ---
         if search_term:
             announcements = [
                 item for item in announcements
-                if search_term in item['text'].lower()
+                if search_term in item.get('summary', '').lower() or search_term in item['text'].lower()
             ]
 
         if announcements:
+            # --- MODIFIED: Display the summary first, with original text in an expander ---
             for item in announcements:
-                with st.expander(f"📄 {item['text']}"):
-                    st.markdown(f"**Source:** {item['source']}")
-                    st.markdown(
-                        f"<a href='{item['link']}' target='_blank' style='color: #ff4b4b; text-decoration: none; font-weight: bold;'>Read More on Official Site ↗</a>",
-                        unsafe_allow_html=True
-                    )
+                # Use item.get('summary', item['text']) as a fallback if summary doesn't exist for old entries
+                summary = item.get('summary', item['text'])
+                
+                st.markdown(f"#### {summary}") # Display the summary as a subheader
+                
+                with st.expander("View Original Announcement Text"):
+                    st.markdown(f"> _{item['text']}_") # Blockquote for original text
+
+                st.markdown(
+                    f"<a href='{item['link']}' target='_blank' style='color: #ff4b4b; text-decoration: none; font-weight: bold;'>Read on Official Site →</a>",
+                    unsafe_allow_html=True
+                )
+                st.divider() # Use st.divider for a clean separator
         else:
             st.info("No announcements found matching your criteria.")
     else:
@@ -84,24 +95,23 @@ def render_announcements_tab(source_name):
 
 def main():
     """Main function to run the dynamic Streamlit app."""
-    st.title("📢 Education Announcements Hub")
-    st.markdown("Your central dashboard for the latest news from various educational authorities.")
+    st.title("🔔 ExamDoor Announcements Hub")
+    st.markdown("Your central dashboard for summarized, easy-to-read news from various educational authorities.")
 
     if st.button("🔄 Refresh All Data"):
         st.cache_data.clear()
-        st.success("Cache cleared! Data will be re-fetched from the server.")
-        time.sleep(1) # Give user time to see the message
+        st.success("Cache cleared! Re-fetching fresh data from the server...")
+        time.sleep(1)
         st.rerun()
 
-    # --- DYNAMIC TAB CREATION ---
+    # --- DYNAMIC TAB CREATION (No changes needed here) ---
     sources_data = fetch_api_data("sources")
     
     if sources_data and "sources" in sources_data and sources_data["sources"]:
-        # Sort sources alphabetically for consistent tab order
         available_sources = sorted(sources_data["sources"])
         
-        # Create tabs dynamically based on the API response
-        tabs = st.tabs([f"🎓 {source}" for source in available_sources])
+        tab_titles = [f" {source} " for source in available_sources]
+        tabs = st.tabs(tab_titles)
         
         for i, source_name in enumerate(available_sources):
             with tabs[i]:
@@ -112,4 +122,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

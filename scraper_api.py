@@ -1,3 +1,5 @@
+# scraper_api.py (Updated to include Summaries)
+
 import psycopg2
 from psycopg2 import extras
 from enum import Enum
@@ -27,7 +29,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- UPDATED ENUM ---
+# --- Source Enum (No changes needed) ---
 class SourceEnum(str, Enum):
     mahacet = "MAHACET"
     nta = "NTA"
@@ -42,7 +44,7 @@ class SourceEnum(str, Enum):
     rrbkolkata = "RRBKolkata"
 
 
-# --- Helper Functions ---
+# --- Helper Functions (No changes needed) ---
 def get_db_connection():
     """Establishes a connection to the PostgreSQL database."""
     conn_params = {
@@ -68,6 +70,7 @@ async def get_sources():
     that have data in the announcements table.
     """
     conn = get_db_connection()
+    # Using RealDictCursor allows us to access columns by name easily
     cursor = conn.cursor(cursor_factory=extras.RealDictCursor) 
     cursor.execute("SELECT DISTINCT source FROM announcements ORDER BY source ASC")
     sources = [row['source'] for row in cursor.fetchall()]
@@ -79,15 +82,22 @@ async def get_sources():
 @app.get("/announcements/{source}")
 async def get_source_data(source: SourceEnum):
     """
-    Instantly fetches announcement data for a specified source from the database.
+    Fetches announcement data, including the new summary, for a specified source.
     """
     conn = get_db_connection()
     cursor = conn.cursor(cursor_factory=extras.RealDictCursor)
-    cursor.execute(
-        "SELECT id, source, text, link FROM announcements WHERE source = %s ORDER BY id DESC",
-        (source.value,),
-    )
+    
+    # --- MODIFIED: Added the 'summary' column to the SELECT statement ---
+    sql_select_query = """
+        SELECT id, source, text, link, summary 
+        FROM announcements 
+        WHERE source = %s 
+        ORDER BY id DESC
+    """
+    
+    cursor.execute(sql_select_query, (source.value,))
     results = cursor.fetchall()
     cursor.close()
     conn.close()
+    
     return {"source": source.value, "data": results}

@@ -6,6 +6,8 @@ A comprehensive full-stack project for automated scraping, aggregating, and brow
 
 ## Features
 - **Automated Parallel Scraping**: Concurrent scraping of 12+ educational portals using Selenium + BeautifulSoup
+- **Summarized Announcements**: Each item is paraphrased via a Transformer model for quick scanning
+- **Result Capping**: Per-source cap of 60 items per cycle to control load and UI noise
 - **Robust Database**: PostgreSQL with deduplication and conflict resolution
 - **REST API**: FastAPI backend with CORS support for announcements and sources
 - **Modern Web UI**: Glassdoor-inspired responsive interface with search, filtering, and pagination
@@ -45,34 +47,36 @@ A comprehensive full-stack project for automated scraping, aggregating, and brow
 ## Project Structure
 ```
 WEB_SCRAPING/
-├── worker.py                 # Main parallel scraping orchestrator
-├── scraper_api.py           # FastAPI backend with CORS support
+├── worker.py                 # Parallel scraping + summarization + DB save
+├── scraper_api.py            # FastAPI backend now returns summary in results
+├── summarizer.py             # Transformer-based paraphraser for summaries
 ├── frontend/
-│   ├── app.py              # Streamlit dashboard
-│   ├── index.html          # Modern web UI (main interface)
-│   ├── app.js              # Frontend JavaScript with API integration
-│   ├── styles.css          # Glassdoor-inspired responsive styling
-│   ├── home.html           # Landing page
-│   └── syllabus.html       # Syllabus information page
-├── scrapers/               # Individual scraper modules
-│   ├── mahacet_scraper.py  # MAHACET announcements
-│   ├── nta_scraper.py      # NTA notifications
-│   ├── cbse_scraper.py     # CBSE circulars
-│   ├── neet_scraper.py     # NEET announcements
-│   ├── jee_scraper.py      # JEE notifications
-│   ├── gate_scraper.py     # GATE notifications
-│   ├── upsc_scraper.py     # UPSC notifications
-│   ├── mpsc_scraper.py     # MPSC announcements
+│   ├── app.py               # Streamlit dashboard (search/sort by summary)
+│   ├── index.html           # Modern web UI (main interface)
+│   ├── app.js               # Frontend JavaScript with API integration
+│   ├── styles.css           # Glassdoor-inspired responsive styling
+│   ├── home.html            # Landing page
+│   ├── home.js              # Home page interactions
+│   └── syllabus.html        # Syllabus information page
+├── scrapers/                # Individual scraper modules
+│   ├── mahacet_scraper.py   # MAHACET announcements
+│   ├── nta_scraper.py       # NTA notifications
+│   ├── cbse_scraper.py      # CBSE circulars
+│   ├── neet_scraper.py      # NEET announcements
+│   ├── jee_scraper.py       # JEE notifications
+│   ├── gate_scraper.py      # GATE notifications
+│   ├── upsc_scraper.py      # UPSC notifications
+│   ├── mpsc_scraper.py      # MPSC announcements
 │   ├── rrbmumbai_scraper.py # RRB Mumbai notices
 │   ├── rrbkolkata_scraper.py # RRB Kolkata notices
 │   ├── rrbahmedabad_scraper.py # RRB Ahmedabad notices
-│   └── isro_scraper.py     # ISRO career notifications
-├── config.json             # Source configuration
-├── requirements.txt        # Python dependencies
-├── dockerfile             # Container configuration
-├── docker-compose.yml     # Multi-service Docker setup
-├── init_db.py            # Legacy SQLite initializer
-└── web_scrape.py         # Standalone scraper example
+│   └── isro_scraper.py      # ISRO career notifications
+├── config.json              # Source configuration
+├── requirements.txt         # Python dependencies (transformers, torch, etc.)
+├── dockerfile               # Container configuration (installs Chrome)
+├── docker-compose.yml       # Multi-service Docker setup (Postgres with timezone)
+├── init_db.py               # Legacy SQLite initializer
+└── web_scrape.py            # Standalone scraper example
 ```
 
 ---
@@ -90,6 +94,8 @@ cd WEB_SCRAPING
 pip install -r requirements.txt
 ```
 
+Note: The summarizer uses `transformers` and `torch`. First run may download a model (`tuner007/pegasus_paraphrase`). Ensure you have sufficient memory and an internet connection.
+
 ### 3. Set up PostgreSQL database
 - **Option 1: Docker (recommended):**
   ```sh
@@ -100,6 +106,11 @@ pip install -r requirements.txt
   - Create a database named `announcements_db` and user `notifyme` with password `Pratham@2025`.
   - Update credentials in `scraper_api.py` and `worker.py` if needed.
 
+Migration note: If you previously created the `announcements` table without a `summary` column, add it:
+```sql
+ALTER TABLE announcements ADD COLUMN IF NOT EXISTS summary TEXT;
+```
+
 ### 4. Configure scraping sources
 - Edit `config.json` to add/remove sources and URLs as needed.
 - Currently configured sources: MAHACET, NTA, CBSE, NEET, JEE, GATE, UPSC, MPSC, RRB Mumbai, RRB Kolkata, RRB Ahmedabad, ISRO
@@ -109,7 +120,7 @@ pip install -r requirements.txt
 ## Running the Project
 
 ### 1. Run the scraping worker
-This will scrape all configured sources in parallel and update the PostgreSQL database every hour.
+This will scrape all configured sources in parallel, paraphrase items, cap to 60 per source, and update the PostgreSQL database every hour.
 ```sh
 python worker.py
 ```
@@ -146,7 +157,7 @@ Returns all available sources that have data in the database.
 ```
 
 ### GET /announcements/{source}
-Returns announcements for a specific source.
+Returns announcements for a specific source (includes `summary`).
 ```json
 {
   "source": "CBSE",
@@ -155,7 +166,8 @@ Returns announcements for a specific source.
       "id": 1,
       "source": "CBSE",
       "text": "Announcement title",
-      "link": "https://example.com/announcement"
+      "link": "https://example.com/announcement",
+      "summary": "Paraphrased, concise version of the announcement"
     }
   ]
 }
@@ -182,7 +194,10 @@ environment:
   POSTGRES_USER: your_db_user
   POSTGRES_PASSWORD: your_db_password
   POSTGRES_DB: announcements_db
+  PGTZ: Asia/Kolkata
 ```
+
+Chrome is installed in the Dockerfile. Ensure network access so `pip` can fetch Python dependencies and `transformers` can download the model.
 
 ---
 
@@ -226,6 +241,8 @@ class SourceEnum(str, Enum):
 
 ### Scraping Architecture
 - **Parallel Processing**: Uses ThreadPoolExecutor with max 10 workers
+- **Summarization**: `summarizer.py` paraphrases text via `tuner007/pegasus_paraphrase`
+- **Per-Source Limit**: Caps to 60 items before summarization and storage
 - **Anti-Detection**: Undetected Chrome WebDriver with stealth options
 - **Error Handling**: Graceful fallback mechanisms for failed scrapes
 - **Deduplication**: Database-level conflict resolution prevents duplicates
@@ -237,6 +254,7 @@ CREATE TABLE announcements (
     source VARCHAR(50) NOT NULL,
     text TEXT NOT NULL,
     link TEXT NOT NULL,
+    summary TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(source, text)
 );
@@ -244,8 +262,8 @@ CREATE TABLE announcements (
 
 ### Performance Features
 - **Caching**: Streamlit dashboard caches API responses for 10 minutes
+- **Search & Sort**: Streamlit UI searches across summary and text, optional A–Z sort by summary
 - **Pagination**: Web UI supports pagination for large result sets
-- **Search & Filter**: Real-time search and source filtering
 - **Responsive Design**: Mobile-friendly interface with modern styling
 
 ---

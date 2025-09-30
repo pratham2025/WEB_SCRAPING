@@ -9,3 +9,7 @@ streamlit
 requests
 pandas
 psycopg2-binary
+transformers
+torch
+sentencepiece
+protobuf
