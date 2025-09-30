@@ -43,6 +43,10 @@
 		{
 			"name": "RRBKolkata",
 			"url": "https://www.rrbkolkata.gov.in/employment_notices.php"
+		},
+		{
+			"name": "RRBAhmedabad",
+			"url": "https://rrbahmedabad.gov.in/news-updates/"
 		}
 	]
 }
