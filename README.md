@@ -1,253 +1,108 @@
-# ExamDoor 🔔 Educational Announcements Aggregator
+# 📢 ExamDoor – Educational Announcements Aggregator  
 
-A comprehensive full-stack project for automated scraping, aggregating, and browsing announcements from major Indian educational websites. The system features parallel scraping of 12+ official portals, PostgreSQL database storage with deduplication, REST API, and multiple modern interfaces for users.
+🚀 **Automated Scraping, Summarization & Smart Interfaces for Indian Educational Portals**  
 
----
-
-## Features
-- **Automated Parallel Scraping**: Concurrent scraping of 12+ educational portals using Selenium + BeautifulSoup
-- **Summarized Announcements**: Each item is paraphrased via a Transformer model for quick scanning
-- **Result Capping**: Per-source cap of 60 items per cycle to control load and UI noise
-- **Robust Database**: PostgreSQL with deduplication and conflict resolution
-- **REST API**: FastAPI backend with CORS support for announcements and sources
-- **Modern Web UI**: Glassdoor-inspired responsive interface with search, filtering, and pagination
-- **Streamlit Dashboard**: Interactive data exploration with dynamic tab creation
-- **Docker Support**: Complete containerization with PostgreSQL database
-- **Configurable Sources**: Easy source management via `config.json`
-- **Comprehensive Logging**: Detailed monitoring for scraping operations and errors
-- **Anti-Detection**: Undetected Chrome WebDriver to bypass bot protection
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)  
+![Python](https://img.shields.io/badge/Python-3.10+-blue)  
+![Docker](https://img.shields.io/badge/Docker-Supported-2496ED)  
+![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688)  
+![Streamlit](https://img.shields.io/badge/Streamlit-Dashboard-FF4B4B)  
+![Postgres](https://img.shields.io/badge/PostgreSQL-Database-336791)  
 
 ---
 
-## Supported Educational Sources
-- **MAHACET** - Maharashtra Common Entrance Test
-- **NTA** - National Testing Agency
-- **CBSE** - Central Board of Secondary Education
-- **NEET** - National Eligibility cum Entrance Test
-- **JEE** - Joint Entrance Examination
-- **GATE** - Graduate Aptitude Test in Engineering
-- **UPSC** - Union Public Service Commission
-- **MPSC** - Maharashtra Public Service Commission
-- **RRB Mumbai** - Railway Recruitment Board Mumbai
-- **RRB Kolkata** - Railway Recruitment Board Kolkata
-- **RRB Ahmedabad** - Railway Recruitment Board Ahmedabad
-- **ISRO** - Indian Space Research Organisation
+## 🔎 What is ExamDoor?
+ExamDoor is a **full-stack system** that continuously scrapes announcements from **12+ major Indian educational portals** (NTA, CBSE, UPSC, ISRO, etc.), summarizes them using a Transformer model, and provides **modern interfaces** for browsing:  
+
+- 📡 **Automated Parallel Scraping** with Selenium + BeautifulSoup  
+- 🧠 **Transformer-based Summarization** for announcements  
+- 🗄️ **PostgreSQL Database** with deduplication & conflict resolution  
+- ⚡ **FastAPI Backend** with REST endpoints + CORS  
+- 💻 **Modern Web UI** (Glassdoor-inspired)  
+- 📊 **Streamlit Dashboard** for interactive exploration  
+- 🐳 **Docker Support** for easy deployment  
 
 ---
 
-## Requirements
-- Python 3.10+
-- Google Chrome browser
-- ChromeDriver (auto-managed by webdriver-manager)
-- PostgreSQL 15+ (local or Docker)
-- See `requirements.txt` for Python dependencies
+## 📊 Data Flow (Architecture)  
+Here’s how ExamDoor works end-to-end:
+
+![ExamDoor Data Flow](Gemini_Generated_Image_e6rwj1e6rwj1e6rw.png)
 
 ---
 
-## Project Structure
-```
-WEB_SCRAPING/
-├── worker.py                 # Parallel scraping + summarization + DB save
-├── scraper_api.py            # FastAPI backend now returns summary in results
-├── summarizer.py             # Transformer-based paraphraser for summaries
-├── frontend/
-│   ├── app.py               # Streamlit dashboard (search/sort by summary)
-│   ├── index.html           # Modern web UI (main interface)
-│   ├── app.js               # Frontend JavaScript with API integration
-│   ├── styles.css           # Glassdoor-inspired responsive styling
-│   ├── home.html            # Landing page
-│   ├── home.js              # Home page interactions
-│   └── syllabus.html        # Syllabus information page
-├── scrapers/                # Individual scraper modules
-│   ├── mahacet_scraper.py   # MAHACET announcements
-│   ├── nta_scraper.py       # NTA notifications
-│   ├── cbse_scraper.py      # CBSE circulars
-│   ├── neet_scraper.py      # NEET announcements
-│   ├── jee_scraper.py       # JEE notifications
-│   ├── gate_scraper.py      # GATE notifications
-│   ├── upsc_scraper.py      # UPSC notifications
-│   ├── mpsc_scraper.py      # MPSC announcements
-│   ├── rrbmumbai_scraper.py # RRB Mumbai notices
-│   ├── rrbkolkata_scraper.py # RRB Kolkata notices
-│   ├── rrbahmedabad_scraper.py # RRB Ahmedabad notices
-│   └── isro_scraper.py      # ISRO career notifications
-├── config.json              # Source configuration
-├── requirements.txt         # Python dependencies (transformers, torch, etc.)
-├── dockerfile               # Container configuration (installs Chrome)
-├── docker-compose.yml       # Multi-service Docker setup (Postgres with timezone)
-├── init_db.py               # Legacy SQLite initializer
-└── web_scrape.py            # Standalone scraper example
-```
+## 🧩 System Overview  
+From scraping to UI — the big picture:
+
+![ExamDoor Overview](Gemini_Generated_Image_nimtwxnimtwxnimt.png)
 
 ---
 
-## Step-by-Step Setup & Usage
+## ✨ Features
+- ⚡ **Parallel Scraping** of 12+ official portals  
+- 🔄 **Summarization via Transformers** for faster scanning  
+- 📉 **Result Capping** (60 per source per cycle)  
+- 🛡️ **Anti-Detection Chrome Driver** to bypass blocking  
+- 🔍 **Search, Filter & Pagination** in UI  
+- 🐳 **One-Click Docker Deployment**  
+- 📝 **Comprehensive Logging & Error Handling**  
 
-### 1. Clone the repository
-```sh
+---
+
+## 🏫 Supported Educational Sources
+- NTA, CBSE, NEET, JEE, GATE, UPSC, ISRO  
+- MAHACET, MPSC, RRB (Mumbai, Kolkata, Ahmedabad)  
+
+---
+
+## ⚙️ Quick Start
+
+### 1️⃣ Clone the Repository
+```bash
 git clone https://github.com/pratham2025/WEB_SCRAPING.git
 cd WEB_SCRAPING
 ```
 
-### 2. Install Python dependencies
-```sh
+### 2️⃣ Install Dependencies
+```bash
 pip install -r requirements.txt
 ```
 
-Note: The summarizer uses `transformers` and `torch`. First run may download a model (`tuner007/pegasus_paraphrase`). Ensure you have sufficient memory and an internet connection.
-
-### 3. Set up PostgreSQL database
-- **Option 1: Docker (recommended):**
-  ```sh
-  docker-compose up -d
-  ```
-- **Option 2: Manual:**
-  - Install PostgreSQL 15+.
-  - Create a database named `announcements_db` and user `notifyme` with password `Pratham@2025`.
-  - Update credentials in `scraper_api.py` and `worker.py` if needed.
-
-Migration note: If you previously created the `announcements` table without a `summary` column, add it:
-```sql
-ALTER TABLE announcements ADD COLUMN IF NOT EXISTS summary TEXT;
+### 3️⃣ Start PostgreSQL (via Docker recommended)
+```bash
+docker-compose up -d
 ```
 
-### 4. Configure scraping sources
-- Edit `config.json` to add/remove sources and URLs as needed.
-- Currently configured sources: MAHACET, NTA, CBSE, NEET, JEE, GATE, UPSC, MPSC, RRB Mumbai, RRB Kolkata, RRB Ahmedabad, ISRO
-
----
-
-## Running the Project
-
-### 1. Run the scraping worker
-This will scrape all configured sources in parallel, paraphrase items, cap to 60 per source, and update the PostgreSQL database every hour.
-```sh
+### 4️⃣ Run the Scraper
+```bash
 python worker.py
 ```
 
-### 2. Start the FastAPI backend
-This serves the announcements and sources via REST API with CORS enabled.
-```sh
+### 5️⃣ Start the Backend
+```bash
 uvicorn scraper_api:app --reload --host 127.0.0.1 --port 8000
 ```
 
-### 3. Launch the Streamlit dashboard
-This provides an interactive dashboard for browsing announcements with dynamic tab creation.
-```sh
+### 6️⃣ Explore the Dashboards
+```bash
+# Streamlit Dashboard
 streamlit run frontend/app.py
 ```
-
-### 4. Use the Modern Web UI
-- **Static Preview**: Open `frontend/index.html` directly in your browser
-- **Dynamic Experience**: 
-  1. Serve the frontend using a local server (e.g., VS Code Live Server, Python's `http.server`)
-  2. Ensure the FastAPI backend is running
-  3. Open `http://127.0.0.1:5500/frontend/index.html` in your browser
+- 🌐 Modern Web UI → Open `frontend/index.html`  
 
 ---
 
-## API Endpoints
+## 📡 API Endpoints
 
-### GET /sources
-Returns all available sources that have data in the database.
-```json
-{
-  "sources": ["CBSE", "JEE", "MAHACET", "NEET", "NTA", ...]
-}
-```
+### `GET /sources`
+Returns list of sources in DB.
 
-### GET /announcements/{source}
-Returns announcements for a specific source (includes `summary`).
-```json
-{
-  "source": "CBSE",
-  "data": [
-    {
-      "id": 1,
-      "source": "CBSE",
-      "text": "Announcement title",
-      "link": "https://example.com/announcement",
-      "summary": "Paraphrased, concise version of the announcement"
-    }
-  ]
-}
-```
+### `GET /announcements/{source}`
+Fetches announcements + summaries for given source.  
 
 ---
 
-## Docker Deployment
-
-### Using Docker Compose (Recommended)
-```sh
-# Start PostgreSQL database
-docker-compose up -d
-
-# Build and run the application
-docker build -t examdoor .
-docker run -p 8000:8000 --network host examdoor
-```
-
-### Environment Configuration
-Update `docker-compose.yml` with your preferred database credentials:
-```yaml
-environment:
-  POSTGRES_USER: your_db_user
-  POSTGRES_PASSWORD: your_db_password
-  POSTGRES_DB: announcements_db
-  PGTZ: Asia/Kolkata
-```
-
-Chrome is installed in the Dockerfile. Ensure network access so `pip` can fetch Python dependencies and `transformers` can download the model.
-
----
-
-## Adding New Sources
-
-### 1. Update Configuration
-Add a new entry in `config.json`:
-```json
-{
-  "name": "NEW_SOURCE",
-  "url": "https://example.com/notifications"
-}
-```
-
-### 2. Create Scraper Module
-Create `scrapers/new_source_scraper.py`:
-```python
-import logging
-from bs4 import BeautifulSoup
-
-def scrape(driver):
-    """Scrapes the NEW_SOURCE website."""
-    logging.info("Scraping NEW_SOURCE website.")
-    # Your scraping logic here
-    results = []
-    # ... scraping implementation
-    return results
-```
-
-### 3. Update API Enum
-Add the new source to `SourceEnum` in `scraper_api.py`:
-```python
-class SourceEnum(str, Enum):
-    # ... existing sources
-    newsource = "NEW_SOURCE"
-```
-
----
-
-## Technical Details
-
-### Scraping Architecture
-- **Parallel Processing**: Uses ThreadPoolExecutor with max 10 workers
-- **Summarization**: `summarizer.py` paraphrases text via `tuner007/pegasus_paraphrase`
-- **Per-Source Limit**: Caps to 60 items before summarization and storage
-- **Anti-Detection**: Undetected Chrome WebDriver with stealth options
-- **Error Handling**: Graceful fallback mechanisms for failed scrapes
-- **Deduplication**: Database-level conflict resolution prevents duplicates
-
-### Database Schema
+## 🗄️ Database Schema
 ```sql
 CREATE TABLE announcements (
     id SERIAL PRIMARY KEY,
@@ -260,50 +115,28 @@ CREATE TABLE announcements (
 );
 ```
 
-### Performance Features
-- **Caching**: Streamlit dashboard caches API responses for 10 minutes
-- **Search & Sort**: Streamlit UI searches across summary and text, optional A–Z sort by summary
-- **Pagination**: Web UI supports pagination for large result sets
-- **Responsive Design**: Mobile-friendly interface with modern styling
+---
+
+## 🐳 Docker Deployment
+```bash
+docker build -t examdoor .
+docker run -p 8000:8000 --network host examdoor
+```
 
 ---
 
-## Troubleshooting
-
-### Common Issues
-
-1. **Chrome Driver Issues**
-   - Ensure Google Chrome is installed
-   - ChromeDriver is auto-managed by webdriver-manager
-
-2. **Database Connection Errors**
-   - Verify PostgreSQL is running
-   - Check credentials in `scraper_api.py` and `worker.py`
-   - Ensure database `announcements_db` exists
-
-3. **CORS Errors in Web UI**
-   - FastAPI CORS is configured for common localhost ports
-   - Serve frontend from `127.0.0.1:5500` or similar
-
-4. **Scraping Failures**
-   - Check website structure changes
-   - Review logs for specific error messages
-   - Some sites may block automated requests
-
-### Logs
-All components include comprehensive logging:
-- Worker: Scraping progress and database operations
-- API: Request handling and database connections
-- Streamlit: Data fetching and caching
+## 🛠️ Troubleshooting
+- ✅ Ensure Chrome & ChromeDriver installed (auto-managed)  
+- ✅ Check PostgreSQL running with correct credentials  
+- ✅ Logs available for worker, API, and UI  
 
 ---
 
-## License
-MIT License
+## 📜 License
+This project is licensed under the **MIT License**.  
 
-## Author
-[pratham2025](https://github.com/pratham2025)
+👨‍💻 Author: [pratham2025](https://github.com/pratham2025)  
 
 ---
 
-**Tip**: For best results, run the backend (FastAPI) and database (PostgreSQL) before using the web or Streamlit UIs. The system is designed to handle high-volume scraping with automatic retry mechanisms and graceful error handling.
+✨ *Tip*: Run **FastAPI backend** + **PostgreSQL** before using UIs for smooth experience.  
