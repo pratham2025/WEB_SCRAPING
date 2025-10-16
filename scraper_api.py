@@ -1,4 +1,4 @@
-# scraper_api.py (Updated to include Summaries)
+# scraper_api.py (Original Version - No Summaries)
 
 import psycopg2
 from psycopg2 import extras
@@ -29,7 +29,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- Source Enum (No changes needed) ---
+# --- Source Enum ---
 class SourceEnum(str, Enum):
     mahacet = "MAHACET"
     nta = "NTA"
@@ -37,14 +37,16 @@ class SourceEnum(str, Enum):
     neet = "NEET"
     jee = "JEE"
     gate = "GATE"
-    upsc = "UPSC" 
+    upsc = "UPSC"
     mpsc = "MPSC"
     rrbmumbai = "RRBMumbai"
     isro = "ISRO"
     rrbkolkata = "RRBKolkata"
+    kseab = "KSEAB"
+    kea = "KEA"
 
 
-# --- Helper Functions (No changes needed) ---
+# --- Helper Functions ---
 def get_db_connection():
     """Establishes a connection to the PostgreSQL database."""
     conn_params = {
@@ -70,8 +72,7 @@ async def get_sources():
     that have data in the announcements table.
     """
     conn = get_db_connection()
-    # Using RealDictCursor allows us to access columns by name easily
-    cursor = conn.cursor(cursor_factory=extras.RealDictCursor) 
+    cursor = conn.cursor(cursor_factory=extras.RealDictCursor)
     cursor.execute("SELECT DISTINCT source FROM announcements ORDER BY source ASC")
     sources = [row['source'] for row in cursor.fetchall()]
     cursor.close()
@@ -82,22 +83,17 @@ async def get_sources():
 @app.get("/announcements/{source}")
 async def get_source_data(source: SourceEnum):
     """
-    Fetches announcement data, including the new summary, for a specified source.
+    Instantly fetches announcement data for a specified source from the database.
     """
     conn = get_db_connection()
     cursor = conn.cursor(cursor_factory=extras.RealDictCursor)
-    
-    # --- MODIFIED: Added the 'summary' column to the SELECT statement ---
-    sql_select_query = """
-        SELECT id, source, text, link, summary 
-        FROM announcements 
-        WHERE source = %s 
-        ORDER BY id DESC
-    """
-    
-    cursor.execute(sql_select_query, (source.value,))
+
+    # --- REVERTED: Original SQL query without the 'summary' column ---
+    cursor.execute(
+        "SELECT id, source, text, link FROM announcements WHERE source = %s ORDER BY id DESC",
+        (source.value,),
+    )
     results = cursor.fetchall()
     cursor.close()
     conn.close()
-    
     return {"source": source.value, "data": results}

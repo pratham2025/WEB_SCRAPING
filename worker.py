@@ -1,4 +1,4 @@
-# worker.py (Updated with a 60-item limit per source)
+# worker.py (Original Version - No Summarization)
 
 import psycopg2
 import time
@@ -11,16 +11,12 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 import undetected_chromedriver as uc
 
-# --- NEW: Import the summary generation function ---
-from summarizer import generate_summary
-
 # --- Configuration ---
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - [%(module)s] - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - [%(filename)s] - %(message)s')
 SCRAPE_INTERVAL_SECONDS = 3600
-# --- NEW: Set a limit for announcements per source ---
-MAX_ANNOUNCEMENTS_PER_SOURCE = 60
+MAX_ANNOUNCEMENTS_PER_SOURCE = 60 # Keeping the limit as it's useful
 
-# --- Selenium Setup (No changes needed here) ---
+# --- Selenium Setup ---
 def setup_driver():
     """Initializes an UNDETECTED headless Chrome WebDriver."""
     options = uc.ChromeOptions()
@@ -43,14 +39,13 @@ def setup_driver():
     })
     return driver
 
-# --- DATABASE OPERATIONS (No changes needed here) ---
-def save_to_db(source_name, results_with_summaries):
-    """Saves results with their summaries to the database."""
-    if not results_with_summaries:
+# --- DATABASE OPERATIONS ---
+def save_to_db(source_name, results):
+    """Saves raw results to the database."""
+    if not results:
         logging.info(f"No results to process for {source_name}.")
         return 0
 
-    # The results are already unique from the scraper task
     conn_params = {
         "host": "localhost", "dbname": "announcements_db", "user": "notifyme",
         "password": "Pratham@2025", "port": "5432"
@@ -61,14 +56,15 @@ def save_to_db(source_name, results_with_summaries):
         conn = psycopg2.connect(**conn_params)
         cursor = conn.cursor()
         
+        # --- REVERTED: Original SQL query without the 'summary' column ---
         sql_insert_query = """
-            INSERT INTO announcements (source, text, link, summary) 
-            VALUES (%s, %s, %s, %s) 
+            INSERT INTO announcements (source, text, link) 
+            VALUES (%s, %s, %s) 
             ON CONFLICT (source, text) DO NOTHING
         """
         
-        for item in results_with_summaries:
-            cursor.execute(sql_insert_query, (source_name, item['text'], item['link'], item['summary']))
+        for item in results:
+            cursor.execute(sql_insert_query, (source_name, item['text'], item['link']))
             if cursor.rowcount > 0:
                 new_items_count += 1
         conn.commit()
@@ -78,19 +74,17 @@ def save_to_db(source_name, results_with_summaries):
     finally:
         if conn: conn.close()
     
-    logging.info(f"Database for {source_name} complete. Processed {len(results_with_summaries)} items, added {new_items_count} new.")
+    logging.info(f"Database for {source_name} complete. Processed {len(results)} items, added {new_items_count} new.")
     return new_items_count
 
-# --- TASK FOR PARALLEL EXECUTION (MODIFIED) ---
+# --- TASK FOR PARALLEL EXECUTION ---
 def run_scraper_task(source_config):
-    """
-    Manages scraping AND summarization for a single source within a thread.
-    """
+    """Manages the scraping process for a single source."""
     source_name = source_config['name']
     url = source_config['url']
     logging.info(f"Starting task for: '{source_name}'")
     
-    driver = None  # Initialize driver to None
+    driver = None
     try:
         driver = setup_driver()
         module_name = f"scrapers.{source_name.lower()}_scraper"
@@ -101,25 +95,12 @@ def run_scraper_task(source_config):
         
         scraped_data = scraper_module.scrape(driver)
 
-        # --- MODIFIED: Limit the number of announcements before processing ---
+        # Limit the number of announcements
         if scraped_data and len(scraped_data) > MAX_ANNOUNCEMENTS_PER_SOURCE:
-            logging.info(f"Source '{source_name}' has {len(scraped_data)} items. Limiting to the first {MAX_ANNOUNCEMENTS_PER_SOURCE}.")
-            # Slice the list to get only the first 60 items
+            logging.info(f"Source '{source_name}' has {len(scraped_data)} items. Limiting to first {MAX_ANNOUNCEMENTS_PER_SOURCE}.")
             scraped_data = scraped_data[:MAX_ANNOUNCEMENTS_PER_SOURCE]
-        
-        # --- Process data and generate summaries right after scraping ---
-        processed_data = []
-        if scraped_data:
-            logging.info(f"Found {len(scraped_data)} items for '{source_name}'. Generating summaries...")
-            for item in scraped_data:
-                # Generate summary for the original text
-                summary = generate_summary(item['text'])
-                # Append the summary to the item dictionary
-                item['summary'] = summary
-                processed_data.append(item)
-            logging.info(f"Summarization complete for '{source_name}'.")
-        
-        return {"source": source_name, "data": processed_data, "status": "Success"}
+
+        return {"source": source_name, "data": scraped_data, "status": "Success"}
     except Exception as e:
         logging.error(f"Task for '{source_name}' failed: {e}", exc_info=False)
         return {"source": source_name, "data": [], "status": f"Failed: {e}"}
@@ -128,9 +109,9 @@ def run_scraper_task(source_config):
             driver.quit()
         logging.info(f"Finished task for: '{source_name}'")
 
-# --- MAIN WORKER ORCHESTRATOR (No changes needed here) ---
+# --- MAIN WORKER ORCHESTRATOR ---
 def main():
-    """Main worker loop to run scrapers in parallel and provide a summary."""
+    """Main worker loop to run scrapers in parallel."""
     logging.info("Worker process starting.")
     try:
         with open('config.json', 'r') as f:
@@ -152,7 +133,6 @@ def main():
                 result = future.result()
                 results_summary.append(result)
 
-        # --- Process all results after scraping is done ---
         total_new_items = 0
         successful_scrapes = 0
         failed_scrapes = 0
@@ -168,7 +148,6 @@ def main():
 
         cycle_end_time = time.time()
         
-        # --- Final Summary Report ---
         logging.info("--- Scraping Cycle Summary ---")
         logging.info(f"Total time taken: {cycle_end_time - cycle_start_time:.2f} seconds")
         logging.info(f"Sources processed: {len(sources_to_scrape)}")

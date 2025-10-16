@@ -47,6 +47,14 @@
 		{
 			"name": "RRBAhmedabad",
 			"url": "https://rrbahmedabad.gov.in/news-updates/"
+		},
+		{
+			"name": "KSEAB",
+			"url": "https://kseab.karnataka.gov.in/english"
+		},
+		{
+			"name": "KEA", 
+			"url": "https://cetonline.karnataka.gov.in/kea/"
 		}
 	]
 }
