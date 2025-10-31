@@ -18,25 +18,20 @@ MAX_ANNOUNCEMENTS_PER_SOURCE = 60 # Keeping the limit as it's useful
 
 # --- Selenium Setup ---
 def setup_driver():
-    """Initializes an UNDETECTED headless Chrome WebDriver."""
-    options = uc.ChromeOptions()
+    """Initializes Chrome driver using local fixed path to avoid re-download errors."""
+    options = webdriver.ChromeOptions()
     options.add_argument("--headless=new")
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_argument("--disable-gpu")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("start-maximized")
-    options.add_argument(
-        "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/120.0.0.0 Safari/537.36"
-    )
     options.add_experimental_option('excludeSwitches', ['enable-logging'])
     
-    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
-    driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
-        "source": "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"
-    })
+    # ✅ Use your local ChromeDriver path here
+    service = ChromeService(r"C:\\chromedriver-win64\\chromedriver.exe")
+
+    driver = webdriver.Chrome(service=service, options=options)
     return driver
 
 # --- DATABASE OPERATIONS ---

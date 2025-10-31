@@ -1,8 +1,7 @@
-// Update copyright year
-document.getElementById('year').textContent = new Date().getFullYear();
+// home.js
 
 // Handle subscription form
-document.getElementById('subscribeForm').addEventListener('submit', async (e) => {
+document.getElementById('subscribeForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = e.target.querySelector('input[type="email"]').value;
     

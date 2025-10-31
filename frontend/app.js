@@ -1,7 +1,3 @@
-// ExamDoor — strictly aligned to your FastAPI used by app.py:
-//   GET /sources -> { "sources": [...] }
-//   GET /announcements/<source> -> { "data": [ {text, source, link, date?}, ... ] }
-
 // Update API_BASE to match your running API
 const API_BASE = "http://127.0.0.1:8000";
 
@@ -11,17 +7,54 @@ const state = {
   items: [],
   filtered: [],
   page: 1,
-  perPage: 10,
-  sort: "default" // default | az
+  perPage: 10
 };
 
+// Metadata: full forms and short descriptions for sources
+const SOURCE_INFO = {
+  "CBSE": { full: "Central Board of Secondary Education", desc: "National school board for India" },
+  "JEE": { full: "Joint Entrance Examination", desc: "Engineering admissions (Main/Advanced)" },
+  "GATE": { full: "Graduate Aptitude Test in Engineering", desc: "Post‑grad and PSU recruitment exam" },
+  "ISRO": { full: "Indian Space Research Organisation", desc: "Recruitment and exam updates" },
+  "NEET": { full: "National Eligibility cum Entrance Test", desc: "Medical and dental admissions" },
+  "NTA": { full: "National Testing Agency", desc: "Agency notifications and test schedules" },
+  "KEA": { full: "Karnataka Examinations Authority", desc: "State entrance and recruitment notices" },
+  "KSEAB": { full: "Karnataka School Examination and Assessment Board", desc: "School exam notifications" },
+  "MAHACET": { full: "Maharashtra State CET Cell", desc: "State common entrance test updates" },
+  "MPSC": { full: "Maharashtra Public Service Commission", desc: "State civil services recruitment" },
+  "UPSC": { full: "Union Public Service Commission", desc: "Civil services and national-level recruitment exams" },
+  "RRBKolkata": { full: "Railway Recruitment Board Kolkata", desc: "RRB Kolkata recruitment and results" },
+  "RRBMumbai": { full: "Railway Recruitment Board Mumbai", desc: "RRB Mumbai recruitment and results" }
+};
+
+// Logo file mapping for known sources
+const LOGO_MAP = {
+  CBSE: "src/logos/CBSE.png",
+  JEE: "src/logos/JEE.jpg",
+  GATE: "src/logos/GATE.webp",
+  ISRO: "src/logos/ISRO.png",
+  NEET: "src/logos/NEET.jpg",
+  NTA: "src/logos/NTA.png",
+  KEA: "src/logos/KEA.jpg", // optional, in case added later
+  KSEAB: "src/logos/KSEAB.jpg", // optional
+  MAHACET: "src/logos/MAHACET.png",
+  MPSC: "src/logos/MPSC.png",
+  RRBKolkata: "src/logos/RRBKOLKATA.png",
+  RRBMumbai: "src/logos/RRBMUMBAI.avif",
+  UPSC: "src/logos/UPSC.webp"
+};
+
+// Add new element selectors
 const els = {
   tabs: document.getElementById("examTabs"),
   list: document.getElementById("examList"),
   count: document.getElementById("resultCount"),
   pagination: document.getElementById("pagination"),
   detail: document.getElementById("examDetail"),
-  status: document.getElementById("connStatus")
+  status: document.getElementById("connStatus"),
+  sourceSelector: document.getElementById("sourceSelector"),
+  sourceCardGrid: document.getElementById("sourceCardGrid"),
+  resultsContainer: document.getElementById("resultsContainer"),
 };
 
 function setStatus(msg, warn=false){
@@ -34,19 +67,14 @@ function setStatus(msg, warn=false){
   console.log("[ExamDoor]", msg);
 }
 
-// Add this function after the existing functions
 function showNotification(message, isError = false) {
   const notification = document.createElement('div');
   notification.className = `notification ${isError ? 'error' : 'success'}`;
   notification.textContent = message;
   document.body.appendChild(notification);
-  
-  setTimeout(() => {
-    notification.remove();
-  }, 5000);
+  setTimeout(() => { notification.remove(); }, 5000);
 }
 
-// Update the fetchJSON function to show notifications
 async function fetchJSON(url){
   try{
     const res = await fetch(url, { headers:{accept:"application/json"} });
@@ -67,22 +95,51 @@ async function loadSources(){
   setStatus("Fetching sources …");
   const {ok, data} = await fetchJSON(`${API_BASE}/sources`);
   if (!ok || !data){
-    // show a helpful CORS note inline (so you’re not staring at an empty screen)
-    setStatus(
-      "Couldn’t read /sources. If you’re serving this page from 127.0.0.1:5500, enable CORS in your FastAPI (see below). Using sample data for preview.",
-      true
-    );
-    // sample sources so UI still works
+    setStatus("Couldn’t read /sources. Using sample data for preview.", true);
     state.sources = ["CBSE","JEE","MHT-CET","NEET","NTA"];
-    buildTabs();
-    await loadAnnouncements(state.sources[0]);
-    showCorsHelpOnce();
+    buildSourceCards();
     return;
   }
   const sources = Array.isArray(data.sources) ? data.sources : (Array.isArray(data) ? data : []);
   state.sources = sources.map(String).sort((a,b)=>a.localeCompare(b));
-  buildTabs();
-  await loadAnnouncements(state.sources[0]);
+  buildSourceCards();
+}
+
+// NEW function to build the source cards
+function buildSourceCards() {
+    if (!els.sourceCardGrid) return;
+    els.sourceCardGrid.innerHTML = state.sources.map(s => {
+        const initials = s.split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
+        const meta = SOURCE_INFO[s] || { full: s, desc: "Latest announcements and updates" };
+        const logo = LOGO_MAP[s];
+        return `
+        <a class="source-card" onclick="selectSource('${escapeAttr(s)}')">
+            <div class="source-card-logo">${logo ? `<img src="${escapeAttr(logo)}" alt="${escapeAttr(meta.full)}"/>` : escapeHtml(initials)}</div>
+            <h3>${escapeHtml(s)}</h3>
+            <div class="source-full">${escapeHtml(meta.full)}</div>
+            <p class="source-desc">${escapeHtml(meta.desc)}</p>
+        </a>`;
+    }).join("");
+}
+
+// NEW function to handle selecting a source
+async function selectSource(source) {
+    els.sourceSelector.style.display = 'none';
+    els.resultsContainer.style.display = 'block';
+    
+    // Update tab bar to show selected source and a back button
+    els.tabs.innerHTML = `
+        <button class="back-btn" onclick="showSourceSelector()">← All Sources</button>
+        <button class="exam-tab active">${escapeHtml(source)}</button>
+    `;
+
+    await loadAnnouncements(source);
+}
+
+// NEW function to go back to the source grid
+function showSourceSelector() {
+    els.resultsContainer.style.display = 'none';
+    els.sourceSelector.style.display = 'block';
 }
 
 async function loadAnnouncements(source){
@@ -112,31 +169,10 @@ function normaAnn(x){
 
 function cryptoId(){ try{ return crypto.getRandomValues(new Uint32Array(1))[0].toString(16);}catch(_){return Math.random().toString(16).slice(2);} }
 
-function buildTabs(){
-  els.tabs.innerHTML = state.sources.map((s,i)=>`
-    <button class="exam-tab ${i===0?'active':''}" data-src="${escapeAttr(s)}">${escapeHtml(s)}</button>
-  `).join("");
-  els.tabs.querySelectorAll(".exam-tab").forEach(btn=>{
-    btn.addEventListener("click", async ()=>{
-      els.tabs.querySelectorAll(".exam-tab").forEach(b=>b.classList.remove("active"));
-      btn.classList.add("active"); // full black via CSS
-      await loadAnnouncements(btn.dataset.src);
-    });
-  });
-}
-
 function applyFilters(){
   const q = (document.getElementById("q")?.value || "").trim().toLowerCase();
-  const org = (document.getElementById("org")?.value || "").trim().toLowerCase();
-
   let arr = state.items.slice();
   if (q) arr = arr.filter(i => i.text.toLowerCase().includes(q));
-  if (org) arr = arr.filter(i => String(i.source||"").toLowerCase().includes(org));
-
-  const sortChip = document.querySelector(".chip.active");
-  const sort = sortChip?.dataset.sort || "default";
-  if (sort === "az") arr.sort((a,b)=> a.text.localeCompare(b.text));
-
   state.filtered = arr;
   renderList();
 }
@@ -209,7 +245,7 @@ function escapeAttr(s){return escapeHtml(s).replace(/"/g,"&quot;")}
 function fmtDate(dt){ const d = new Date(dt); return isNaN(d)? String(dt) : d.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}); }
 
 /* events */
-document.getElementById("globalSearch")?.addEventListener("submit",(e)=>{e.preventDefault(); applyFilters();});
+// Remove search binding: no global search or filters now
 document.querySelectorAll(".chip[data-sort]")?.forEach(ch=>{
   ch.addEventListener("click", ()=>{
     document.querySelectorAll(".chip[data-sort]").forEach(c=>c.classList.remove("active"));
@@ -220,10 +256,14 @@ document.querySelectorAll(".chip[data-sort]")?.forEach(ch=>{
 /* expose for inline handlers */
 window.selectItem = selectItem;
 window.gotoPage = gotoPage;
+window.selectSource = selectSource; // Expose new functions
+window.showSourceSelector = showSourceSelector;
 
 /* init */
 (async function init(){
-  // default activate "Default" sort chip
-  const def = document.querySelector('.chip[data-sort="default"]'); if(def) def.classList.add("active");
-  await loadSources();
+  // This check ensures we only run this logic on the notifications page
+  if (document.getElementById('sourceSelector')) {
+    const def = document.querySelector('.chip[data-sort="default"]'); if(def) def.classList.add("active");
+    await loadSources();
+  }
 })();
