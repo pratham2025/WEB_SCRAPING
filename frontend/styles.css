@@ -43,7 +43,34 @@ body{
   border-bottom:1px solid var(--ink-100);
   width:100%;
 }
-.brand{display:flex; align-items:center; gap:10px; font-weight:700; font-size:20px}
+.brand{
+  display:flex; align-items:center; gap:10px; font-weight:700; font-size:20px;
+  /* --- ADDED LINES --- */
+  text-decoration: none;
+  transition: transform 0.2s ease-out;
+  /* --- END ADDED LINES --- */
+}
+/* --- ADDED RULE for text gradient --- */
+.brand span {
+  background: linear-gradient(180deg, var(--ink-900), var(--ink-700));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  transition: opacity 0.2s ease;
+}
+/* --- ADDED RULE for hover effects --- */
+.brand:hover {
+  transform: scale(1.02); /* Slight grow */
+}
+.brand:hover span {
+  opacity: 0.8; /* Subtle fade on hover */
+}
+/* Make the bell ring again on hover */
+.brand:hover .bell-logo {
+  animation: bell-ring 900ms ease-in-out;
+}
+/* --- END ADDED RULES --- */
+
 .brand .logo{filter: drop-shadow(0 2px 6px rgba(0,165,98,.20));}
 /* bell icon shared size & animation */
 .bell-logo{ width:32px; height:36px; transform-origin: top center; }
@@ -64,6 +91,7 @@ body{
 .actions{display:flex; align-items:center; gap:12px; position:absolute; left:50%; transform:translateX(-50%)}
 .actions .link{color:var(--ink-700); text-decoration:none; font-weight:500}
 .actions .link:hover{color:var(--green-600)}
+.actions .link.active{ color:var(--green-600); font-weight: 600; } /* Added active style */
 
 /* modal */
 .modal{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:1000 }
@@ -103,6 +131,7 @@ body{
   border:1px solid transparent; padding:10px 14px; border-radius:10px; font-weight:600;
   cursor:pointer; transition:.18s transform ease, .18s background ease, .18s box-shadow ease, .12s color ease, .12s border-color ease;
   box-shadow:0 1px 0 rgba(9,30,66,.04);
+  text-decoration: none; /* Ensure links styled as buttons have no underline */
 }
 .btn:hover{transform:translateY(-1px)}
 .btn:active{transform:translateY(0)}
@@ -128,7 +157,8 @@ body{
 /* layout */
 .container{
   position:relative; z-index:1;
-  display:grid; grid-template-columns: 280px 1fr 420px; gap:16px;
+  display:grid; grid-template-columns: 1fr; /* <-- CHANGED */
+  gap:16px;
   padding:24px; max-width:1440px; margin: 0 auto;
 }
 
@@ -154,13 +184,28 @@ body{
 .card-list{ list-style:none; padding:0; margin:12px 0 0 0; display:flex; flex-direction:column; gap:12px }
 .card{
   border:1px solid var(--ink-100); border-radius:14px; padding:14px; background:#fff;
-  display:grid; grid-template-columns: 56px 1fr auto; gap:12px; cursor:pointer; transition:.2s transform ease,.2s box-shadow ease;
+  display:grid; grid-template-columns: 56px 1fr auto; gap:12px; transition:.2s transform ease,.2s box-shadow ease;
+  align-items: center; /* <-- THIS IS THE NEW LINE */
 }
-.card:hover{ transform:translateY(-1px); box-shadow:var(--shadow) }
+.card:hover{ 
+  transform:translateY(-1px); box-shadow:var(--shadow);
+  /* Removed hover cursor logic */
+}
 .card .logo{
   width:56px; height:56px; border-radius:12px; background:linear-gradient(180deg,var(--green-100),#fff);
   display:flex; align-items:center; justify-content:center; font-weight:800; color:var(--green-700)
 }
+/* --- ADDED RULE --- */
+.card .logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 12px; /* Match the parent .logo container */
+  background: #fff;
+  padding: 4px; /* Give logo a little space */
+}
+/* --- END ADDED RULE --- */
+
 .meta{ display:flex; flex-direction:column; gap:6px }
 .title{ font-weight:700 }
 .org{ color:var(--ink-700); font-weight:600 }
@@ -172,7 +217,12 @@ body{
 .page-btn.active, .page-btn:hover{ border-color:var(--green-200); box-shadow:0 0 0 3px var(--ring) }
 
 /* details */
-.details{ background:var(--card); border:1px solid var(--ink-100); border-radius:16px; padding:0; box-shadow:var(--shadow); min-height:60vh; overflow:hidden }
+.details{ 
+  background:var(--card); border:1px solid var(--ink-100); 
+  border-radius:16px; padding:0; box-shadow:var(--shadow); 
+  min-height:60vh; overflow:hidden;
+  display: none; /* <-- ADDED THIS LINE to hide it */
+}
 .detail{ padding:16px }
 .empty-state{ padding:40px; text-align:center; color:var(--ink-500) }
 .empty-art{ width:220px; height:140px; margin:0 auto 8px auto; display:block }
@@ -190,7 +240,12 @@ body{
 
 /* footer */
 .footer{ padding:32px 24px; max-width:1440px; margin:24px auto 0; color:var(--ink-700) }
-.footer-grid{ display:grid; grid-template-columns: repeat(4, 1fr); gap:16px; background:#fff; border:1px solid var(--ink-100); border-radius:16px; padding:20px; box-shadow:var(--shadow) }
+.footer-grid{ 
+  display:grid; 
+  grid-template-columns: repeat(3, 1fr); /* <-- CHANGED */
+  gap:16px; background:#fff; border:1px solid var(--ink-100); 
+  border-radius:16px; padding:20px; box-shadow:var(--shadow) 
+}
 .footer-grid h4{ margin:0 0 8px 0 }
 .footer-grid a{ display:block; color:var(--ink-700); text-decoration:none; padding:4px 0 }
 .footer-grid a:hover{ color:var(--green-600) }
@@ -201,15 +256,31 @@ body{
 
 /* responsive */
 @media (max-width: 1200px){
-  .container{grid-template-columns: 280px 1fr}
+  /* Container is already 1fr, this is redundant but fine */
+  .container{grid-template-columns: 1fr}
+  /* Details is already hidden, this is redundant but fine */
   .details{display:none}
 }
-@media (max-width: 900px){
+@media (max-logo-card
+    width: 900px){
   .topbar{row-gap:10px}
-  .actions{justify-content:flex-end}
+  .actions{
+    position: relative; /* Changed */
+    left: auto; /* Changed */
+    transform: none; /* Changed */
+    justify-content:flex-end
+  }
   .searchbar{flex-wrap:wrap}
   .searchbar .field{min-width:160px}
   .container{grid-template-columns: 1fr}
+  
+  /* --- ADDED RULE --- */
+  /* Stack footer to 1 column on mobile */
+  .footer-grid {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  /* --- END ADDED RULE --- */
 }
 
 .notification {
@@ -237,33 +308,66 @@ body{
   to { transform: translateX(0); }
 }
 
-/* Home page styles */
+/* --- HOME PAGE STYLES --- */
+/* REMOVED: .features, .feature-card, 
+  .subscribe-section, .subscribe-form 
+*/
+
 .home-container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 4rem; /* Adds spacing between new sections */
 }
 
+/* General Home Page Section Titles */
+.home-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--ink-900);
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+}
+.home-subtitle {
+    font-size: 1.125rem;
+    color: var(--ink-700);
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 2.5rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* 1. Hero Section (Existing) */
 .hero {
     text-align: center;
     padding: 4rem 1rem;
-    background: linear-gradient(rgba(0,165,98,0.02), rgba(0,165,98,0.01)), url('src/images/card_back_home1.jpg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    border-radius: 1rem;
-    margin: 2rem 0;
+    /* Using a cleaner gradient, removing image */
+    background: linear-gradient(145deg, var(--green-50), #fff);
+    border: 1px solid var(--green-100);
+    border-radius: 1.5rem; /* More rounded */
+    margin: 0; /* Removed margin */
+    box-shadow: var(--shadow);
 }
 
 .hero h1 {
     font-size: 3rem;
-    color: #111827;
+    color: var(--ink-900);
     margin-bottom: 1rem;
+    /* Added text gradient */
+    background: linear-gradient(180deg, var(--ink-900), var(--green-700));
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .hero p {
     font-size: 1.25rem;
-    color: #4B5563;
+    color: var(--ink-700);
     margin-bottom: 2rem;
 }
 
@@ -271,75 +375,214 @@ body{
     display: flex;
     gap: 1rem;
     justify-content: center;
+    flex-wrap: wrap; /* Added for mobile */
 }
 
-.features {
+/* 2. "Why Choose Us?" Section (New) */
+.why-choose-us {
+  padding: 2rem 0;
+}
+.why-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 2rem;
-    padding: 4rem 0;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
 }
-
-.feature-card {
+.why-card {
+    background: var(--card);
+    border: 1px solid var(--ink-100);
+    border-radius: 1rem;
     padding: 2rem;
-    background: linear-gradient(rgba(255,255,255,0.85), rgba(255,255,255,0.85)), url('src/images/whole_back_1.jpg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    border-radius: 0.5rem;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-    transition: transform 0.2s;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-
-.feature-card:hover {
+.why-card:hover {
     transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(9,30,66,.1);
 }
-
-.feature-card h3 {
-    color: #111827;
+.why-icon {
+    width: 32px;
+    height: 32px;
+    color: var(--green-600);
     margin-bottom: 1rem;
 }
-
-.feature-card p {
-    color: #4B5563;
+.why-card h3 {
+    color: var(--ink-900);
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-size: 1.25rem;
+}
+.why-card p {
+    color: var(--ink-700);
+    margin: 0;
+    line-height: 1.6;
 }
 
-.subscribe-section {
-    text-align: center;
-    padding: 4rem 1rem;
-    background: linear-gradient(rgba(0,165,98,0.05), rgba(0,165,98,0.02));
-    border-radius: 1rem;
+/* 3. "Featured Sources" Section (New) */
+.featured-sources {
+    padding: 2rem 0;
+    background: linear-gradient(180deg, #ffffff, var(--green-50));
+    border-radius: 1.5rem;
+    border: 1px solid var(--green-100);
+    box-shadow: var(--shadow);
 }
-
-.subscribe-form {
-    max-width: 500px;
-    margin: 2rem auto;
+.source-logo-grid {
     display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 0 1rem;
+    margin-bottom: 2.5rem;
+}
+.source-logo-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    border-radius: 1rem;
+    background: var(--card);
+    border: 1px solid var(--ink-100);
+    width: 120px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.source-logo-card:hover {
+    transform: scale(1.05);
+    box-shadow: var(--shadow);
+}
+.source-logo-card img {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: contain;
+}
+.source-logo-card span {
+    font-weight: 600;
+    color: var(--ink-700);
+}
+
+/* 4. "What We Track" Section (New) */
+.what-we-track {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: center;
+    background: var(--card);
+    border: 1px solid var(--ink-100);
+    border-radius: 1.5rem;
+    padding: 3rem;
+    box-shadow: var(--shadow);
+}
+.track-card .home-title {
+  text-align: left;
+}
+.track-list {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
     gap: 1rem;
 }
-
-.subscribe-form input {
-    flex: 1;
-    padding: 0.75rem 1rem;
-    border: 1px solid #E5E7EB;
-    border-radius: 0.375rem;
-    font-size: 1rem;
+.track-list li {
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: var(--ink-700);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
 }
+.track-list li::before {
+    content: '✓';
+    color: var(--green-600);
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+.track-art {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.track-art img {
+    width: 150px;
+    height: auto;
+    filter: drop-shadow(0 4px 12px rgba(0,165,98,.25));
+    animation: bell-ring 1.5s ease-in-out infinite 1s;
+}
+
+/* 5. "CTA Section" (New) */
+.cta-section {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    background: linear-gradient(145deg, var(--green-700), var(--green-600));
+    border-radius: 1.5rem;
+    box-shadow: var(--shadow);
+}
+.cta-section h2 {
+    font-size: 2.25rem;
+    color: #fff;
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+}
+.cta-section p {
+    font-size: 1.125rem;
+    color: var(--green-100);
+    margin-top: 0;
+    margin-bottom: 2rem;
+}
+/* Re-style primary button for dark background */
+.cta-section .btn.primary {
+    background: #fff;
+    color: var(--green-600);
+    border-color: #fff;
+}
+.cta-section .btn.primary:hover {
+    background: var(--green-50);
+    color: var(--green-700);
+    border-color: var(--green-50);
+    box-shadow: 0 0 0 3px #fff;
+}
+
+
+/* --- END NEW HOME STYLES --- */
+
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-    .hero h1 {
+    .home-container {
+      gap: 3rem;
+      padding: 1rem;
+    }
+
+    .hero h1, .cta-section h2 {
         font-size: 2rem;
     }
     
     .hero-buttons {
         flex-direction: column;
+        padding: 0 1rem;
     }
     
-    .subscribe-form {
-        flex-direction: column;
+    .home-title {
+      font-size: 1.75rem;
+    }
+    .home-subtitle {
+      font-size: 1rem;
+    }
+
+    .what-we-track {
+      grid-template-columns: 1fr;
+      padding: 2rem 1.5rem;
+    }
+    .track-card .home-title {
+      text-align: center;
+    }
+    .track-art {
+      display: none; /* Hide image on mobile */
     }
 }
+
+/* --- DUPLICATE STYLES (for safety, will be merged) --- */
+/* These are from the original file, ensure they are not lost */
 
 /* NEW STYLES FOR SOURCE CARDS */
 .source-selector-container {
@@ -418,3 +661,4 @@ body{
 .back-btn:hover {
     background: var(--ink-100);
 }
+

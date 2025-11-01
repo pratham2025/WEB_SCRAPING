@@ -1,14 +1,15 @@
-<div class="brand">
+<!-- We wrap the brand in an <a> tag to make it a link -->
+  <a href="home.html" class="brand">
     <img src="src/images/bell_icon.png" alt="GETNOTIFY" class="logo bell-logo" width="28" height="28"/>
     <span>GETNOTIFY</span>
-  </div>
+  </a>
   
   <nav class="actions">
       <a class="link" href="home.html">Home</a>
       <button class="btn secondary" id="loginBtn" type="button">Log in</button>
       <a class="link" href="index.html">Notifications</a>
   </nav>
-
+  
   <!-- Login Modal -->
   <div id="loginModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
     <div class="modal-backdrop" data-close="true"></div>
@@ -33,5 +34,7 @@
       <p class="auth-privacy">By continuing, you agree to receive notifications from time to time. You can unsubscribe anytime.</p>
     </div>
   </div>
-
+  
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  
+  

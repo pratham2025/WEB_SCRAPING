@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GETNOTIFY — Your Education Hub</title>
+    <title>GETNOTIFY — Real-time Exam Alerts for CBSE, JEE, NEET, UPSC</title>
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Get instant notifications for all major educational updates in India. We track exam announcements, results, admit cards, and syllabus changes for CBSE, JEE, NEET, NTA, UPSC, and more.">
+    <meta name="keywords" content="exam notifications, educational updates, cbse, jee, neet, nta, upsc, exam results, admit card, syllabus, answer keys, getnotify">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -13,37 +17,102 @@
     <header class="topbar"></header>
 
     <main class="home-container">
+        <!-- 1. Hero Section (Unchanged, as requested) -->
         <section class="hero">
             <h1>Your Gateway to Educational Updates</h1>
             <p>Stay informed about latest announcements from CBSE, JEE, NEET, and more</p>
             <div class="hero-buttons">
                 <a href="index.html" class="btn primary">View Notifications</a>
-                <a href="#subscribe" class="btn ghost">Subscribe for Updates</a>
+                <a href="#features" class="btn ghost smooth-scroll">Learn More</a>
             </div>
         </section>
 
-        <section class="features">
-            <div class="feature-card">
-                <h3>Real-time Updates</h3>
-                <p>Get instant notifications about exam schedules, results, and important announcements</p>
-            </div>
-            <div class="feature-card">
-                <h3>Multiple Boards</h3>
-                <p>Coverage across major educational boards and competitive exams</p>
-            </div>
-            <div class="feature-card">
-                <h3>Easy Access</h3>
-                <p>Find all educational updates in one place</p>
+        <!-- 2. "Why Choose Us?" Section (Replaces old 'features') -->
+        <section id="features" class="why-choose-us">
+            <h2 class="home-title">Never Miss a Critical Update</h2>
+            <p class="home-subtitle">We simplify the chaos of educational announcements so you can focus on what matters.</p>
+            
+            <div class="why-grid">
+                <div class="why-card">
+                    <svg class="why-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3zm-8.27 4a2 2 0 0 1-3.46 0"></path></svg>
+                    <h3>Instant Exam Alerts</h3>
+                    <p>Get real-time notifications for exam schedules, postponements, and results. No more constant checking.</p>
+                </div>
+                <div class="why-card">
+                    <svg class="why-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                    <h3>All Sources, One Place</h3>
+                    <p>We track dozens of official sources, from national boards (CBSE, NTA) to competitive exams (JEE, NEET, UPSC).</p>
+                </div>
+                <div class="why-card">
+                    <svg class="why-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                    <h3>Syllabus & Answer Keys</h3>
+                    <p>Find official syllabus updates and verified answer keys (coming soon) to aid your preparation.</p>
+                </div>
             </div>
         </section>
 
-        <section id="subscribe" class="subscribe-section">
-            <h2>Stay Updated</h2>
-            <p>Get notifications directly in your inbox</p>
-            <form id="subscribeForm" class="subscribe-form">
-                <input type="email" placeholder="Enter your email" required>
-                <button type="submit" class="btn primary">Subscribe</button>
-            </form>
+        <!-- 3. Featured Sources Section -->
+        <section class="featured-sources">
+            <h2 class="home-title">Tracking All Major Exam Boards</h2>
+            <p class="home-subtitle">We monitor official announcements from sources that matter to you.</p>
+            <div class="source-logo-grid">
+                <div class="source-logo-card">
+                    <img src="src/logos/CBSE.png" alt="CBSE Logo">
+                    <span>CBSE</span>
+                </div>
+                <div class="source-logo-card">
+                    <img src="src/logos/NTA.png" alt="NTA Logo">
+                    <span>NTA</span>
+                </div>
+                <div class="source-logo-card">
+                    <img src="src/logos/JEE.jpg" alt="JEE Logo">
+                    <span>JEE</span>
+                </div>
+                <div class="source-logo-card">
+                    <img src="src/logos/NEET.jpg" alt="NEET Logo">
+                    <span>NEET</span>
+                </div>
+                <div class="source-logo-card">
+                    <img src="src/logos/UPSC.webp" alt="UPSC Logo">
+                    <span>UPSC</span>
+                </div>
+                <div class="source-logo-card">
+                    <img src="src/logos/GATE.webp" alt="GATE Logo">
+                    <span>GATE</span>
+                </div>
+            </div>
+            <div class="hero-buttons">
+                <a href="index.html" class="btn secondary">View All Sources</a>
+            </div>
+        </section>
+
+        <!-- 4. "What We Track" Section -->
+        <section class="what-we-track">
+            <div class="track-card">
+                <h2 class="home-title">One Platform for Every Update</h2>
+                <ul class="track-list">
+                    <li>Exam Notifications & Dates</li>
+                    <li>Result Announcements</li>
+                    <li>Admit Card & Hall Ticket Releases</li>
+                    <li>Official Answer Keys</li>
+                    <li>Syllabus Changes & Updates</li>
+                    <li>Application Start/End Dates</li>
+                    <li>And much more...</li>
+                </ul>
+            </div>
+            <div class="track-card track-art">
+                 <img src="src/images/bell_icon.png" alt="GetNotify Bell Icon">
+            </div>
+        </section>
+
+
+        <!-- 5. Final Call-to-Action (Replaces 'subscribe') -->
+        <section id="subscribe" class="cta-section">
+            <h2>Get Started Now</h2>
+            <p>Stop searching. Start preparing. Let the updates find you.</p>
+            <div class="hero-buttons">
+                <a href="index.html" class="btn primary">Browse All Notifications</a>
+            </div>
         </section>
     </main>
 
@@ -53,3 +122,4 @@
     <script src="./home.js"></script>
 </body>
 </html>
+

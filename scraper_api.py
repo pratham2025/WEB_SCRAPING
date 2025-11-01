@@ -88,12 +88,13 @@ async def get_source_data(source: SourceEnum):
     conn = get_db_connection()
     cursor = conn.cursor(cursor_factory=extras.RealDictCursor)
 
-    # --- REVERTED: Original SQL query without the 'summary' column ---
+    # --- THIS IS THE MODIFIED LINE ---
     cursor.execute(
-        "SELECT id, source, text, link FROM announcements WHERE source = %s ORDER BY id DESC",
+        "SELECT id, source, text, link, scraped_at FROM announcements WHERE source = %s ORDER BY id DESC",
         (source.value,),
     )
     results = cursor.fetchall()
     cursor.close()
     conn.close()
     return {"source": source.value, "data": results}
+

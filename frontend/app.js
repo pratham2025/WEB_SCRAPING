@@ -144,14 +144,26 @@ function showSourceSelector() {
 
 async function loadAnnouncements(source){
   state.activeSource = source;
+
+  // --- ADDED LINES ---
+  els.list.innerHTML = ''; // Clear old list
+  els.pagination.innerHTML = ''; // Clear old pagination
+  els.count.textContent = '0'; // Reset count
+  if (els.status) els.status.style.display = 'block'; // Show status
+  // --- END ADDD ---
+
   setStatus(`Fetching announcements for ${source} …`);
   const {ok, data} = await fetchJSON(`${API_BASE}/announcements/${encodeURIComponent(source)}`);
+  
   if(!ok || !data){
     setStatus(`Couldn’t read announcements for ${source}. Showing empty list.`, true);
     state.items = [];
+    if (els.status) els.status.style.display = 'block'; // Keep error status visible
   }else{
     const arr = Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []);
     state.items = arr.map(normaAnn);
+    // Hide status on success *before* filtering
+    if (els.status) els.status.style.display = 'none';
   }
   state.page = 1;
   applyFilters();
@@ -163,17 +175,15 @@ function normaAnn(x){
     text: String(x.text ?? x.title ?? "Untitled"),
     source: String(x.source ?? state.activeSource ?? "Source"),
     link: String(x.link ?? x.url ?? "#"),
-    date: x.date ?? x.postedAt ?? x.published_at ?? null
+    date: x.scraped_at ?? x.date ?? x.postedAt ?? x.published_at ?? null // <-- MODIFIED
   };
 }
 
 function cryptoId(){ try{ return crypto.getRandomValues(new Uint32Array(1))[0].toString(16);}catch(_){return Math.random().toString(16).slice(2);} }
 
 function applyFilters(){
-  const q = (document.getElementById("q")?.value || "").trim().toLowerCase();
-  let arr = state.items.slice();
-  if (q) arr = arr.filter(i => i.text.toLowerCase().includes(q));
-  state.filtered = arr;
+  // Filters are removed, so just use all items
+  state.filtered = state.items.slice();
   renderList();
 }
 
@@ -181,14 +191,38 @@ function renderList(){
   const start = (state.page-1)*state.perPage;
   const pageItems = state.filtered.slice(start, start+state.perPage);
   if (els.count) els.count.textContent = String(state.filtered.length);
-  els.list.innerHTML = pageItems.map(renderCard).join("");
+
+  // --- REPLACED LOGIC ---
+  if (state.filtered.length > 0) {
+      if (els.status) els.status.style.display = 'none'; // Hide status
+      els.list.innerHTML = pageItems.map(renderCard).join("");
+  } else {
+      // Only show "No announcements" if we aren't already showing a fetch error
+      if (els.status && els.status.textContent.startsWith("Fetching")) {
+        setStatus(`No announcements found for ${state.activeSource}.`, true);
+        els.status.style.display = 'block';
+      }
+      els.list.innerHTML = ''; // Ensure list is empty
+  }
+  // --- END REPLACEMENT ---
+  
   renderPagination();
 }
 
 function renderCard(x){
-  const initials = (x.source || "??").split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
-  return `<li class="card" data-id="${escapeAttr(x.id)}" onclick="selectItem('${escapeAttr(x.id)}')">
-    <div class="logo" aria-hidden="true">${escapeHtml(initials)}</div>
+  // --- LOGO LOGIC ---
+  const logoUrl = LOGO_MAP[x.source];
+  let logoHtml = '';
+  if (logoUrl) {
+    logoHtml = `<img src="${escapeAttr(logoUrl)}" alt="${escapeAttr(x.source)} logo" />`;
+  } else {
+    const initials = (x.source || "??").split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
+    logoHtml = escapeHtml(initials);
+  }
+  // --- END LOGO LOGIC ---
+
+  return `<li class="card" data-id="${escapeAttr(x.id)}">
+    <div class="logo" aria-hidden="true">${logoHtml}</div>
     <div class="meta">
       <div class="title">${escapeHtml(x.text)}</div>
       <div class="org">${escapeHtml(x.source)}</div>
@@ -200,6 +234,11 @@ function renderCard(x){
 
 function renderPagination(){
   const pages = Math.ceil(state.filtered.length / state.perPage) || 1;
+  if (pages <= 1) {
+    els.pagination.innerHTML = ""; // Hide pagination if only one page
+    return;
+  }
+  
   let html = "";
   for(let i=1;i<=pages;i++){
     html += `<button class="page-btn ${i===state.page?'active':''}" onclick="gotoPage(${i})">${i}</button>`;
@@ -209,61 +248,24 @@ function renderPagination(){
 
 function gotoPage(n){ state.page = n; renderList(); }
 
-function selectItem(id){
-  const x = state.filtered.find(j => String(j.id) === String(id));
-  if(!x || !els.detail) return;
-  els.detail.classList.remove("empty");
-  els.detail.innerHTML = `
-    <div class="detail-header">
-      <div>
-        <h3 class="detail-title">${escapeHtml(x.text)}</h3>
-        <div class="detail-org">${escapeHtml(x.source)}</div>
-      </div>
-      <div class="detail-actions">
-        <a href="${escapeAttr(x.link)}" target="_blank" rel="noopener" class="btn primary apply">Open on official site</a>
-        <button class="btn save" type="button" onclick="saveItem('${escapeAttr(x.id)}')">Save</button>
-      </div>
-    </div>
-    <div class="detail-body">
-      ${x.date ? `<p><b>Date:</b> ${escapeHtml(fmtDate(x.date))}</p>` : ""}
-      <p>Announcement from <b>${escapeHtml(x.source)}</b>. Use the button to read it on the official website.</p>
-    </div>`;
-}
-
-function saveItem(id){
-  try{
-    const set = new Set(JSON.parse(localStorage.getItem("savedAnnouncements")||"[]"));
-    if (set.has(id)) set.delete(id); else set.add(id);
-    localStorage.setItem("savedAnnouncements", JSON.stringify([...set]));
-    alert("Saved list updated.");
-  }catch(e){}
-}
-
 /* helpers */
 function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function escapeAttr(s){return escapeHtml(s).replace(/"/g,"&quot;")}
 function fmtDate(dt){ const d = new Date(dt); return isNaN(d)? String(dt) : d.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}); }
 
 /* events */
-// Remove search binding: no global search or filters now
-document.querySelectorAll(".chip[data-sort]")?.forEach(ch=>{
-  ch.addEventListener("click", ()=>{
-    document.querySelectorAll(".chip[data-sort]").forEach(c=>c.classList.remove("active"));
-    ch.classList.add("active"); applyFilters();
-  });
-});
+// No filters, so event listeners removed
 
 /* expose for inline handlers */
-window.selectItem = selectItem;
 window.gotoPage = gotoPage;
-window.selectSource = selectSource; // Expose new functions
+window.selectSource = selectSource;
 window.showSourceSelector = showSourceSelector;
 
 /* init */
 (async function init(){
   // This check ensures we only run this logic on the notifications page
   if (document.getElementById('sourceSelector')) {
-    const def = document.querySelector('.chip[data-sort="default"]'); if(def) def.classList.add("active");
     await loadSources();
   }
 })();
+
