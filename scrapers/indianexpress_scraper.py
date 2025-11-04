@@ -122,3 +122,4 @@ def scrape(driver):
         logging.error(f"An error occurred while scraping Indian Express: {e}", exc_info=False)
         driver.save_screenshot('indianexpress_error.png')
         return []
+    

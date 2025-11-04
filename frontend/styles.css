@@ -459,6 +459,56 @@ body{
     color: var(--ink-700);
 }
 
+/* --- ADDED: Home Page Latest News --- */
+/* 4. "Latest News" Section */
+.latest-news {
+  padding: 2rem 0;
+}
+.news-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Styles for the news card rendered by home.js */
+.news-card {
+    background: var(--card);
+    border: 1px solid var(--ink-100);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    display: flex; /* Use flex for layout */
+    flex-direction: column; /* Stack children vertically */
+    justify-content: space-between; /* Push footer to bottom */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.news-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(9,30,66,.1);
+}
+
+.news-card-date {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--green-600);
+    margin-bottom: 0.75rem;
+}
+
+.news-card-headline {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--ink-900);
+    margin: 0 0 1rem 0;
+    /* Allow headline to grow, pushing footer down */
+    flex-grow: 1; 
+}
+
+.news-card-footer {
+    margin-top: 1rem; /* Add space above the button */
+}
+/* --- END: Home Page Latest News --- */
+
+
 /* 4. "What We Track" Section (New) */
 .what-we-track {
     display: grid;
@@ -737,4 +787,3 @@ body{
 .back-btn:hover {
     background: var(--ink-100);
 }
-
