@@ -1,5 +1,3 @@
-# scraper_api.py (Original Version - No Summaries)
-
 import psycopg2
 from psycopg2 import extras
 from enum import Enum
@@ -29,7 +27,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- Source Enum ---
+# --- Source Enum (14 sources) ---
+# Note: IndianExpress is not here because it uses a separate table and endpoint.
 class SourceEnum(str, Enum):
     mahacet = "MAHACET"
     nta = "NTA"
@@ -42,6 +41,7 @@ class SourceEnum(str, Enum):
     rrbmumbai = "RRBMumbai"
     isro = "ISRO"
     rrbkolkata = "RRBKolkata"
+    rrbahmedabad = "RRBAhmedabad"
     kseab = "KSEAB"
     kea = "KEA"
 
@@ -88,7 +88,6 @@ async def get_source_data(source: SourceEnum):
     conn = get_db_connection()
     cursor = conn.cursor(cursor_factory=extras.RealDictCursor)
 
-    # --- THIS IS THE MODIFIED LINE ---
     cursor.execute(
         "SELECT id, source, text, link, scraped_at FROM announcements WHERE source = %s ORDER BY id DESC",
         (source.value,),
@@ -98,3 +97,21 @@ async def get_source_data(source: SourceEnum):
     conn.close()
     return {"source": source.value, "data": results}
 
+
+# --- NEW ENDPOINT FOR LATEST NEWS (Simpler Version) ---
+
+@app.get("/latest-news")
+async def get_latest_news():
+    """
+    Fetches the latest news articles (headline, link, date) from the latest_news table.
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor(cursor_factory=extras.RealDictCursor) 
+    
+    # Updated query to match the new, simpler table
+    cursor.execute("SELECT headline, article_link, article_date FROM latest_news ORDER BY scraped_at DESC")
+    
+    news = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return {"news": news}

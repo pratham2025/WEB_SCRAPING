@@ -55,6 +55,10 @@
 		{
 			"name": "KEA", 
 			"url": "https://cetonline.karnataka.gov.in/kea/"
+		},
+				{
+			"name": "IndianExpress", 
+			"url": "https://indianexpress.com/section/education/"
 		}
 	]
 }

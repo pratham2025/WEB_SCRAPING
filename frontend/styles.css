@@ -261,8 +261,7 @@ body{
   /* Details is already hidden, this is redundant but fine */
   .details{display:none}
 }
-@media (max-logo-card
-    width: 900px){
+@media (max-width: 900px){
   .topbar{row-gap:10px}
   .actions{
     position: relative; /* Changed */
@@ -502,34 +501,72 @@ body{
     align-items: center;
     justify-content: center;
 }
+/* --- MODIFIED RULE --- */
 .track-art img {
-    width: 150px;
+    width: 250px; /* Increased size from 150px */
+    max-width: 100%; /* Added for responsiveness */
     height: auto;
     filter: drop-shadow(0 4px 12px rgba(0,165,98,.25));
-    animation: bell-ring 1.5s ease-in-out infinite 1s;
+    /* animation: bell-ring 1.5s ease-in-out infinite 1s; -- REMOVED */
+    transition: transform 0.3s ease; /* Added for hover */
+}
+
+/* --- ADDED RULE --- */
+/* Add hover effect for interactivity */
+.track-art img:hover {
+    transform: scale(1.05);
 }
 
 /* 5. "CTA Section" (New) */
+/* --- MODIFIED RULE --- */
 .cta-section {
-    text-align: center;
+    /* text-align: center; -- REMOVED */
     padding: 3rem 1.5rem;
-    background: linear-gradient(145deg, var(--green-700), var(--green-600));
+    /* background: linear-gradient(145deg, var(--green-700), var(--green-600)); -- REPLACED */
+    background: var(--card); /* CHANGED TO WHITE */
+    border: 1px solid var(--ink-100); /* ADDED BORDER */
     border-radius: 1.5rem;
     box-shadow: var(--shadow);
+    
+    /* --- ADDED RULES --- */
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: center;
+    /* --- END ADDED RULES --- */
 }
+
+/* --- ADDED RULE --- */
+/* This new wrapper will hold the text content */
+.cta-content {
+    text-align: left; /* Align text left on desktop */
+}
+
+/* --- ADDED NEW RULE --- */
+.cta-content .hero-buttons {
+    justify-content: flex-start; /* Aligns button to the left */
+}
+
+/* --- MODIFIED RULES (for clarity) --- */
 .cta-section h2 {
     font-size: 2.25rem;
-    color: #fff;
+    /* color: #fff; -- REPLACED */
+    color: var(--ink-900); /* CHANGED TO DARK */
     margin-top: 0;
     margin-bottom: 0.5rem;
 }
 .cta-section p {
     font-size: 1.125rem;
-    color: var(--green-100);
+    /* color: var(--green-100); -- REPLACED */
+    color: var(--ink-700); /* CHANGED TO DARK */
     margin-top: 0;
     margin-bottom: 2rem;
 }
+/* --- END MODIFIED RULES --- */
+
 /* Re-style primary button for dark background */
+/* --- REMOVED THE FOLLOWING RULES --- */
+/*
 .cta-section .btn.primary {
     background: #fff;
     color: var(--green-600);
@@ -541,6 +578,33 @@ body{
     border-color: var(--green-50);
     box-shadow: 0 0 0 3px #fff;
 }
+*/
+/* --- END REMOVED RULES --- */
+
+
+/* --- ADDED NEW RULES for CTA art --- */
+.cta-art {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* --- MODIFIED RULE --- */
+.cta-art img {
+    width: 250px;
+    max-width: 100%;
+    height: auto;
+    border-radius: 12px;
+    transition: transform 0.3s ease;
+    background: #fff; /* Added a white card background */
+    padding: 1rem; /* Added padding around the image */
+    box-shadow: var(--shadow); /* Added a shadow to lift it */
+}
+
+.cta-art img:hover {
+    transform: scale(1.05); /* Interactive hover */
+}
+/* --- END ADDED NEW RULES --- */
 
 
 /* --- END NEW HOME STYLES --- */
@@ -553,6 +617,7 @@ body{
       padding: 1rem;
     }
 
+    /* --- MODIFIED RULE --- */
     .hero h1, .cta-section h2 {
         font-size: 2rem;
     }
@@ -569,15 +634,26 @@ body{
       font-size: 1rem;
     }
 
-    .what-we-track {
+    /* MODIFIED this rule to include .cta-section */
+    .what-we-track, .cta-section {
       grid-template-columns: 1fr;
       padding: 2rem 1.5rem;
     }
-    .track-card .home-title {
+
+    /* MODIFIED this rule to include .cta-content */
+    .track-card .home-title, .cta-content {
       text-align: center;
     }
+
+    /* --- MODIFIED RULE --- */
     .track-art {
-      display: none; /* Hide image on mobile */
+      /* display: none; -- Removed this rule, let's show the art on mobile */
+      margin-top: 1rem; /* Add some space */
+    }
+
+    /* --- ADDED RULE for new cta-art on mobile --- */
+    .cta-art {
+        display: none; /* Hide the second image on mobile for a cleaner look */
     }
 }
 
