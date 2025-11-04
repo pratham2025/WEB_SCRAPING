@@ -7,16 +7,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 
-# Database connection parameters
-conn_params = {
-    "host": "localhost",
-    "dbname": "announcements_db",
-    "user": "notifyme",
-    "password": "Pratham@2025",
-    "port": "5432"
-}
+# --- Database Functions ---
 
-def clear_old_news():
+def clear_old_news(conn_params):
     """Deletes all existing rows from the latest_news table."""
     try:
         conn = psycopg2.connect(**conn_params)
@@ -29,7 +22,7 @@ def clear_old_news():
     finally:
         if conn: conn.close()
 
-def insert_new_news(news_items):
+def insert_new_news(conn_params, news_items):
     """Inserts a list of new news items into the database."""
     if not news_items:
         logging.info("No new news items to insert.")
@@ -55,7 +48,7 @@ def insert_new_news(news_items):
     finally:
         if conn: conn.close()
 
-# --- THIS FUNCTION IS NOW NAMED 'scrape' ---
+# --- Main Scraper Function ---
 def scrape(driver):
     """
     Scrapes the Indian Express education page using Selenium.
@@ -63,23 +56,41 @@ def scrape(driver):
     logging.info("Scraping Indian Express (Headline/Date only)...")
     results = []
     
+    conn_params = {
+        "host": "localhost",
+        "dbname": "announcements_db",
+        "user": "notifyme",
+        "password": "Pratham@2025",
+        "port": "5432"
+    }
+    
     try:
         wait = WebDriverWait(driver, 20)
+        # We still wait for the "div.articles" container
         wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, "div.articles")))
         time.sleep(1) 
 
         soup = BeautifulSoup(driver.page_source, 'html.parser')
-        articles = soup.find_all("div", class_="articles")
+        
+        # We can find all articles inside the 'leftpanel' for precision
+        left_panel = soup.find('div', class_='leftpanel')
+        if not left_panel:
+            logging.error("Indian Express: Could not find 'div.leftpanel'.")
+            return []
 
+        articles = left_panel.find_all("div", class_="articles")
         if not articles:
-            logging.warning("Indian Express: No articles found.")
+            logging.warning("Indian Express: No articles found inside 'leftpanel'.")
             return []
 
         for article in articles:
             headline, link, date = "", "", ""
             context_div = article.find('div', class_='img-context')
             if context_div:
-                title_tag = context_div.find('h3', class_='title')
+                
+                # --- THE FIX: Changed 'h3' to 'h2' ---
+                title_tag = context_div.find('h2', class_='title')
+                
                 if title_tag:
                     link_tag = title_tag.find('a')
                     if link_tag:
@@ -100,12 +111,11 @@ def scrape(driver):
         logging.info(f"Found {len(results)} news articles from Indian Express.")
 
         if results:
-            clear_old_news()
-            insert_new_news(results)
+            clear_old_news(conn_params)
+            insert_new_news(conn_params, results)
         else:
             logging.warning("No news articles found for Indian Express.")
         
-        # We return an empty list because this scraper handles its own DB logic.
         return []
 
     except Exception as e:
