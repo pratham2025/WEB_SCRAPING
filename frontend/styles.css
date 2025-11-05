@@ -470,6 +470,96 @@ body{
     gap: 1.5rem;
 }
 
+/* ---- Notice Board styles ---- */
+.notice-board {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+  align-items: start;
+}
+
+/* Paper / pinned card look */
+.notice {
+  position: relative;
+  background: linear-gradient(180deg,#fff,#fbfff7);
+  border: 1px solid var(--ink-100);
+  border-radius: 8px;
+  padding: 16px 14px 14px 14px;
+  min-height: 120px;
+  box-shadow: 0 8px 20px rgba(9,30,66,.06);
+  transform-origin: top center;
+  overflow: hidden;
+  transition: transform .18s ease, box-shadow .18s ease;
+  cursor: default;
+}
+
+/* Slight tilt variety for organic board look */
+.notice.tilt-1 { transform: rotate(-1.6deg); }
+.notice.tilt-2 { transform: rotate(1.2deg); }
+.notice.tilt-3 { transform: rotate(-0.6deg); }
+.notice.tilt-4 { transform: rotate(0.8deg); }
+
+/* Pin at top */
+.notice::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  background: radial-gradient(circle at 30% 30%, #fff, #f2f2f2 40%), linear-gradient(180deg,#ff7676,#ff4b4b);
+  border-radius: 50%;
+  position: absolute;
+  top: -8px;
+  left: 16px;
+  box-shadow: 0 4px 8px rgba(0,0,0,.12);
+  transform: translateY(-10px);
+}
+
+/* New badge */
+.notice .badge {
+  display:inline-block;
+  background:linear-gradient(180deg,var(--green-500),var(--green-600));
+  color:#fff;
+  font-weight:700;
+  font-size:11px;
+  padding:4px 8px;
+  border-radius:999px;
+  position:absolute;
+  right:12px;
+  top:12px;
+  box-shadow:0 6px 18px rgba(0,165,98,.12);
+}
+
+/* content */
+.notice .date { font-size: 12px; color: var(--ink-500); margin-bottom:8px; font-weight:600; }
+.notice .headline { font-weight:700; font-size:1rem; color:var(--ink-900); margin:0 0 8px 0; line-height:1.2 }
+.notice .note-actions { margin-top:auto; display:flex; justify-content:flex-end; gap:8px }
+
+/* animation: drop-in + subtle scale */
+@keyframes dropIn {
+  0% { opacity: 0; transform: translateY(-20px) scale(.98) rotate(-2deg); }
+  60% { opacity: 1; transform: translateY(6px) scale(1.02) rotate(1deg); }
+  100% { opacity: 1; transform: translateY(0) scale(1) rotate(0); }
+}
+
+/* apply animation via inline style (JS sets delay) */
+.notice.animate {
+  animation: dropIn .6s cubic-bezier(.2,.9,.2,1) both;
+}
+
+/* hover lift */
+.notice:hover { transform: translateY(-6px) scale(1.01); box-shadow: 0 16px 32px rgba(9,30,66,.12); }
+
+/* small responsiveness */
+@media (max-width: 640px){
+  .notice { padding: 14px; min-height: 110px; }
+  .notice::before { left: 10px; }
+  .notice .badge { right: 10px; top: 10px; }
+}
+
+/* fallback small message */
+.notice-empty { padding: 2rem; text-align:center; color:var(--ink-500); background:var(--card); border-radius:12px }
+
+
 /* Styles for the news card rendered by home.js */
 .news-card {
     background: var(--card);

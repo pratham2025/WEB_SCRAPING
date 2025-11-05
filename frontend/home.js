@@ -1,100 +1,179 @@
-// home.js
-
-// API Base URL (copied from app.js)
+// home.js — Notice Board Edition
+// Base API URL
 const API_BASE = "http://127.0.0.1:8000";
 
-// --- NEW: Load Latest News ---
+// Wait for the DOM to load
 document.addEventListener('DOMContentLoaded', () => {
-    // We already have a DOMContentLoaded listener in common.js,
-    // but this is specific to home.js logic.
+    bindButtons();
     loadLatestNews();
 });
 
-async function loadLatestNews() {
+// ----------------------
+// Bind UI Buttons
+// ----------------------
+function bindButtons() {
+    // Toggle between showing top 3 and all notices
+    document.getElementById('showAllBtn')?.addEventListener('click', (e) => {
+        const btn = e.currentTarget;
+        const board = document.getElementById('latestNewsList');
+        if (btn.dataset.state === 'all') {
+            btn.textContent = 'Show All';
+            btn.dataset.state = '';
+            loadLatestNews({ limit: 3 });
+        } else {
+            btn.textContent = 'Show Top 20';
+            btn.dataset.state = 'all';
+            loadLatestNews({ limit: 20 });
+        }
+    });
+
+    // Manual refresh button
+    document.getElementById('refreshNewsBtn')?.addEventListener('click', async () => {
+        await loadLatestNews({ force: true });
+        flashNotice('News refreshed');
+    });
+}
+
+// ----------------------
+// Visual feedback notification
+// ----------------------
+function flashNotice(msg) {
+    const node = document.createElement('div');
+    node.className = 'notification success';
+    node.textContent = msg;
+    document.body.appendChild(node);
+    setTimeout(() => node.remove(), 2000);
+}
+
+// ----------------------
+// Fetch and render latest news
+// ----------------------
+async function loadLatestNews(opts = {}) {
     const listEl = document.getElementById('latestNewsList');
     if (!listEl) return;
 
+    const limit = opts.limit ?? 3;
+
     try {
-        // You'll need to create this /latest-news endpoint in your FastAPI
         const res = await fetch(`${API_BASE}/latest-news`);
-        if (!res.ok) {
-            throw new Error(`HTTP error! status: ${res.status}`);
-        }
-        const data = await res.json(); // Assuming { "news": [...] }
-        
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        // Normalize data: {news: []}, {data: []}, or array
         let newsItems = [];
-        
-        // --- MODIFIED THIS BLOCK ---
-        if (data && Array.isArray(data.news)) {
-            // Handle the new API structure { "news": [...] }
-            newsItems = data.news;
-        } else if (data && data.data) {
-            // Fallback for old structure { "data": [...] }
-            newsItems = data.data;
-        } else if (Array.isArray(data)) {
-            // Fallback if the API just returns an array
-            newsItems = data;
-        }
-        // --- END MODIFICATION ---
+        if (data && Array.isArray(data.news)) newsItems = data.news;
+        else if (data && Array.isArray(data.data)) newsItems = data.data;
+        else if (Array.isArray(data)) newsItems = data;
+        else newsItems = [];
 
-        // Limit to 3 news items for the homepage grid
-        const limitedNews = newsItems.slice(0, 3);
+        // Sort by date descending if possible
+        newsItems.sort((a, b) => {
+            const da = new Date(a.article_date || a.date || a.published_at || a.postedAt || 0);
+            const db = new Date(b.article_date || b.date || b.published_at || b.postedAt || 0);
+            return db - da;
+        });
 
-        if (limitedNews.length > 0) {
-            listEl.innerHTML = limitedNews.map(renderNewsCard).join('');
-        } else {
-            listEl.innerHTML = '<p>No news updates at this time.</p>';
+        // Limit for homepage
+        const limited = newsItems.slice(0, limit);
+
+        // If no news found
+        if (limited.length === 0) {
+            listEl.innerHTML = `<div class="notice-empty">No news updates at this time.</div>`;
+            return;
         }
 
-    } catch (error) {
-        console.error("Failed to load latest news:", error);
-        if (listEl) {
-            listEl.innerHTML = '<p>Could not load news. Please try again later.</p>';
-        }
+        // Build and inject HTML
+        listEl.innerHTML = limited.map((n, idx) => renderNoticeCard(n, idx)).join('');
+
+        // Apply staggered animation
+        requestAnimationFrame(() => {
+            const cards = listEl.querySelectorAll('.notice');
+            cards.forEach((card, i) => {
+                card.style.animationDelay = `${i * 80}ms`;
+                card.classList.add('animate');
+            });
+        });
+
+        // Wire up "Read" buttons
+        listEl.querySelectorAll('.notice .open-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const url = btn.dataset.url;
+                if (url) window.open(url, '_blank', 'noopener');
+            });
+        });
+
+    } catch (err) {
+        console.error('Failed to load latest news:', err);
+        listEl.innerHTML = `<div class="notice-empty">Could not load news. Please try again later.</div>`;
     }
 }
 
-function renderNewsCard(news) {
-    const { headline, article_link, article_date } = news;
+// ----------------------
+// Render a single notice card
+// ----------------------
+function renderNoticeCard(news, idx) {
+    // Support different field names
+    const headline = news.headline ?? news.title ?? news.text ?? news.name ?? 'Untitled';
+    const link = news.article_link ?? news.link ?? news.url ?? '#';
+    const dateRaw = news.article_date ?? news.date ?? news.published_at ?? news.postedAt ?? null;
+
+    // Format date
+    const dateStr = dateRaw ? fmtDate(dateRaw) : 'Latest';
+
+    // Check if new (within 48 hours)
+    let isNew = false;
+    if (dateRaw) {
+        const dt = new Date(dateRaw);
+        if (!isNaN(dt)) {
+            const diffMs = Date.now() - dt.getTime();
+            isNew = diffMs >= 0 && diffMs <= (48 * 60 * 60 * 1000);
+        }
+    }
+
+    // Tilt variation for notice board style
+    const tiltClass = `tilt-${(idx % 4) + 1}`;
+
+    // Escape for safety
+    const safeHeadline = escapeHtml(headline);
+    const safeLink = escapeAttr(link);
+
+    // Return HTML card
     return `
-        <div class="news-card">
-            <span class="news-card-date">${article_date ? escapeHtml(fmtDate(article_date)) : 'Latest Update'}</span>
-            <h3 class="news-card-headline">${escapeHtml(headline)}</h3>
-            <div class="news-card-footer">
-                <a href="${escapeAttr(article_link)}" class="btn secondary" target="_blank" rel="noopener">
-                    Read More
-                </a>
-            </div>
+    <article class="notice ${tiltClass}" data-idx="${idx}">
+        ${isNew ? `<span class="badge">NEW</span>` : ''}
+        <div class="date">${escapeHtml(dateStr)}</div>
+        <h3 class="headline">${safeHeadline}</h3>
+        <div class="note-actions">
+            <button class="btn secondary open-btn" data-url="${safeLink}">Read</button>
         </div>
+    </article>
     `;
 }
-// --- END: Load Latest News ---
 
+// ----------------------
+// Helper functions
+// ----------------------
+function escapeHtml(s) {
+    return String(s ?? "").replace(/[&<>"']/g, m => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    }[m]));
+}
 
-// Handle subscription form
-document.getElementById('subscribeForm')?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = e.target.querySelector('input[type="email"]').value;
-    
-    // Show success message (in production, this would connect to a backend)
-    alert(`Subscription successful! We'll send updates to ${email}`);
-    e.target.reset();
-});
+function escapeAttr(s) {
+    return escapeHtml(s).replace(/"/g, "&quot;");
+}
 
-// Smooth scroll for anchor links
-document.querySelectorAll('a.smooth-scroll').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-            target.scrollIntoView({
-                behavior: 'smooth'
-            });
-        }
-    });
-});
-
-// --- NEW: Helper functions (copied from app.js) ---
-function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-function escapeAttr(s){return escapeHtml(s).replace(/"/g,"&quot;")}
-function fmtDate(dt){ const d = new Date(dt); return isNaN(d)? String(dt) : d.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}); }
+function fmtDate(dt) {
+    const d = new Date(dt);
+    return isNaN(d)
+        ? String(dt)
+        : d.toLocaleDateString(undefined, {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+}

@@ -1,25 +1,31 @@
+# scraper_api.py — Supabase-native FastAPI Scraper API
+
 import os
-import psycopg2
-from psycopg2 import extras
+import time
+import importlib
+import logging
+from typing import List, Dict, Any
 from enum import Enum
+from datetime import datetime, timezone
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-import logging
+from fastapi.concurrency import run_in_threadpool
 from dotenv import load_dotenv
+from supabase import create_client, Client
 
-# --- Load environment variables from .env ---
+import undetected_chromedriver as uc
+from selenium import webdriver
+
+# --- Load .env ---
 load_dotenv()
 
-# --- FastAPI App Initialization ---
-app = FastAPI(title="GETNOTIFY Scraper API", version="2.0")
+# --- Logging ---
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - [%(filename)s] - %(message)s")
 
-# --- Setup Logging ---
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - [%(filename)s] - %(message)s"
-)
+# --- FastAPI ---
+app = FastAPI(title="GETNOTIFY Supabase API", version="3.0")
 
-# --- CORS Configuration ---
+# --- CORS ---
 origins = [
     "http://localhost:5173",
     "http://localhost:8501",
@@ -28,141 +34,189 @@ origins = [
     "http://127.0.0.1:8000",
     "*"
 ]
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["GET"],
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 
-# --- Enum for Supported Sources ---
+# --- Supabase Init ---
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
+if not SUPABASE_URL or not SUPABASE_KEY:
+    raise RuntimeError("❌ Missing Supabase credentials. Please check your .env file.")
+
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+logging.info("✅ Connected to Supabase successfully")
+
+# --- Supported sources ---
 class SourceEnum(str, Enum):
-    mahacet = "MAHACET"
-    nta = "NTA"
-    cbse = "CBSE"
-    neet = "NEET"
-    jee = "JEE"
-    gate = "GATE"
-    upsc = "UPSC"
-    mpsc = "MPSC"
-    rrbmumbai = "RRBMumbai"
-    isro = "ISRO"
-    rrbkolkata = "RRBKolkata"
-    rrbahmedabad = "RRBAhmedabad"
-    kseab = "KSEAB"
-    kea = "KEA"
+    MAHACET = "MAHACET"
+    NTA = "NTA"
+    CBSE = "CBSE"
+    NEET = "NEET"
+    JEE = "JEE"
+    GATE = "GATE"
+    UPSC = "UPSC"
+    MPSC = "MPSC"
+    RRBMumbai = "RRBMumbai"
+    ISRO = "ISRO"
+    RRBKolkata = "RRBKolkata"
+    RRBAhmedabad = "RRBAhmedabad"
+    KSEAB = "KSEAB"
+    KEA = "KEA"
 
+# --- Driver setup ---
+def setup_driver():
+    opts = webdriver.ChromeOptions()
+    opts.add_argument("--headless=new")
+    opts.add_argument("--no-sandbox")
+    opts.add_argument("--disable-dev-shm-usage")
+    opts.add_argument("--disable-blink-features=AutomationControlled")
+    opts.add_argument("--disable-gpu")
+    opts.add_experimental_option("excludeSwitches", ["enable-logging"])
+    return uc.Chrome(options=opts, use_subprocess=True)
 
-# --- Database Connection Helper ---
-def get_db_connection():
-    """Establishes a connection to Supabase PostgreSQL database."""
-    conn_params = {
-        "host": os.getenv("DB_HOST", "db.hfsazlirxtjbarftyqqh.supabase.co"),
-        "dbname": os.getenv("DB_NAME", "postgres"),
-        "user": os.getenv("DB_USER", "postgres"),
-        "password": os.getenv("DB_PASSWORD", "Pratham@123"),
-        "port": os.getenv("DB_PORT", "5432"),
-        "sslmode": "require"
-    }
+# --- Save to Supabase ---
+def save_to_supabase(source: str, data: List[Dict[str, Any]]) -> int:
+    """Insert scraped data into Supabase announcements table."""
+    if not data:
+        return 0
+    inserted = 0
     try:
-        conn = psycopg2.connect(**conn_params)
-        return conn
-    except psycopg2.Error as e:
-        logging.error(f"Database connection error: {e}")
-        raise HTTPException(status_code=500, detail="Database connection error")
+        for item in data:
+            # set scraped_at to provided value OR current UTC time
+            scraped_at = item.get("scraped_at")
+            if not scraped_at:
+                # ISO 8601 UTC timestamp
+                scraped_at = datetime.now(timezone.utc).isoformat()
 
+            payload = {
+                "source": source,
+                "text": item.get("text") or item.get("headline", ""),
+                "link": item.get("link") or item.get("article_link", ""),
+                "scraped_at": scraped_at
+            }
 
-# --- Root Route ---
+            # check duplicate by source + text
+            exists = supabase.table("announcements") \
+                .select("id") \
+                .eq("source", source) \
+                .eq("text", payload["text"]) \
+                .limit(1) \
+                .execute()
+
+            if not exists.data:
+                supabase.table("announcements").insert(payload).execute()
+                inserted += 1
+
+        logging.info(f"✅ Supabase DB updated for {source}: inserted {inserted} new records.")
+    except Exception as e:
+        logging.error(f"❌ Supabase insert failed for {source}: {e}")
+    return inserted
+
+# --- Run scraper ---
+def run_scraper(source_name: str):
+    """Runs a single scraper module (requests or Selenium)."""
+    result = {"source": source_name, "found": 0, "inserted": 0, "error": None}
+
+    module_name = f"scrapers.{source_name.lower()}_scraper"
+    logging.info(f"▶️ Running scraper for {source_name}")
+    try:
+        scraper = importlib.import_module(module_name)
+    except ModuleNotFoundError:
+        result["error"] = f"Scraper not found: {module_name}"
+        return result
+
+    driver = None
+    data = []
+    try:
+        if hasattr(scraper, "scrape_requests"):
+            data = scraper.scrape_requests()
+        elif hasattr(scraper, "scrape"):
+            driver = setup_driver()
+            data = scraper.scrape(driver)
+        else:
+            raise Exception("Scraper must define scrape() or scrape_requests()")
+
+        result["found"] = len(data)
+        result["inserted"] = save_to_supabase(source_name, data)
+    except Exception as e:
+        logging.exception(f"Error scraping {source_name}: {e}")
+        result["error"] = str(e)
+    finally:
+        if driver:
+            try:
+                driver.quit()
+            except Exception:
+                pass
+    return result
+
+# --- Endpoints ---
+
 @app.get("/")
 async def root():
-    return {"message": "GETNOTIFY Scraper API is running successfully 🚀"}
+    return {"message": "GETNOTIFY Supabase API running 🚀"}
 
-
-# --- API: Get All Available Sources ---
 @app.get("/sources")
 async def get_sources():
-    """
-    Returns a list of all unique exam sources stored in Supabase.
-    """
-    conn = get_db_connection()
-    cursor = conn.cursor(cursor_factory=extras.RealDictCursor)
-    try:
-        cursor.execute("SELECT DISTINCT source FROM announcements ORDER BY source ASC")
-        sources = [row['source'] for row in cursor.fetchall()]
-        return {"sources": sources}
-    except Exception as e:
-        logging.error(f"Error fetching sources: {e}")
-        raise HTTPException(status_code=500, detail="Failed to fetch sources")
-    finally:
-        cursor.close()
-        conn.close()
+    """Return all supported sources"""
+    return {"sources": [s.value for s in SourceEnum]}
 
-
-# --- API: Get Announcements for a Source ---
+# ✅ FIXED: Fetch announcements in same order as ID (ascending)
 @app.get("/announcements/{source}")
-async def get_source_data(source: SourceEnum):
-    """
-    Fetches all announcements for a given source from Supabase.
-    """
-    conn = get_db_connection()
-    cursor = conn.cursor(cursor_factory=extras.RealDictCursor)
+async def get_announcements(source: SourceEnum):
+    """Fetch announcements directly from Supabase in ID ASC order (same as dashboard)."""
     try:
-        cursor.execute("""
-            SELECT id, source, text, link, scraped_at
-            FROM announcements
-            WHERE source = %s
-            ORDER BY id DESC
-        """, (source.value,))
-        results = cursor.fetchall()
-        return {"source": source.value, "data": results}
+        # Build the query in one expression to avoid accidental line-continuation issues.
+        res = (
+            supabase.table("announcements")
+            .select("*")
+            .eq("source", source.value)
+            .order("scraped_at", desc=True)  # ASC order by ID
+            .limit(100)
+            .execute()
+        )
+
+        return {"source": source.value, "data": res.data}
     except Exception as e:
-        logging.error(f"Error fetching announcements for {source}: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to fetch announcements for {source}")
-    finally:
-        cursor.close()
-        conn.close()
+        raise HTTPException(status_code=500, detail=f"Supabase fetch failed: {e}")
 
-
-# --- API: Latest News ---
 @app.get("/latest-news")
-async def get_latest_news():
-    """
-    Fetches the latest news from the latest_news table in Supabase.
-    """
-    conn = get_db_connection()
-    cursor = conn.cursor(cursor_factory=extras.RealDictCursor)
+async def get_latest_news(limit: int = 20):
+    """Fetch news from Supabase latest_news table (latest first)."""
     try:
-        cursor.execute("""
-            SELECT headline, article_link, article_date
-            FROM latest_news
-            ORDER BY scraped_at DESC
-        """)
-        news = cursor.fetchall()
-        return {"news": news}
+        res = supabase.table("latest_news") \
+            .select("*") \
+            .order("scraped_at", desc=False) \
+            .limit(limit) \
+            .execute()
+        return {"news": res.data}
     except Exception as e:
-        logging.error(f"Error fetching latest news: {e}")
-        raise HTTPException(status_code=500, detail="Failed to fetch latest news")
-    finally:
-        cursor.close()
-        conn.close()
+        raise HTTPException(status_code=500, detail=f"Supabase fetch failed: {e}")
 
+@app.post("/scrape/{source}")
+async def scrape_source(source: SourceEnum):
+    """Trigger a scraper for one source now."""
+    result = await run_in_threadpool(run_scraper, source.value)
+    return result
 
-# --- Health Check Endpoint ---
+@app.post("/scrape_all")
+async def scrape_all():
+    """Scrape all sources sequentially."""
+    results = []
+    for src in SourceEnum:
+        results.append(await run_in_threadpool(run_scraper, src.value))
+    return {"results": results}
+
 @app.get("/health")
-async def health_check():
-    """
-    Verifies database connection and API health.
-    """
+async def health():
+    """Check Supabase connection."""
     try:
-        conn = get_db_connection()
-        conn.close()
-        return {"status": "healthy", "db_connection": "ok"}
+        res = supabase.table("announcements").select("id").limit(1).execute()
+        return {"status": "healthy", "supabase_connected": True, "records_found": len(res.data)}
     except Exception as e:
-        logging.error(f"Health check failed: {e}")
         return {"status": "unhealthy", "error": str(e)}
-
-
-# --- Run Command ---
-# Run this API using: uvicorn scraper_api:app --reload --port 8000

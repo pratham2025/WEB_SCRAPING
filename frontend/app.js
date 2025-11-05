@@ -14,7 +14,7 @@ const state = {
 const SOURCE_INFO = {
   "CBSE": { full: "Central Board of Secondary Education", desc: "National school board for India" },
   "JEE": { full: "Joint Entrance Examination", desc: "Engineering admissions (Main/Advanced)" },
-  "GATE": { full: "Graduate Aptitude Test in Engineering", desc: "Post‑grad and PSU recruitment exam" },
+  "GATE": { full: "Graduate Aptitude Test in Engineering", desc: "Post-grad and PSU recruitment exam" },
   "ISRO": { full: "Indian Space Research Organisation", desc: "Recruitment and exam updates" },
   "NEET": { full: "National Eligibility cum Entrance Test", desc: "Medical and dental admissions" },
   "NTA": { full: "National Testing Agency", desc: "Agency notifications and test schedules" },
@@ -35,8 +35,8 @@ const LOGO_MAP = {
   ISRO: "src/logos/ISRO.png",
   NEET: "src/logos/NEET.jpg",
   NTA: "src/logos/NTA.png",
-  KEA: "src/logos/KEA.jpg", // optional, in case added later
-  KSEAB: "src/logos/KSEAB.jpg", // optional
+  KEA: "src/logos/KEA.jpg",
+  KSEAB: "src/logos/KSEAB.jpg",
   MAHACET: "src/logos/MAHACET.png",
   MPSC: "src/logos/MPSC.png",
   RRBKolkata: "src/logos/RRBKOLKATA.png",
@@ -64,7 +64,7 @@ function setStatus(msg, warn=false){
     els.status.style.borderColor = warn ? "#ffd0d0" : "var(--green-100)";
     els.status.style.color = warn ? "#a82b2b" : "var(--green-700)";
   }
-  console.log("[ExamDoor]", msg);
+  console.log("[GETNOTIFY]", msg);
 }
 
 function showNotification(message, isError = false) {
@@ -105,84 +105,93 @@ async function loadSources(){
   buildSourceCards();
 }
 
-// NEW function to build the source cards
+// Build source cards
 function buildSourceCards() {
-    if (!els.sourceCardGrid) return;
-    els.sourceCardGrid.innerHTML = state.sources.map(s => {
-        const initials = s.split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
-        const meta = SOURCE_INFO[s] || { full: s, desc: "Latest announcements and updates" };
-        const logo = LOGO_MAP[s];
-        return `
-        <a class="source-card" onclick="selectSource('${escapeAttr(s)}')">
-            <div class="source-card-logo">${logo ? `<img src="${escapeAttr(logo)}" alt="${escapeAttr(meta.full)}"/>` : escapeHtml(initials)}</div>
-            <h3>${escapeHtml(s)}</h3>
-            <div class="source-full">${escapeHtml(meta.full)}</div>
-            <p class="source-desc">${escapeHtml(meta.desc)}</p>
-        </a>`;
-    }).join("");
+  if (!els.sourceCardGrid) return;
+  els.sourceCardGrid.innerHTML = state.sources.map(s => {
+      const initials = s.split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
+      const meta = SOURCE_INFO[s] || { full: s, desc: "Latest announcements and updates" };
+      const logo = LOGO_MAP[s];
+      return `
+      <a class="source-card" onclick="selectSource('${escapeAttr(s)}')">
+          <div class="source-card-logo">${logo ? `<img src="${escapeAttr(logo)}" alt="${escapeAttr(meta.full)}"/>` : escapeHtml(initials)}</div>
+          <h3>${escapeHtml(s)}</h3>
+          <div class="source-full">${escapeHtml(meta.full)}</div>
+          <p class="source-desc">${escapeHtml(meta.desc)}</p>
+      </a>`;
+  }).join("");
 }
 
-// NEW function to handle selecting a source
+// Handle selecting a source
 async function selectSource(source) {
-    els.sourceSelector.style.display = 'none';
-    els.resultsContainer.style.display = 'block';
-    
-    // Update tab bar to show selected source and a back button
-    els.tabs.innerHTML = `
-        <button class="back-btn" onclick="showSourceSelector()">← All Sources</button>
-        <button class="exam-tab active">${escapeHtml(source)}</button>
-    `;
+  els.sourceSelector.style.display = 'none';
+  els.resultsContainer.style.display = 'block';
+  
+  els.tabs.innerHTML = `
+      <button class="back-btn" onclick="showSourceSelector()">← All Sources</button>
+      <button class="exam-tab active">${escapeHtml(source)}</button>
+  `;
 
-    await loadAnnouncements(source);
+  await loadAnnouncements(source);
 }
 
-// NEW function to go back to the source grid
 function showSourceSelector() {
-    els.resultsContainer.style.display = 'none';
-    els.sourceSelector.style.display = 'block';
+  els.resultsContainer.style.display = 'none';
+  els.sourceSelector.style.display = 'block';
 }
 
+// ✅ FINAL FIX: always show latest first
 async function loadAnnouncements(source){
   state.activeSource = source;
 
-  // --- ADDED LINES ---
-  els.list.innerHTML = ''; // Clear old list
-  els.pagination.innerHTML = ''; // Clear old pagination
-  els.count.textContent = '0'; // Reset count
-  if (els.status) els.status.style.display = 'block'; // Show status
-  // --- END ADDD ---
+  els.list.innerHTML = '';
+  els.pagination.innerHTML = '';
+  els.count.textContent = '0';
+  if (els.status) els.status.style.display = 'block';
 
   setStatus(`Fetching announcements for ${source} …`);
   const {ok, data} = await fetchJSON(`${API_BASE}/announcements/${encodeURIComponent(source)}`);
-  
-  if(!ok || !data){
+
+  if (!ok || !data) {
     setStatus(`Couldn’t read announcements for ${source}. Showing empty list.`, true);
     state.items = [];
-    if (els.status) els.status.style.display = 'block'; // Keep error status visible
-  }else{
+    if (els.status) els.status.style.display = 'block';
+  } else {
     const arr = Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []);
-    state.items = arr.map(normaAnn);
-    // Hide status on success *before* filtering
+
+    // ✅ Reverse order to make sure latest is on top
+    state.items = arr.map(normaAnn).reverse();
+
+    console.log(`[loadAnnouncements] ${source}: ${state.items.length} items (latest first)`);
+
     if (els.status) els.status.style.display = 'none';
   }
+
   state.page = 1;
   applyFilters();
 }
 
+// Normalize announcements
 function normaAnn(x){
+  const rawDate = x.scraped_at ?? x.date ?? x.postedAt ?? x.published_at ?? null;
   return {
     id: String(x.id ?? cryptoId()),
     text: String(x.text ?? x.title ?? "Untitled"),
     source: String(x.source ?? state.activeSource ?? "Source"),
     link: String(x.link ?? x.url ?? "#"),
-    date: x.scraped_at ?? x.date ?? x.postedAt ?? x.published_at ?? null // <-- MODIFIED
+    date: rawDate
   };
 }
 
-function cryptoId(){ try{ return crypto.getRandomValues(new Uint32Array(1))[0].toString(16);}catch(_){return Math.random().toString(16).slice(2);} }
+function cryptoId(){ 
+  try{ 
+    return crypto.getRandomValues(new Uint32Array(1))[0].toString(16);
+  }catch(_){
+    return Math.random().toString(16).slice(2);
+  } 
+}
 
 function applyFilters(){
-  // Filters are removed, so just use all items
   state.filtered = state.items.slice();
   renderList();
 }
@@ -192,25 +201,21 @@ function renderList(){
   const pageItems = state.filtered.slice(start, start+state.perPage);
   if (els.count) els.count.textContent = String(state.filtered.length);
 
-  // --- REPLACED LOGIC ---
   if (state.filtered.length > 0) {
-      if (els.status) els.status.style.display = 'none'; // Hide status
+      if (els.status) els.status.style.display = 'none';
       els.list.innerHTML = pageItems.map(renderCard).join("");
   } else {
-      // Only show "No announcements" if we aren't already showing a fetch error
       if (els.status && els.status.textContent.startsWith("Fetching")) {
         setStatus(`No announcements found for ${state.activeSource}.`, true);
         els.status.style.display = 'block';
       }
-      els.list.innerHTML = ''; // Ensure list is empty
+      els.list.innerHTML = '';
   }
-  // --- END REPLACEMENT ---
   
   renderPagination();
 }
 
 function renderCard(x){
-  // --- LOGO LOGIC ---
   const logoUrl = LOGO_MAP[x.source];
   let logoHtml = '';
   if (logoUrl) {
@@ -219,7 +224,6 @@ function renderCard(x){
     const initials = (x.source || "??").split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
     logoHtml = escapeHtml(initials);
   }
-  // --- END LOGO LOGIC ---
 
   return `<li class="card" data-id="${escapeAttr(x.id)}">
     <div class="logo" aria-hidden="true">${logoHtml}</div>
@@ -235,7 +239,7 @@ function renderCard(x){
 function renderPagination(){
   const pages = Math.ceil(state.filtered.length / state.perPage) || 1;
   if (pages <= 1) {
-    els.pagination.innerHTML = ""; // Hide pagination if only one page
+    els.pagination.innerHTML = "";
     return;
   }
   
@@ -246,26 +250,27 @@ function renderPagination(){
   els.pagination.innerHTML = html;
 }
 
-function gotoPage(n){ state.page = n; renderList(); }
+function gotoPage(n){ 
+  state.page = n; 
+  renderList(); 
+}
 
 /* helpers */
 function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function escapeAttr(s){return escapeHtml(s).replace(/"/g,"&quot;")}
-function fmtDate(dt){ const d = new Date(dt); return isNaN(d)? String(dt) : d.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}); }
+function fmtDate(dt){ 
+  const d = new Date(dt); 
+  return isNaN(d)? String(dt) : d.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}); 
+}
 
-/* events */
-// No filters, so event listeners removed
-
-/* expose for inline handlers */
+/* expose */
 window.gotoPage = gotoPage;
 window.selectSource = selectSource;
 window.showSourceSelector = showSourceSelector;
 
 /* init */
 (async function init(){
-  // This check ensures we only run this logic on the notifications page
   if (document.getElementById('sourceSelector')) {
     await loadSources();
   }
 })();
-
