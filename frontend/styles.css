@@ -22,13 +22,14 @@
 
 *{box-sizing:border-box}
 html,body{height:100%}
-body{
-  margin:0;
-  font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
-  color:var(--ink-900);
-  background: linear-gradient(180deg, #ffffff 0%, var(--green-50) 100%);
-  overflow-x:hidden;
+body {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
+  color: var(--ink-900);
+  background-color: #ffffff; /* ✅ Pure white background */
+  overflow-x: hidden;
 }
+
 
 /* doodles */
 .doodle{position:fixed;pointer-events:none;z-index:0;opacity:.8}
