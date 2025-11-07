@@ -30,7 +30,9 @@ origins = [
     "http://localhost:5173",
     "http://localhost:8501",
     "http://localhost:5500",
+    "http://localhost:5501",
     "http://127.0.0.1:5500",
+    "http://127.0.0.1:5501",
     "http://127.0.0.1:8000",
     "*"
 ]
@@ -68,7 +70,6 @@ class SourceEnum(str, Enum):
     RRBAhmedabad = "RRBAhmedabad"
     KSEAB = "KSEAB"
     KEA = "KEA"
-
 # --- Driver setup ---
 def setup_driver():
     opts = webdriver.ChromeOptions()
@@ -187,15 +188,21 @@ async def get_announcements(source: SourceEnum):
 
 @app.get("/latest-news")
 async def get_latest_news(limit: int = 20):
-    """Fetch news from Supabase latest_news table (latest first)."""
+    """Fetch news from Supabase latest_news table (latest first).
+    
+    Returns fields: id, headline, article_link, article_date, scraped_at
+    """
     try:
         res = supabase.table("latest_news") \
             .select("*") \
-            .order("scraped_at", desc=False) \
+            .order("scraped_at", desc=True) \
             .limit(limit) \
             .execute()
-        return {"news": res.data}
+        
+        logging.info(f"Fetched {len(res.data or [])} items from latest_news table")
+        return {"news": res.data or []}
     except Exception as e:
+        logging.error(f"Failed to fetch latest news from latest_news table: {e}")
         raise HTTPException(status_code=500, detail=f"Supabase fetch failed: {e}")
 
 @app.post("/scrape/{source}")

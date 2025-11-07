@@ -345,12 +345,11 @@ body {
 /* 1. Hero Section (Existing) */
 .hero {
     text-align: center;
-    padding: 4rem 1rem;
     /* Using a cleaner gradient, removing image */
     background: linear-gradient(145deg, var(--green-50), #fff);
     border: 1px solid var(--green-100);
-    border-radius: 1.5rem; /* More rounded */
-    margin: 0; /* Removed margin */
+    border-radius: 1.5rem;
+    margin: 0;
     box-shadow: var(--shadow);
 }
 
@@ -379,26 +378,21 @@ body {
 }
 
 /* 2. "Why Choose Us?" Section (New) */
-.why-choose-us {
-  padding: 2rem 0;
-}
+/* Padding handled inline in HTML for consistency */
 .why-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
 }
 .why-card {
-    background: var(--card);
-    border: 1px solid var(--ink-100);
-    border-radius: 1rem;
-    padding: 2rem;
-    box-shadow: var(--shadow);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+    transition: none;
 }
-.why-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(9,30,66,.1);
-}
+.why-card:hover { transform: none; box-shadow: none; }
 .why-icon {
     width: 32px;
     height: 32px;
@@ -418,13 +412,7 @@ body {
 }
 
 /* 3. "Featured Sources" Section (New) */
-.featured-sources {
-    padding: 2rem 0;
-    background: linear-gradient(180deg, #ffffff, var(--green-50));
-    border-radius: 1.5rem;
-    border: 1px solid var(--green-100);
-    box-shadow: var(--shadow);
-}
+.featured-sources { background: transparent; border: none; box-shadow: none; margin: 0; border-radius: 0; }
 .source-logo-grid {
     display: flex;
     flex-wrap: wrap;
@@ -438,17 +426,14 @@ body {
     flex-direction: column;
     align-items: center;
     gap: 0.75rem;
-    padding: 1rem;
-    border-radius: 1rem;
-    background: var(--card);
-    border: 1px solid var(--ink-100);
+    padding: 0; /* remove padded card look */
+    border-radius: 0;
+    background: transparent;
+    border: none;
     width: 120px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: none;
 }
-.source-logo-card:hover {
-    transform: scale(1.05);
-    box-shadow: var(--shadow);
-}
+.source-logo-card:hover { transform: none; box-shadow: none; }
 .source-logo-card img {
     width: 64px;
     height: 64px;
@@ -462,9 +447,30 @@ body {
 
 /* --- ADDED: Home Page Latest News --- */
 /* 4. "Latest News" Section */
-.latest-news {
-  padding: 2rem 0;
+/* Padding handled inline in HTML for consistency */
+
+/* Latest News Header */
+.latest-news-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
 }
+
+.latest-news-title-section {
+  flex: 1;
+  min-width: 280px;
+}
+
+.latest-news-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
 .news-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -474,91 +480,218 @@ body {
 /* ---- Notice Board styles ---- */
 .notice-board {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1rem;
-  padding: 1rem;
-  align-items: start;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  padding: 0;
+  align-items: stretch;
 }
 
-/* Paper / pinned card look */
+/* Modern card design - clean and even */
 .notice {
   position: relative;
-  background: linear-gradient(180deg,#fff,#fbfff7);
+  background: var(--card);
   border: 1px solid var(--ink-100);
-  border-radius: 8px;
-  padding: 16px 14px 14px 14px;
-  min-height: 120px;
-  box-shadow: 0 8px 20px rgba(9,30,66,.06);
-  transform-origin: top center;
-  overflow: hidden;
-  transition: transform .18s ease, box-shadow .18s ease;
+  border-radius: 12px;
+  padding: 20px;
+  min-height: 180px;
+  box-shadow: 0 2px 8px rgba(9,30,66,.08);
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
   cursor: default;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
-/* Slight tilt variety for organic board look */
-.notice.tilt-1 { transform: rotate(-1.6deg); }
-.notice.tilt-2 { transform: rotate(1.2deg); }
-.notice.tilt-3 { transform: rotate(-0.6deg); }
-.notice.tilt-4 { transform: rotate(0.8deg); }
+/* Remove tilt effects for even appearance */
+.notice.tilt-1,
+.notice.tilt-2,
+.notice.tilt-3,
+.notice.tilt-4 {
+  transform: none;
+}
 
-/* Pin at top */
+/* Remove pin decoration for cleaner look */
 .notice::before {
-  content: "";
-  width: 18px;
-  height: 18px;
-  background: radial-gradient(circle at 30% 30%, #fff, #f2f2f2 40%), linear-gradient(180deg,#ff7676,#ff4b4b);
-  border-radius: 50%;
-  position: absolute;
-  top: -8px;
-  left: 16px;
-  box-shadow: 0 4px 8px rgba(0,0,0,.12);
-  transform: translateY(-10px);
+  display: none;
 }
 
 /* New badge */
 .notice .badge {
-  display:inline-block;
-  background:linear-gradient(180deg,var(--green-500),var(--green-600));
-  color:#fff;
-  font-weight:700;
-  font-size:11px;
-  padding:4px 8px;
-  border-radius:999px;
-  position:absolute;
-  right:12px;
-  top:12px;
-  box-shadow:0 6px 18px rgba(0,165,98,.12);
+  display: inline-block;
+  background: linear-gradient(180deg, var(--green-500), var(--green-600));
+  color: #fff;
+  font-weight: 700;
+  font-size: 10px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  box-shadow: 0 2px 8px rgba(18,183,106,.25);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-/* content */
-.notice .date { font-size: 12px; color: var(--ink-500); margin-bottom:8px; font-weight:600; }
-.notice .headline { font-weight:700; font-size:1rem; color:var(--ink-900); margin:0 0 8px 0; line-height:1.2 }
-.notice .note-actions { margin-top:auto; display:flex; justify-content:flex-end; gap:8px }
+/* Notice header with date */
+.notice-header {
+  margin-bottom: 12px;
+}
 
-/* animation: drop-in + subtle scale */
-@keyframes dropIn {
-  0% { opacity: 0; transform: translateY(-20px) scale(.98) rotate(-2deg); }
-  60% { opacity: 1; transform: translateY(6px) scale(1.02) rotate(1deg); }
-  100% { opacity: 1; transform: translateY(0) scale(1) rotate(0); }
+.notice .date {
+  font-size: 13px;
+  color: var(--ink-500);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 0;
+}
+
+.notice .date-icon {
+  width: 14px;
+  height: 14px;
+  color: var(--green-600);
+  flex-shrink: 0;
+}
+
+/* Headline styling */
+.notice .headline {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--ink-900);
+  margin: 0 0 16px 0;
+  line-height: 1.4;
+  flex-grow: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Actions at bottom */
+.notice .note-actions {
+  margin-top: auto;
+  display: flex;
+  justify-content: flex-start;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--ink-100);
+}
+
+.notice .read-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  padding: 8px 16px;
+  font-size: 14px;
+  border-radius: 8px;
+  transition: all .2s ease;
+  border: 1px solid var(--ink-100);
+  background: #fff;
+  color: var(--green-600);
+  font-weight: 600;
+}
+
+.notice .read-link:hover {
+  color: #fff;
+  background: linear-gradient(180deg, var(--green-500), var(--green-600));
+  border-color: rgba(0,0,0,.15);
+  box-shadow: var(--shadow);
+  transform: translateY(-1px);
+}
+
+.notice .read-link .link-icon {
+  width: 14px;
+  height: 14px;
+  transition: transform .2s ease;
+  flex-shrink: 0;
+}
+
+.notice .read-link:hover .link-icon {
+  transform: translate(2px, -2px);
+}
+
+/* animation: smooth fade-in */
+@keyframes fadeInUp {
+  0% { 
+    opacity: 0; 
+    transform: translateY(20px); 
+  }
+  100% { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
 }
 
 /* apply animation via inline style (JS sets delay) */
 .notice.animate {
-  animation: dropIn .6s cubic-bezier(.2,.9,.2,1) both;
+  animation: fadeInUp .4s cubic-bezier(.2,.9,.2,1) both;
 }
 
-/* hover lift */
-.notice:hover { transform: translateY(-6px) scale(1.01); box-shadow: 0 16px 32px rgba(9,30,66,.12); }
+/* hover effect - subtle lift */
+.notice:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(9,30,66,.12);
+  border-color: var(--green-200);
+}
 
-/* small responsiveness */
-@media (max-width: 640px){
-  .notice { padding: 14px; min-height: 110px; }
-  .notice::before { left: 10px; }
-  .notice .badge { right: 10px; top: 10px; }
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .latest-news-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .latest-news-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  
+  .notice-board {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .notice {
+    padding: 16px;
+    min-height: 160px;
+  }
+  
+  .notice .headline {
+    font-size: 1rem;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+}
+
+@media (max-width: 640px) {
+  .notice {
+    padding: 14px;
+    min-height: 150px;
+  }
+  
+  .notice .badge {
+    right: 12px;
+    top: 12px;
+    font-size: 9px;
+    padding: 3px 8px;
+  }
 }
 
 /* fallback small message */
-.notice-empty { padding: 2rem; text-align:center; color:var(--ink-500); background:var(--card); border-radius:12px }
+.notice-empty { 
+    padding: 2rem; 
+    text-align:center; 
+    color:var(--ink-700); 
+    background:var(--card); 
+    border: 1px solid var(--ink-100);
+    border-radius:12px;
+    margin: 1rem 0;
+    font-size: 1rem;
+    line-height: 1.6;
+}
 
 
 /* Styles for the news card rendered by home.js */
@@ -601,16 +734,12 @@ body {
 
 
 /* 4. "What We Track" Section (New) */
-.what-we-track {
+.what-we-track { background: transparent; border: none; box-shadow: none; margin: 0; border-radius: 0; }
+.what-we-track-inner {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 2rem;
     align-items: center;
-    background: var(--card);
-    border: 1px solid var(--ink-100);
-    border-radius: 1.5rem;
-    padding: 3rem;
-    box-shadow: var(--shadow);
 }
 .track-card .home-title {
   text-align: left;
@@ -660,21 +789,12 @@ body {
 
 /* 5. "CTA Section" (New) */
 /* --- MODIFIED RULE --- */
-.cta-section {
-    /* text-align: center; -- REMOVED */
-    padding: 3rem 1.5rem;
-    /* background: linear-gradient(145deg, var(--green-700), var(--green-600)); -- REPLACED */
-    background: var(--card); /* CHANGED TO WHITE */
-    border: 1px solid var(--ink-100); /* ADDED BORDER */
-    border-radius: 1.5rem;
-    box-shadow: var(--shadow);
-    
-    /* --- ADDED RULES --- */
+.cta-section { background: transparent; border: none; box-shadow: none; margin: 0; border-radius: 0; }
+.cta-section-inner {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 2rem;
     align-items: center;
-    /* --- END ADDED RULES --- */
 }
 
 /* --- ADDED RULE --- */
@@ -776,9 +896,8 @@ body {
     }
 
     /* MODIFIED this rule to include .cta-section */
-    .what-we-track, .cta-section {
+    .what-we-track-inner, .cta-section-inner {
       grid-template-columns: 1fr;
-      padding: 2rem 1.5rem;
     }
 
     /* MODIFIED this rule to include .cta-content */
@@ -788,13 +907,18 @@ body {
 
     /* --- MODIFIED RULE --- */
     .track-art {
-      /* display: none; -- Removed this rule, let's show the art on mobile */
       margin-top: 1rem; /* Add some space */
     }
 
     /* --- ADDED RULE for new cta-art on mobile --- */
     .cta-art {
         display: none; /* Hide the second image on mobile for a cleaner look */
+    }
+
+    /* Remove side margins on mobile for full-width sections */
+    .hero, .featured-sources, .what-we-track, .cta-section {
+      margin: 0;
+      border-radius: 0;
     }
 }
 
