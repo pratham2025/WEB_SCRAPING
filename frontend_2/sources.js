@@ -77,11 +77,8 @@ function buildSourceCards(sources) {
 
 // Handle source card click
 function handleSourceClick(source) {
-  // For now, just log the selection
-  // You can implement navigation to a detail page or filter announcements
-  console.log('Selected source:', source);
-  // Example: window.location.href = `announcements.html?source=${source}`;
-  alert(`Selected: ${source}\n\nThis will show announcements for ${source} in a future update.`);
+  const encoded = encodeURIComponent(source);
+  window.location.href = `source-announcements.html?source=${encoded}`;
 }
 
 // Create Network Pattern for Sources Page

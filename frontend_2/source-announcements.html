@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GETNOTIFY — Source Announcements</title>
+  <link rel="stylesheet" href="announcements.css">
+  <script defer src="announcements.js"></script>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="home.html" class="logo">
+      <svg class="bell-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+      </svg>
+      GET<span>NOTIFY</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="home.html">Home</a></li>
+      <li><a href="sources.html">Sources</a></li>
+      <li><a href="home.html#about">About</a></li>
+      <li><button class="login-btn">Login</button></li>
+    </ul>
+  </nav>
+
+  <main class="page">
+    <!-- Source Hero -->
+    <section class="source-hero" aria-label="Source introduction">
+      <div class="source-hero-inner">
+        <div class="source-hero-icon" id="sourceHeroIconWrapper">
+          <img id="sourceHeroIcon" alt="Source logo" />
+          <span id="sourceHeroIconFallback">SRC</span>
+        </div>
+        <div class="source-hero-text">
+          <h1 id="sourceTitle">Source Announcements</h1>
+          <p class="source-full" id="sourceFull">National Testing Agency</p>
+          <p class="source-desc" id="sourceDesc">Agency notifications and test schedules</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Announcements List -->
+    <section class="announcements-section">
+      <div class="section-heading">
+        <h2>Latest Announcements</h2>
+        <button class="refresh-btn" id="refreshBtn" type="button">Refresh</button>
+      </div>
+      <div id="announcementsList" class="announcements-list">
+        <div class="empty-state">Loading announcements...</div>
+      </div>
+    </section>
+
+    <!-- Subscribe Panel -->
+    <section class="subscribe-section">
+      <div class="subscribe-card">
+        <div class="subscribe-content">
+          <h2>Get Instant Alerts</h2>
+          <p>Subscribe and receive verified updates from <span id="subscribeSource">this source</span> straight to your inbox.</p>
+        </div>
+        <form class="subscribe-form" id="subscribeForm">
+          <label for="emailInput" class="visually-hidden">Email address</label>
+          <input type="email" id="emailInput" name="email" placeholder="Enter your email" required>
+          <button type="submit" class="subscribe-btn">Subscribe</button>
+        </form>
+        <div class="subscribe-status" id="subscribeStatus" role="status" aria-live="polite"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>© 2025 GETNOTIFY | Built with ❤️ by <span>Pratham Patil (Bosco)</span></p>
+  </footer>
+</body>
+</html>
+

@@ -193,28 +193,26 @@ function toggleTheme() {
 // Hero Carousel Functionality
 let currentSlide = 0;
 const totalSlides = 5;
+const SLIDE_DURATION_MS = 5000;
 let carouselInterval = null;
 
 function initHeroCarousel() {
   const carouselTrack = document.getElementById('heroCarousel');
   const dots = document.querySelectorAll('.carousel-dot');
+  const heroSection = document.getElementById('heroSection');
   
   if (!carouselTrack) return;
 
   function goToSlide(slideIndex) {
     currentSlide = slideIndex;
-    
-    // Update track position
     const translateX = -currentSlide * 20; // Each slide is 20% width
     carouselTrack.style.transform = `translateX(${translateX}%)`;
-    
-    // Update active classes
+
     const boxes = document.querySelectorAll('.hero-box');
     boxes.forEach((box, index) => {
       box.classList.toggle('active', index === currentSlide);
     });
-    
-    // Update dots
+
     dots.forEach((dot, index) => {
       dot.classList.toggle('active', index === currentSlide);
     });
@@ -226,7 +224,8 @@ function initHeroCarousel() {
   }
 
   function startCarousel() {
-    carouselInterval = setInterval(nextSlide, 5000); // 5 seconds
+    stopCarousel();
+    carouselInterval = setInterval(nextSlide, SLIDE_DURATION_MS);
   }
 
   function stopCarousel() {
@@ -237,11 +236,9 @@ function initHeroCarousel() {
   }
 
   function resetCarousel() {
-    stopCarousel();
     startCarousel();
   }
 
-  // Dot navigation
   dots.forEach((dot, index) => {
     dot.addEventListener('click', () => {
       goToSlide(index);
@@ -249,17 +246,13 @@ function initHeroCarousel() {
     });
   });
 
-  // Pause on hover
-  const carouselContainer = document.querySelector('.hero-carousel-container');
-  if (carouselContainer) {
-    carouselContainer.addEventListener('mouseenter', stopCarousel);
-    carouselContainer.addEventListener('mouseleave', startCarousel);
+  const hoverTarget = heroSection || document.querySelector('.hero-carousel-container');
+  if (hoverTarget) {
+    hoverTarget.addEventListener('mouseenter', stopCarousel);
+    hoverTarget.addEventListener('mouseleave', startCarousel);
   }
 
-  // Initialize first slide
   goToSlide(0);
-  
-  // Start auto-sliding
   startCarousel();
 }
 
