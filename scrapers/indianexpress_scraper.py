@@ -18,73 +18,103 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def scrape(driver):
     """
-    Scrapes the Indian Express education page and stores the results in 'latest_news' table.
+    Scrapes the Indian Express education page (headline, link, date, image).
     """
-    logging.info("Scraping Indian Express (Headline/Date only)...")
+    logging.info("Scraping Indian Express (Education News)…")
     results = []
 
     try:
-        wait = WebDriverWait(driver, 25)
-        wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, "div.articles")))
+        # Wait until articles appear
+        WebDriverWait(driver, 25).until(
+            EC.visibility_of_element_located((By.CSS_SELECTOR, "div.articles"))
+        )
         time.sleep(1)
 
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
-        left_panel = soup.find("div", class_="leftpanel")
-        if not left_panel:
-            logging.error("Indian Express: Could not find 'div.leftpanel'.")
-            return []
+        # ---- Correct selector for article blocks ----
+        articles = soup.select("div.articles")
 
-        articles = left_panel.find_all("div", class_="articles")
         if not articles:
-            logging.warning("Indian Express: No articles found inside 'leftpanel'.")
+            logging.warning("No articles found inside Indian Express education section.")
             return []
 
         for article in articles:
-            headline, link, date = "", "", ""
-            context_div = article.find("div", class_="img-context")
-            if context_div:
-                title_tag = context_div.find("h2", class_="title")
-                if title_tag:
-                    link_tag = title_tag.find("a")
-                    if link_tag:
-                        headline = link_tag.get_text(strip=True)
-                        link = urljoin(driver.current_url, link_tag["href"])
+            headline = ""
+            link = ""
+            date = ""
+            image_url = ""
 
-                date_tag = context_div.find("div", class_="date")
-                if date_tag:
-                    date = date_tag.get_text(strip=True)
+            # --------------- IMAGE (Correct Selector) ----------------
+            img_tag = article.select_one("div.snaps a img")
 
+            if img_tag:
+                image_url = (
+                    img_tag.get("data-src")
+                    or img_tag.get("data-lazy-src")
+                    or img_tag.get("data-srcset")
+                    or img_tag.get("srcset")
+                    or img_tag.get("src")
+                    or ""
+                )
+
+            # If srcset contains multiple URLs → choose the first one
+            if image_url and " " in image_url:
+                image_url = image_url.split(" ")[0]
+
+            if image_url:
+                image_url = urljoin(driver.current_url, image_url)
+
+            # Debug log (optional)
+            logging.info(f"IMAGE FOUND: {image_url}")
+
+            # ---------------- TITLE + LINK ----------------
+            title_tag = article.select_one("div.img-context h2.title a")
+            if title_tag:
+                headline = title_tag.get_text(strip=True)
+                link = urljoin(driver.current_url, title_tag.get("href", ""))
+
+            # ---------------- DATE ----------------
+            date_tag = article.select_one("div.img-context div.date")
+            if date_tag:
+                date = date_tag.get_text(strip=True)
+
+            # Add only if headline & link exist
             if headline and link:
                 results.append({
                     "headline": headline,
                     "article_link": link,
-                    "article_date": date
+                    "article_date": date,
+                    "image_url": image_url
                 })
 
         logging.info(f"Found {len(results)} news articles from Indian Express.")
 
-        # --- Save to Supabase ---
+        # --------------- Save into Supabase ----------------
         new_items = 0
         for item in results:
-            headline = item["headline"]
-            link = item["article_link"]
 
-            # check if article already exists
-            existing = supabase.table("latest_news").select("id").eq("article_link", link).execute()
-            if not existing.data:
+            exists = supabase.table("latest_news") \
+                             .select("id") \
+                             .eq("article_link", item["article_link"]) \
+                             .execute()
+
+            if not exists.data:
                 supabase.table("latest_news").insert({
-                    "headline": headline,
-                    "article_link": link,
+                    "headline": item["headline"],
+                    "article_link": item["article_link"],
                     "article_date": item["article_date"],
+                    "image_url": item["image_url"],
                     "scraped_at": time.strftime("%Y-%m-%dT%H:%M:%SZ")
                 }).execute()
+
                 new_items += 1
 
-        logging.info(f"✅ Supabase DB: Added {new_items} new news articles to 'latest_news'.")
+        logging.info(f"Saved {new_items} new articles to Supabase latest_news.")
+
         return results
 
     except Exception as e:
-        logging.error(f"An error occurred while scraping Indian Express: {e}", exc_info=False)
+        logging.error(f"[indianexpress_scraper.py] Error scraping Indian Express: {e}")
         driver.save_screenshot("indianexpress_error.png")
         return []
