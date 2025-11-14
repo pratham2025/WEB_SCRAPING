@@ -32,6 +32,11 @@ document.addEventListener("DOMContentLoaded", async function() {
 
       // Auth modal wiring
       setupLoginModal();
+      
+      // Mobile menu toggle - use setTimeout to ensure DOM is ready
+      setTimeout(() => {
+        setupMobileMenu();
+      }, 100);
 
       // Ensure Google script is loaded and GIS is initialized for dynamically injected header
       try {
@@ -173,5 +178,73 @@ async function initGoogleSignIn(){
       text: 'signin_with',
       logo_alignment: 'left',
       width: 320
+  });
+}
+
+// --- Mobile menu toggle functionality ---
+function setupMobileMenu() {
+  const menuToggle = document.getElementById('menuToggle');
+  const mainNav = document.getElementById('mainNav');
+  if (!menuToggle || !mainNav) {
+    console.warn('Mobile menu elements not found');
+    return;
+  }
+  
+  // Prevent duplicate event listeners
+  if (menuToggle.dataset.initialized === 'true') {
+    return;
+  }
+  menuToggle.dataset.initialized = 'true';
+
+  // Create overlay element
+  let overlay = document.querySelector('.menu-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.className = 'menu-overlay';
+    document.body.appendChild(overlay);
+  }
+
+  const toggleMenu = () => {
+    const isOpen = mainNav.classList.contains('menu-open');
+    if (isOpen) {
+      mainNav.classList.remove('menu-open');
+      overlay.classList.remove('active');
+      menuToggle.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+    } else {
+      mainNav.classList.add('menu-open');
+      overlay.classList.add('active');
+      menuToggle.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+    }
+  };
+
+  menuToggle.addEventListener('click', toggleMenu);
+  
+  // Close menu when clicking overlay
+  overlay.addEventListener('click', () => {
+    if (mainNav.classList.contains('menu-open')) {
+      toggleMenu();
+    }
+  });
+
+  // Close menu when clicking a link (mobile)
+  const navLinks = mainNav.querySelectorAll('.link, .btn');
+  navLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth <= 900 && mainNav.classList.contains('menu-open')) {
+        toggleMenu();
+      }
+    });
+  });
+
+  // Close menu on window resize if it goes back to desktop
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 900 && mainNav.classList.contains('menu-open')) {
+      mainNav.classList.remove('menu-open');
+      overlay.classList.remove('active');
+      menuToggle.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+    }
   });
 }

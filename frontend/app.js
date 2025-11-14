@@ -228,13 +228,14 @@ function renderCard(x){
   }
 
   return `<li class="card" data-id="${escapeAttr(x.id)}">
-    <div class="logo" aria-hidden="true">${logoHtml}</div>
-    <div class="meta">
-      <div class="title">${escapeHtml(x.text)}</div>
-      <div class="org">${escapeHtml(x.source)}</div>
-      <div class="row">${x.date ? escapeHtml(fmtDate(x.date)) : "Latest"}</div>
-    </div>
-    <div><a class="btn primary" href="${escapeAttr(x.link)}" target="_blank" rel="noopener">Read</a></div>
+    <a href="${escapeAttr(x.link)}" target="_blank" rel="noopener" class="card-link">
+      <div class="logo" aria-hidden="true">${logoHtml}</div>
+      <div class="meta">
+        <div class="title">${escapeHtml(x.text)}</div>
+        <div class="org">${escapeHtml(x.source)}</div>
+        <div class="row">${x.date ? escapeHtml(fmtDate(x.date)) : "Latest"}</div>
+      </div>
+    </a>
   </li>`;
 }
 
