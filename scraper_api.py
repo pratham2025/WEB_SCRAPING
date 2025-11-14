@@ -34,6 +34,9 @@ origins = [
     "http://127.0.0.1:5500",
     "http://127.0.0.1:5501",
     "http://127.0.0.1:8000",
+    "http://192.168.0.197:8000",
+    "http://192.168.0.197:5500",
+    "http://192.168.0.197:5501",
     "*"
 ]
 app.add_middleware(
@@ -195,7 +198,7 @@ async def get_latest_news(limit: int = 20):
     try:
         res = supabase.table("latest_news") \
             .select("*") \
-            .order("scraped_at", desc=True) \
+            .order("article_date", desc=True) \
             .limit(limit) \
             .execute()
         
