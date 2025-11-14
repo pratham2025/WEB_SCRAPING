@@ -48,6 +48,16 @@ const refreshBtn = document.getElementById('refreshBtn');
 const sourceHeroIconEl = document.getElementById('sourceHeroIcon');
 const sourceHeroIconFallbackEl = document.getElementById('sourceHeroIconFallback');
 const sourceHeroIconWrapper = document.getElementById('sourceHeroIconWrapper');
+const paginationContainer = document.getElementById('paginationContainer');
+const paginationInfo = document.getElementById('paginationInfo');
+const paginationNumbers = document.getElementById('paginationNumbers');
+const prevPageBtn = document.getElementById('prevPageBtn');
+const nextPageBtn = document.getElementById('nextPageBtn');
+
+// Pagination state
+let allAnnouncements = [];
+let currentPage = 1;
+const itemsPerPage = 10;
 
 const queryParams = new URLSearchParams(window.location.search);
 const sourceParam = queryParams.get('source');
@@ -124,7 +134,7 @@ async function fetchAnnouncements() {
           ? data.data
           : [];
 
-    const announcements = announcementsRaw
+    allAnnouncements = announcementsRaw
       .map((item, index) => {
         const timestamp = parseAnnouncementDate(item);
         return { item, index, timestamp };
@@ -136,34 +146,18 @@ async function fetchAnnouncements() {
         // fall back to original ordering (which is already newest-first from API)
         return a.index - b.index;
       })
-      .map(wrapper => wrapper.item)
-      .reverse();
+      .map(wrapper => wrapper.item);
 
-    if (!announcements.length) {
+    if (!allAnnouncements.length) {
       announcementsList.innerHTML = '<div class="empty-state">No announcements available yet. Check back soon!</div>';
+      paginationContainer.style.display = 'none';
       return;
     }
 
-    announcementsList.innerHTML = announcements.map((item, index) => {
-      const title = item.title || item.headline || item.text || `Announcement ${index + 1}`;
-      const summary = item.summary || item.description || item.text || 'Details available in the linked notice.';
-      const link = item.link || item.url || item.article_link;
-      const rawDate = item.date || item.published_at || item.article_date || item.scraped_at;
-      const formattedDate = formatAnnouncementDate(rawDate);
-
-      return `
-        <article class="announcement-card" style="animation-delay:${index * 0.05}s">
-          <header class="announcement-header">
-            <h3 class="announcement-title">${title}</h3>
-            <div class="announcement-date">${formattedDate}</div>
-          </header>
-          <p class="announcement-summary">${summary}</p>
-          <div class="announcement-actions">
-            ${link ? `<a class="announcement-link" href="${link}" target="_blank" rel="noopener noreferrer">Read Official Notice →</a>` : ''}
-          </div>
-        </article>
-      `;
-    }).join('');
+    // Reset to first page when new data is loaded
+    currentPage = 1;
+    renderAnnouncements();
+    renderPagination();
   } catch (error) {
     console.error('Error fetching announcements:', error);
     announcementsList.innerHTML = '<div class="empty-state">Unable to load announcements right now. Please try again later.</div>';
@@ -193,6 +187,120 @@ function parseAnnouncementDate(item) {
     return date.getTime();
   }
   return 0;
+}
+
+function renderAnnouncements() {
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const pageAnnouncements = allAnnouncements.slice(startIndex, endIndex);
+
+  announcementsList.innerHTML = pageAnnouncements.map((item, index) => {
+    const title = item.title || item.headline || item.text || `Announcement ${startIndex + index + 1}`;
+    const summary = item.summary || item.description || item.text || 'Details available in the linked notice.';
+    const link = item.link || item.url || item.article_link;
+    const rawDate = item.date || item.published_at || item.article_date || item.scraped_at;
+    const formattedDate = formatAnnouncementDate(rawDate);
+
+    return `
+      <article class="announcement-card" style="animation-delay:${index * 0.05}s">
+        <header class="announcement-header">
+          <h3 class="announcement-title">${title}</h3>
+          <div class="announcement-date">${formattedDate}</div>
+        </header>
+        <p class="announcement-summary">${summary}</p>
+        <div class="announcement-actions">
+          ${link ? `<a class="announcement-link" href="${link}" target="_blank" rel="noopener noreferrer">Read Official Notice →</a>` : ''}
+        </div>
+      </article>
+    `;
+  }).join('');
+
+  // Update pagination info
+  const totalItems = allAnnouncements.length;
+  const start = totalItems > 0 ? startIndex + 1 : 0;
+  const end = Math.min(endIndex, totalItems);
+  paginationInfo.textContent = `Showing ${start}-${end} of ${totalItems}`;
+
+  // Scroll to top of announcements section
+  announcementsList.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderPagination() {
+  const totalPages = Math.ceil(allAnnouncements.length / itemsPerPage);
+  
+  if (totalPages <= 1) {
+    paginationContainer.style.display = 'none';
+    return;
+  }
+
+  paginationContainer.style.display = 'flex';
+
+  // Update prev/next buttons
+  prevPageBtn.disabled = currentPage === 1;
+  nextPageBtn.disabled = currentPage === totalPages;
+
+  // Generate page numbers
+  paginationNumbers.innerHTML = '';
+  const maxVisiblePages = 7;
+  let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+  let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+  if (endPage - startPage < maxVisiblePages - 1) {
+    startPage = Math.max(1, endPage - maxVisiblePages + 1);
+  }
+
+  // First page
+  if (startPage > 1) {
+    const firstBtn = document.createElement('button');
+    firstBtn.className = 'pagination-number';
+    firstBtn.textContent = '1';
+    firstBtn.addEventListener('click', () => goToPage(1));
+    paginationNumbers.appendChild(firstBtn);
+
+    if (startPage > 2) {
+      const ellipsis = document.createElement('span');
+      ellipsis.className = 'pagination-ellipsis';
+      ellipsis.textContent = '...';
+      paginationNumbers.appendChild(ellipsis);
+    }
+  }
+
+  // Page numbers
+  for (let i = startPage; i <= endPage; i++) {
+    const pageBtn = document.createElement('button');
+    pageBtn.className = 'pagination-number';
+    if (i === currentPage) {
+      pageBtn.classList.add('active');
+    }
+    pageBtn.textContent = i;
+    pageBtn.addEventListener('click', () => goToPage(i));
+    paginationNumbers.appendChild(pageBtn);
+  }
+
+  // Last page
+  if (endPage < totalPages) {
+    if (endPage < totalPages - 1) {
+      const ellipsis = document.createElement('span');
+      ellipsis.className = 'pagination-ellipsis';
+      ellipsis.textContent = '...';
+      paginationNumbers.appendChild(ellipsis);
+    }
+
+    const lastBtn = document.createElement('button');
+    lastBtn.className = 'pagination-number';
+    lastBtn.textContent = totalPages;
+    lastBtn.addEventListener('click', () => goToPage(totalPages));
+    paginationNumbers.appendChild(lastBtn);
+  }
+}
+
+function goToPage(page) {
+  const totalPages = Math.ceil(allAnnouncements.length / itemsPerPage);
+  if (page < 1 || page > totalPages) return;
+  
+  currentPage = page;
+  renderAnnouncements();
+  renderPagination();
 }
 
 async function handleSubscribe(event) {
@@ -240,6 +348,12 @@ function init() {
   }
   if (subscribeForm) {
     subscribeForm.addEventListener('submit', handleSubscribe);
+  }
+  if (prevPageBtn) {
+    prevPageBtn.addEventListener('click', () => goToPage(currentPage - 1));
+  }
+  if (nextPageBtn) {
+    nextPageBtn.addEventListener('click', () => goToPage(currentPage + 1));
   }
 }
 

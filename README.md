@@ -129,7 +129,11 @@ pip install -r requirements.txt
 
 ### 3️⃣ Run FastAPI Backend
 ```bash
+# For localhost only:
 uvicorn scraper_api:app --reload --host 127.0.0.1 --port 8000
+
+# For network access (mobile devices via IP):
+uvicorn scraper_api:app --reload --host 0.0.0.0 --port 8000
 ```
 
 ### 4️⃣ Launch Frontend

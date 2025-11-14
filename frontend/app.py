@@ -14,7 +14,9 @@ st.set_page_config(
 )
 
 # --- API URL ---
-API_BASE_URL = "http://127.0.0.1:8000"
+# Auto-detect: use environment variable or default to localhost
+import os
+API_BASE_URL = os.getenv("API_BASE_URL", "http://127.0.0.1:8000")
 
 # --- Setup Logging ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

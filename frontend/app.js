@@ -1,5 +1,7 @@
 // Update API_BASE to match your running API
-const API_BASE = "http://127.0.0.1:8000";
+// Auto-detect hostname: works on localhost and mobile devices via IP
+const hostname = window.location.hostname || '127.0.0.1';
+const API_BASE = `http://${hostname}:8000`;
 
 const state = {
   sources: [],
