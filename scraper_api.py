@@ -180,7 +180,7 @@ async def get_announcements(source: SourceEnum):
             supabase.table("announcements")
             .select("*")
             .eq("source", source.value)
-            .order("scraped_at", desc=True)  # ASC order by ID
+            .order("scraped_at", desc=False)  # ASC order by ID
             .limit(100)
             .execute()
         )
@@ -198,7 +198,7 @@ async def get_latest_news(limit: int = 20):
     try:
         res = supabase.table("latest_news") \
             .select("*") \
-            .order("article_date", desc=True) \
+            .order("article_date", desc=False) \
             .limit(limit) \
             .execute()
         

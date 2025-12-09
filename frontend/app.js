@@ -26,7 +26,8 @@ const SOURCE_INFO = {
   "MPSC": { full: "Maharashtra Public Service Commission", desc: "State civil services recruitment" },
   "UPSC": { full: "Union Public Service Commission", desc: "Civil services and national-level recruitment exams" },
   "RRBKolkata": { full: "Railway Recruitment Board Kolkata", desc: "RRB Kolkata recruitment and results" },
-  "RRBMumbai": { full: "Railway Recruitment Board Mumbai", desc: "RRB Mumbai recruitment and results" }
+  "RRBMumbai": { full: "Railway Recruitment Board Mumbai", desc: "RRB Mumbai recruitment and results" },
+  "RRBAhmedabad": { full: "Railway Recruitment Board Ahmedabad", desc: "RRB Ahmedabad recruitment and results" }
 };
 
 // Logo file mapping for known sources
@@ -43,6 +44,7 @@ const LOGO_MAP = {
   MPSC: "src/logos/MPSC.png",
   RRBKolkata: "src/logos/RRBKOLKATA.png",
   RRBMumbai: "src/logos/RRBMUMBAI.avif",
+  RRBAhmedabad: "src/logos/RRBAHMEDABAD.jpg",
   UPSC: "src/logos/UPSC.webp"
 };
 
