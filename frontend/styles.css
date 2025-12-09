@@ -39,10 +39,15 @@ body {
 /* topbar */
 .topbar{
   position:sticky; top:0; z-index:100;
-  display:flex; gap:16px; justify-content:space-between; align-items:center;
-  padding:12px 24px; background:rgba(255,255,255,.72); backdrop-filter:blur(14px);
-  border-bottom:1px solid var(--ink-100);
+  display:flex; gap:20px; justify-content:space-between; align-items:center;
+  padding:14px 28px; 
+  background:rgba(255,255,255,.95); 
+  backdrop-filter:blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom:1px solid rgba(0,0,0,.06);
   width:100%;
+  box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.06);
+  transition: all 0.3s ease;
 }
 
 /* Ensure topbar stays above menu on mobile */
@@ -54,10 +59,10 @@ body {
 }
 .brand{
   display:flex; align-items:center; gap:10px; font-weight:700; font-size:20px;
-  /* --- ADDED LINES --- */
   text-decoration: none;
-  transition: transform 0.2s ease-out;
-  /* --- END ADDED LINES --- */
+  transition: all 0.2s ease-out;
+  padding: 4px 0;
+  border-radius: 8px;
 }
 /* --- ADDED RULE for text gradient --- */
 .brand span {
@@ -69,10 +74,11 @@ body {
 }
 /* --- ADDED RULE for hover effects --- */
 .brand:hover {
-  transform: scale(1.02); /* Slight grow */
+  transform: translateY(-1px);
+  opacity: 0.9;
 }
 .brand:hover span {
-  opacity: 0.8; /* Subtle fade on hover */
+  opacity: 0.85;
 }
 /* Make the bell ring again on hover */
 .brand:hover .bell-logo {
@@ -97,10 +103,307 @@ body {
 @media (prefers-reduced-motion: reduce){
   .bell-logo{ animation: none }
 }
-.actions{display:flex; align-items:center; gap:12px; position:absolute; left:50%; transform:translateX(-50%)}
-.actions .link{color:var(--ink-700); text-decoration:none; font-weight:500}
-.actions .link:hover{color:var(--green-600)}
-.actions .link.active{ color:var(--green-600); font-weight: 600; } /* Added active style */
+.actions{
+  display:flex; 
+  align-items:center; 
+  gap:8px; 
+  position:absolute; 
+  left:50%; 
+  transform:translateX(-50%);
+  background: rgba(255,255,255,.5);
+  padding: 6px 12px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+.actions .link{
+  color:var(--ink-700); 
+  text-decoration:none; 
+  font-weight:500;
+  font-size: 15px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.actions .link::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%) scaleX(0);
+  width: 0;
+  height: 2px;
+  background: var(--green-500);
+  transition: all 0.3s ease;
+  border-radius: 2px;
+}
+
+.actions .link:hover {
+  color:var(--green-600);
+  background: rgba(18,183,106,.08);
+}
+
+.actions .link:hover::after {
+  width: calc(100% - 28px);
+  transform: translateX(-50%) scaleX(1);
+}
+
+.actions .link.active{ 
+  color:var(--green-600); 
+  font-weight: 600;
+  background: rgba(18,183,106,.1);
+}
+
+.actions .link.active::after {
+  width: calc(100% - 28px);
+  transform: translateX(-50%) scaleX(1);
+}
+
+/* User Details Section */
+.user-details {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.user-info-wrapper {
+  position: relative;
+}
+
+.user-info-trigger {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.user-info-trigger:hover {
+  transform: translateY(-1px);
+}
+
+.user-info-trigger:active {
+  transform: translateY(0);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  border-radius: 12px;
+  background: rgba(18,183,106,.06);
+  border: 1px solid rgba(18,183,106,.12);
+  transition: all 0.2s ease;
+}
+
+.user-info:hover {
+  background: rgba(18,183,106,.1);
+  border-color: rgba(18,183,106,.2);
+}
+
+.user-info-trigger[aria-expanded="true"] .user-info {
+  background: rgba(18,183,106,.12);
+  border-color: rgba(18,183,106,.25);
+}
+
+.user-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255,255,255,.8);
+  background: var(--green-100);
+  box-shadow: 0 2px 8px rgba(18,183,106,.15);
+  transition: all 0.2s ease;
+}
+
+.user-info:hover .user-avatar {
+  box-shadow: 0 3px 12px rgba(18,183,106,.25);
+  transform: scale(1.05);
+}
+
+.avatar-fallback {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--green-500), var(--green-600));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 15px;
+  border: 2px solid rgba(255,255,255,.8);
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(18,183,106,.15);
+  transition: all 0.2s ease;
+}
+
+.user-info:hover .avatar-fallback {
+  box-shadow: 0 3px 12px rgba(18,183,106,.25);
+  transform: scale(1.05);
+}
+
+.user-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+}
+
+.user-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--ink-900);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.user-email {
+  font-size: 12px;
+  color: var(--ink-500);
+  line-height: 1.3;
+}
+
+.user-dropdown-icon {
+  color: var(--ink-400);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.user-info-trigger[aria-expanded="true"] .user-dropdown-icon {
+  transform: rotate(180deg);
+}
+
+/* User Dropdown Menu */
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 240px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.08);
+  border: 1px solid rgba(0,0,0,.08);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.user-dropdown[aria-hidden="false"] {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.user-dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(18,183,106,.05), rgba(18,183,106,.02));
+  border-bottom: 1px solid rgba(0,0,0,.06);
+}
+
+.user-avatar-large {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255,255,255,.9);
+  background: var(--green-100);
+  box-shadow: 0 2px 8px rgba(18,183,106,.15);
+}
+
+.user-dropdown-header .avatar-fallback {
+  width: 48px;
+  height: 48px;
+  font-size: 18px;
+  border: 2px solid rgba(255,255,255,.9);
+}
+
+.user-dropdown-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.user-name-large {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--ink-900);
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-email-large {
+  font-size: 12px;
+  color: var(--ink-500);
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-dropdown-divider {
+  height: 1px;
+  background: rgba(0,0,0,.06);
+  margin: 4px 0;
+}
+
+.user-dropdown-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  color: var(--ink-700);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.user-dropdown-item:hover {
+  background: rgba(18,183,106,.08);
+  color: var(--green-600);
+}
+
+.user-dropdown-item svg {
+  color: currentColor;
+  flex-shrink: 0;
+}
+
+.user-dropdown-item span {
+  flex: 1;
+}
+
+/* Hide login button when user is logged in */
+.user-logged-in .actions #loginBtn {
+  display: none !important;
+}
+
+/* Ensure login button is visible by default */
+.actions #loginBtn {
+  display: inline-block;
+}
+
+/* Mobile responsive for user details - merged into main mobile query below */
 
 /* Hamburger menu button */
 .menu-toggle {
@@ -171,20 +474,83 @@ body {
 .modal[aria-hidden="false"]{ display:flex }
 .modal-backdrop{ position:absolute; inset:0; background:rgba(11,19,36,.35) }
 .modal-content{
-  position:relative; z-index:1; width:100%; max-width:520px; padding:24px; border-radius:16px;
-  background:#fff; border:1px solid var(--ink-100); box-shadow:var(--shadow)
+  position:relative; z-index:1; width:100%; max-width:520px; padding:32px; border-radius:16px;
+  background:#fff; border:1px solid var(--ink-100); box-shadow:var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
-.auth-modal{ text-align:center }
-.auth-hero{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; margin-bottom:12px }
-.auth-title{ margin:0; font-size:22px }
+.auth-modal{ 
+  text-align:center;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.auth-hero{ 
+  display:flex; 
+  flex-direction:column; 
+  align-items:center; 
+  justify-content:center; 
+  gap:8px; 
+  margin-bottom: 0;
+}
+.auth-title{ 
+  margin:0; 
+  font-size:22px; 
+  font-weight: 700;
+  color: var(--ink-900);
+}
 .auth-subtitle{ display:none }
 .auth-hero .bell-logo{ width:44px; height:44px }
-.auth-desc{ color:var(--ink-700); font-size:14px; line-height:1.5; background:linear-gradient(180deg,#fff,#f7fff9); border:1px solid var(--ink-100); padding:10px 12px; border-radius:12px; margin:12px 0 16px 0 }
-.auth-privacy{ color:var(--ink-500); font-size:12px; margin:12px 0 0 0 }
+.auth-desc{ 
+  color:var(--ink-700); 
+  font-size:14px; 
+  line-height:1.6; 
+  background:linear-gradient(180deg,#fff,#f7fff9); 
+  border:1px solid var(--ink-100); 
+  padding:14px 16px; 
+  border-radius:12px; 
+  margin: 0;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+.auth-privacy{ 
+  color:var(--ink-500); 
+  font-size:12px; 
+  margin: 0;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
 
 /* Center Google Sign-In button */
 .g_id_signin{ display:flex; justify-content:center }
 .g_id_signin > div{ margin:0 auto }
+
+/* Ensure login button in modal is visible */
+.auth-modal .btn.primary {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 100% !important;
+  max-width: 320px !important;
+  margin: 0 auto !important;
+}
+
+/* Ensure all modal content is visible */
+.modal-content * {
+  visibility: visible !important;
+}
+
+.modal-content p,
+.modal-content button,
+.modal-content h3,
+.modal-content .auth-hero {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
 .modal-close{ position:absolute; right:10px; top:10px; border:none; background:transparent; font-size:20px; cursor:pointer; color:var(--ink-500) }
 
 /* tabs */
@@ -390,6 +756,47 @@ body {
     order: 2; /* Place it after the brand */
     position: relative;
     z-index: 1002; /* Above menu and overlay */
+    margin-left: auto;
+    margin-right: 8px;
+  }
+  
+  /* User details on mobile */
+  .user-details {
+    position: relative;
+    order: 3; /* Place after hamburger menu */
+    margin-left: 0;
+    flex-shrink: 0;
+  }
+  
+  .user-info {
+    gap: 0;
+    padding: 4px;
+    background: rgba(18,183,106,.08);
+    border: 1px solid rgba(18,183,106,.15);
+  }
+  
+  .user-text {
+    display: none; /* Hide text on mobile, show only avatar */
+  }
+  
+  .user-dropdown-icon {
+    display: none; /* Hide dropdown icon on mobile */
+  }
+  
+  .user-avatar,
+  .avatar-fallback {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+    border-width: 1.5px;
+  }
+  
+  /* User dropdown on mobile */
+  .user-dropdown {
+    right: 0;
+    left: auto;
+    min-width: 200px;
+    max-width: calc(100vw - 32px);
   }
   
   /* Hide navigation by default on mobile */
@@ -1153,6 +1560,23 @@ body {
   
   .news-card-small .news-content {
     padding: 10px;
+  }
+  
+  /* User details on very small screens */
+  .user-info {
+    padding: 3px;
+  }
+  
+  .user-avatar,
+  .avatar-fallback {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+  
+  .user-dropdown {
+    min-width: 180px;
+    right: 0;
   }
 }
 

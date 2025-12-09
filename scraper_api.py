@@ -190,15 +190,17 @@ async def get_announcements(source: SourceEnum):
         raise HTTPException(status_code=500, detail=f"Supabase fetch failed: {e}")
 
 @app.get("/latest-news")
-async def get_latest_news(limit: int = 20):
+async def get_latest_news(limit: int = 100):
     """Fetch news from Supabase latest_news table (latest first).
     
     Returns fields: id, headline, article_link, article_date, scraped_at
+    Orders by scraped_at (timestamp) for proper chronological sorting.
+    Frontend will handle final sorting by article_date after parsing dates.
     """
     try:
         res = supabase.table("latest_news") \
             .select("*") \
-            .order("article_date", desc=False) \
+            .order("scraped_at", desc=True) \
             .limit(limit) \
             .execute()
         

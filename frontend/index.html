@@ -38,11 +38,10 @@
         <!-- JS will now add a 'Back' button and the active source here -->
     </nav>
     <main class="container">
-        <div class="status" id="connStatus" aria-live="polite">Checking API…</div>
+        <div class="status" id="connStatus" aria-live="polite" style="display: none;"></div>
 
         <section class="results" aria-label="Announcements">
           <div class="results-header">
-            <div class="status" id="connStatus" aria-live="polite">Checking API…</div>
             <h2><span id="resultCount">0</span> announcements</h2>
           </div>
           <ul id="examList" class="card-list" role="list"></ul>
@@ -68,6 +67,12 @@
 
   <footer class="footer"></footer>
 
+  <!-- Supabase Auth Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="secrets.js"></script>
+  <script src="auth.js"></script>
+
+  <!-- Core site scripts -->
   <script src="./common.js"></script>
   <script src="./app.js"></script>
 </body>
