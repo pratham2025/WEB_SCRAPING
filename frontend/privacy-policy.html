@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Privacy Policy — GETNOTIFY</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css"/>
+  <meta name="description" content="Privacy Policy for GETNOTIFY - How we collect, use, and protect your information"/>
+</head>
+<body>
+  <header class="topbar"></header>
+
+  <main class="legal-page">
+    <div class="legal-container">
+      <h1>Privacy Policy</h1>
+      <p class="legal-updated">Effective Date: Immediately<br>Last Updated: <span id="privacyDate"></span></p>
+
+      <section class="legal-section">
+        <h2>1. What Information We Collect</h2>
+        <p>When you use GETNOTIFY, we collect the following information:</p>
+        
+        <h3>A. Information You Provide</h3>
+        <ul>
+          <li>Your Google account name</li>
+          <li>Email address</li>
+          <li>Profile photo (optional)</li>
+          <li>Preferences (such as saved sources, favorites)</li>
+        </ul>
+
+        <h3>B. Automatically Collected</h3>
+        <ul>
+          <li>Browser type</li>
+          <li>Device type</li>
+          <li>IP address (from Supabase logs)</li>
+          <li>Pages visited</li>
+          <li>Timestamps of login/logout</li>
+        </ul>
+
+        <h3>We do NOT collect:</h3>
+        <ul style="list-style: none; padding-left: 0;">
+          <li>❌ Exam registration details</li>
+          <li>❌ Passwords</li>
+          <li>❌ Personal sensitive information</li>
+          <li>❌ Financial data</li>
+        </ul>
+      </section>
+
+      <section class="legal-section">
+        <h2>2. How We Use Your Information</h2>
+        <p>We use your data to:</p>
+        <ul>
+          <li>Provide account access</li>
+          <li>Sync your preferences across devices</li>
+          <li>Improve notification accuracy</li>
+          <li>Enhance user experience</li>
+          <li>Maintain security & prevent misuse</li>
+        </ul>
+        <p><strong>We never sell or share your information with third-party advertisers.</strong></p>
+      </section>
+
+      <section class="legal-section">
+        <h2>3. Cookies & Tracking</h2>
+        <p>We use minimal cookies for:</p>
+        <ul>
+          <li>Session management</li>
+          <li>Keeping you logged in</li>
+          <li>Improving site performance</li>
+        </ul>
+        <p><strong>No advertising or behavioral tracking cookies are used.</strong></p>
+      </section>
+
+      <section class="legal-section">
+        <h2>4. Data Storage</h2>
+        <p>All user data is securely stored in <strong>Supabase</strong>, a GDPR-compliant platform. Supabase uses encrypted storage and JWT-secured authentication.</p>
+      </section>
+
+      <section class="legal-section">
+        <h2>5. Third-Party Authentication</h2>
+        <p>GETNOTIFY uses <strong>Google OAuth</strong> for login. We only request basic profile information (name, email, profile photo). We do not post, share, or modify your Google account in any way.</p>
+      </section>
+
+      <section class="legal-section">
+        <h2>6. Your Rights</h2>
+        <p>You may request at any time:</p>
+        <ul>
+          <li>Account deletion</li>
+          <li>Removal of stored data</li>
+          <li>Export of your user data</li>
+          <li>Logout from all sessions</li>
+        </ul>
+        <p>To exercise these rights, please contact us at: <a href="mailto:support@getnotify.in">support@getnotify.in</a></p>
+      </section>
+
+      <section class="legal-section">
+        <h2>7. Children's Privacy</h2>
+        <p>This service is intended for users <strong>13+ years of age</strong>.</p>
+      </section>
+
+      <section class="legal-section">
+        <h2>8. Changes to This Policy</h2>
+        <p>Updates will be posted on this page with a new effective date. We recommend reviewing this policy periodically.</p>
+      </section>
+
+      <section class="legal-section">
+        <h2>Contact Us</h2>
+        <p>If you have questions about this Privacy Policy, please contact us at: <a href="mailto:support@getnotify.in">support@getnotify.in</a></p>
+      </section>
+
+      <div class="legal-nav">
+        <a href="disclaimer.html">Legal Disclaimer</a>
+        <a href="terms-of-use.html">Terms of Use</a>
+        <a href="fair-use.html">Fair Use Notice</a>
+        <a href="cookie-notice.html">Cookie Notice</a>
+        <a href="home.html">← Back to Home</a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer"></footer>
+
+  <!-- Supabase Auth Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="secrets.js"></script>
+  <script src="auth.js"></script>
+  <script src="./common.js"></script>
+  <script>
+    document.getElementById('privacyDate').textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  </script>
+</body>
+</html>
+

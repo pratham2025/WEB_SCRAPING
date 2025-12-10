@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fair Use Notice — GETNOTIFY</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css"/>
+  <meta name="description" content="Fair Use Notice for GETNOTIFY - Use of logos, names, and content for educational purposes"/>
+</head>
+<body>
+  <header class="topbar"></header>
+
+  <main class="legal-page">
+    <div class="legal-container">
+      <h1>Fair Use Notice</h1>
+      <p class="legal-updated">Last Updated: <span id="fairUseDate"></span></p>
+
+      <section class="legal-section">
+        <p>This platform may display the following for the purpose of <strong>identification, information, education, and commentary only</strong>:</p>
+        <ul>
+          <li>Logos</li>
+          <li>Names</li>
+          <li>Titles of notices</li>
+          <li>Headlines</li>
+          <li>Summaries</li>
+        </ul>
+      </section>
+
+      <section class="legal-section">
+        <h2>Ownership</h2>
+        <p><strong>All materials remain the property of their respective exam authorities.</strong> We do not claim ownership of any official logos, names, documents, or content displayed on this platform.</p>
+      </section>
+
+      <section class="legal-section">
+        <h2>Legal Basis</h2>
+        <p>Use of these items falls under <strong>Section 52 of the Indian Copyright Act (Fair Use for reporting)</strong>, which permits the use of copyrighted material for:</p>
+        <ul>
+          <li>Reporting current events</li>
+          <li>Educational purposes</li>
+          <li>Criticism or review</li>
+          <li>News reporting</li>
+        </ul>
+      </section>
+
+      <section class="legal-section">
+        <h2>Purpose of Use</h2>
+        <p>We use official logos, names, and content solely to:</p>
+        <ul>
+          <li>Identify and categorize exam-related information</li>
+          <li>Provide accurate attribution to source authorities</li>
+          <li>Enable users to quickly identify relevant exam boards</li>
+          <li>Facilitate access to publicly available information</li>
+        </ul>
+        <p>We do not use this content for commercial gain or to mislead users about our affiliation with any exam authority.</p>
+      </section>
+
+      <section class="legal-section">
+        <h2>Content Removal Requests</h2>
+        <p>If any organization wants removal or modification of any content, please contact us at: <a href="mailto:support@getnotify.in">support@getnotify.in</a></p>
+        <p><strong>We will respond within 48 hours</strong> and take appropriate action as required.</p>
+      </section>
+
+      <section class="legal-section">
+        <h2>Respect for Intellectual Property</h2>
+        <p>We respect the intellectual property rights of all examination authorities and government bodies. If you believe any content on this platform infringes on your rights, please contact us immediately with:</p>
+        <ul>
+          <li>Description of the content in question</li>
+          <li>Your relationship to the content owner</li>
+          <li>Reason for the removal request</li>
+          <li>Your contact information</li>
+        </ul>
+      </section>
+
+      <section class="legal-section">
+        <h2>Contact</h2>
+        <p>For questions or concerns about our Fair Use practices, please contact: <a href="mailto:support@getnotify.in">support@getnotify.in</a></p>
+      </section>
+
+      <div class="legal-nav">
+        <a href="disclaimer.html">Legal Disclaimer</a>
+        <a href="privacy-policy.html">Privacy Policy</a>
+        <a href="terms-of-use.html">Terms of Use</a>
+        <a href="cookie-notice.html">Cookie Notice</a>
+        <a href="home.html">← Back to Home</a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer"></footer>
+
+  <!-- Supabase Auth Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="secrets.js"></script>
+  <script src="auth.js"></script>
+  <script src="./common.js"></script>
+  <script>
+    document.getElementById('fairUseDate').textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  </script>
+</body>
+</html>
+
