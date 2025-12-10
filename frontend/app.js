@@ -79,12 +79,16 @@ function showNotification(message, isError = false) {
   setTimeout(() => { notification.remove(); }, 5000);
 }
 
-async function fetchJSON(url){
+async function fetchJSON(url, options = {}){
   try{
-    const res = await fetch(url, { headers:{accept:"application/json"} });
+    const res = await fetch(url, {
+      headers: { accept: "application/json", ...(options.headers || {}) },
+      ...options
+    });
     if(!res.ok){
+      const errorData = await res.json().catch(() => ({}));
       showNotification(`Error: HTTP ${res.status} for ${url}`, true);
-      return {ok:false, status:res.status, error:`HTTP ${res.status}`};
+      return {ok:false, status:res.status, error: errorData.message || `HTTP ${res.status}`};
     }
     const data = await res.json();
     return {ok:true, data};
@@ -110,19 +114,31 @@ async function loadSources(){
 }
 
 // Build source cards
-function buildSourceCards() {
+async function buildSourceCards() {
   if (!els.sourceCardGrid) return;
+  
+  // Get user's current subscriptions
+  const subscriptions = await getUserSubscriptions();
+  
   els.sourceCardGrid.innerHTML = state.sources.map(s => {
       const initials = s.split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
       const meta = SOURCE_INFO[s] || { full: s, desc: "Latest announcements and updates" };
       const logo = LOGO_MAP[s];
+      const isSubscribed = subscriptions.includes(s);
       return `
-      <a class="source-card" onclick="selectSource('${escapeAttr(s)}')">
-          <div class="source-card-logo">${logo ? `<img src="${escapeAttr(logo)}" alt="${escapeAttr(meta.full)}"/>` : escapeHtml(initials)}</div>
-          <h3>${escapeHtml(s)}</h3>
-          <div class="source-full">${escapeHtml(meta.full)}</div>
-          <p class="source-desc">${escapeHtml(meta.desc)}</p>
-      </a>`;
+      <div class="source-card-wrapper">
+        <a class="source-card" onclick="selectSource('${escapeAttr(s)}')">
+            <div class="source-card-logo">${logo ? `<img src="${escapeAttr(logo)}" alt="${escapeAttr(meta.full)}"/>` : escapeHtml(initials)}</div>
+            <h3>${escapeHtml(s)}</h3>
+            <div class="source-full">${escapeHtml(meta.full)}</div>
+            <p class="source-desc">${escapeHtml(meta.desc)}</p>
+        </a>
+        <button class="subscribe-btn ${isSubscribed ? 'subscribed' : ''}" 
+                onclick="event.stopPropagation(); toggleSubscription('${escapeAttr(s)}', this)"
+                data-source="${escapeAttr(s)}">
+            ${isSubscribed ? '✓ Subscribed' : 'Subscribe'}
+        </button>
+      </div>`;
   }).join("");
 }
 
@@ -268,10 +284,87 @@ function fmtDate(dt){
   return isNaN(d)? String(dt) : d.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}); 
 }
 
+// Subscription functions
+async function getUserSubscriptions() {
+  try {
+    const user = await getLoggedInUser();
+    if (!user) return [];
+    
+    const {ok, data} = await fetchJSON(`${API_BASE}/subscriptions`);
+    if (ok && data && Array.isArray(data.subscriptions)) {
+      return data.subscriptions.map(s => s.source);
+    }
+    return [];
+  } catch (e) {
+    console.warn('Failed to fetch subscriptions:', e);
+    return [];
+  }
+}
+
+async function toggleSubscription(source, buttonEl) {
+  try {
+    const user = await getLoggedInUser();
+    if (!user) {
+      showNotification('Please log in to subscribe to sources', true);
+      // Optionally open login modal
+      const loginBtn = document.getElementById('loginBtn');
+      if (loginBtn) loginBtn.click();
+      return;
+    }
+    
+    const isSubscribed = buttonEl.classList.contains('subscribed');
+    const action = isSubscribed ? 'unsubscribe' : 'subscribe';
+    
+    buttonEl.disabled = true;
+    buttonEl.textContent = isSubscribed ? 'Unsubscribing...' : 'Subscribing...';
+    
+    const result = await fetchJSON(`${API_BASE}/${action}`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({source, email: user.email})
+    });
+    const {ok, data, error} = result;
+    
+    if (ok) {
+      if (isSubscribed) {
+        buttonEl.classList.remove('subscribed');
+        buttonEl.textContent = 'Subscribe';
+        showNotification(`Unsubscribed from ${source}`);
+      } else {
+        buttonEl.classList.add('subscribed');
+        buttonEl.textContent = '✓ Subscribed';
+        showNotification(`Subscribed to ${source}! You'll receive email notifications for new announcements.`);
+      }
+    } else {
+      showNotification(error || `Failed to ${action}`, true);
+      buttonEl.textContent = isSubscribed ? '✓ Subscribed' : 'Subscribe';
+    }
+  } catch (e) {
+    console.error('Subscription error:', e);
+    showNotification('An error occurred. Please try again.', true);
+    buttonEl.textContent = buttonEl.classList.contains('subscribed') ? '✓ Subscribed' : 'Subscribe';
+  } finally {
+    buttonEl.disabled = false;
+  }
+}
+
+// Helper function to get logged in user (from auth.js)
+async function getLoggedInUser() {
+  if (!window.supabase) return null;
+  try {
+    const { data: { user } } = await window.supabase.auth.getUser();
+    return user;
+  } catch (e) {
+    return null;
+  }
+}
+
+
 /* expose */
 window.gotoPage = gotoPage;
 window.selectSource = selectSource;
 window.showSourceSelector = showSourceSelector;
+window.toggleSubscription = toggleSubscription;
 
 /* init */
 (async function init(){

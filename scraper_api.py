@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.concurrency import run_in_threadpool
+from pydantic import BaseModel
 from dotenv import load_dotenv
 from supabase import create_client, Client
 
@@ -86,10 +87,11 @@ def setup_driver():
 
 # --- Save to Supabase ---
 def save_to_supabase(source: str, data: List[Dict[str, Any]]) -> int:
-    """Insert scraped data into Supabase announcements table."""
+    """Insert scraped data into Supabase announcements table and notify subscribers."""
     if not data:
         return 0
     inserted = 0
+    new_announcements = []
     try:
         for item in data:
             # set scraped_at to provided value OR current UTC time
@@ -116,8 +118,22 @@ def save_to_supabase(source: str, data: List[Dict[str, Any]]) -> int:
             if not exists.data:
                 supabase.table("announcements").insert(payload).execute()
                 inserted += 1
+                # Track new announcements for email notifications
+                new_announcements.append(payload)
 
         logging.info(f"✅ Supabase DB updated for {source}: inserted {inserted} new records.")
+        
+        # Notify subscribers if there are new announcements
+        if new_announcements:
+            try:
+                from notify_subscribers import notify_subscribers
+                emails_sent = notify_subscribers(source, new_announcements)
+                if emails_sent > 0:
+                    logging.info(f"📧 Sent email notifications to {emails_sent} subscribers for {source}")
+            except Exception as e:
+                logging.error(f"❌ Failed to notify subscribers for {source}: {e}")
+                # Don't fail the entire scrape if email notification fails
+                
     except Exception as e:
         logging.error(f"❌ Supabase insert failed for {source}: {e}")
     return inserted
@@ -232,3 +248,77 @@ async def health():
         return {"status": "healthy", "supabase_connected": True, "records_found": len(res.data)}
     except Exception as e:
         return {"status": "unhealthy", "error": str(e)}
+
+# --- Subscription Endpoints ---
+
+class SubscribeRequest(BaseModel):
+    email: str
+    source: str
+
+@app.post("/subscribe")
+async def subscribe(request: SubscribeRequest):
+    """Subscribe a user (email) to a source for email notifications."""
+    try:
+        email = request.email
+        source = request.source
+        
+        # Check if subscription already exists
+        existing = supabase.table("subscriptions") \
+            .select("id") \
+            .eq("email", email) \
+            .eq("source", source) \
+            .limit(1) \
+            .execute()
+        
+        if existing.data:
+            return {"message": "Already subscribed", "subscribed": True}
+        
+        # Create new subscription
+        supabase.table("subscriptions").insert({
+            "email": email,
+            "source": source,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }).execute()
+        
+        logging.info(f"✅ New subscription: {email} -> {source}")
+        return {"message": "Subscribed successfully", "subscribed": True}
+    except Exception as e:
+        logging.error(f"❌ Subscription failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Subscription failed: {e}")
+
+@app.post("/unsubscribe")
+async def unsubscribe(request: SubscribeRequest):
+    """Unsubscribe a user (email) from a source."""
+    try:
+        email = request.email
+        source = request.source
+        
+        # Delete subscription
+        supabase.table("subscriptions") \
+            .delete() \
+            .eq("email", email) \
+            .eq("source", source) \
+            .execute()
+        
+        logging.info(f"✅ Unsubscribed: {email} -> {source}")
+        return {"message": "Unsubscribed successfully", "subscribed": False}
+    except Exception as e:
+        logging.error(f"❌ Unsubscribe failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Unsubscribe failed: {e}")
+
+@app.get("/subscriptions")
+async def get_subscriptions(email: str = None):
+    """Get all subscriptions for a user (email)."""
+    try:
+        if not email:
+            raise HTTPException(status_code=400, detail="Email parameter is required")
+        
+        res = supabase.table("subscriptions") \
+            .select("*") \
+            .eq("email", email) \
+            .execute()
+        
+        return {"subscriptions": res.data or []}
+    except Exception as e:
+        logging.error(f"❌ Failed to fetch subscriptions: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to fetch subscriptions: {e}")

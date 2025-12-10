@@ -2137,6 +2137,12 @@ body {
     gap: 1.5rem;
 }
 
+.source-card-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
 .source-card {
     background: var(--card);
     border: 1px solid var(--ink-100);
@@ -2148,6 +2154,7 @@ body {
     text-decoration: none;
     color: var(--ink-900);
     min-height: 180px;
+    flex: 1;
 }
 
 .source-card:hover {
@@ -2178,6 +2185,44 @@ body {
 
 .source-full{ margin-top:4px; color: var(--ink-700); font-size: .9rem }
 .source-desc{ margin:8px 8px 0 8px; color: var(--ink-500); font-size: .85rem; line-height:1.4 }
+
+/* Subscribe button styles */
+.subscribe-btn {
+    margin-top: 0.75rem;
+    padding: 0.5rem 1rem;
+    border: 1.5px solid var(--green-600);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--green-700);
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+}
+
+.subscribe-btn:hover {
+    background: var(--green-50);
+    border-color: var(--green-700);
+    transform: translateY(-1px);
+}
+
+.subscribe-btn.subscribed {
+    background: var(--green-600);
+    color: #fff;
+    border-color: var(--green-600);
+}
+
+.subscribe-btn.subscribed:hover {
+    background: var(--green-700);
+    border-color: var(--green-700);
+}
+
+.subscribe-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
 
 /* Style for the 'Back' button in the tab bar */
 .back-btn {
