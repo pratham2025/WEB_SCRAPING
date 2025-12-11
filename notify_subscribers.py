@@ -3,10 +3,9 @@
 import os
 import logging
 from typing import List, Dict, Any
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
 from dotenv import load_dotenv
 from supabase import create_client, Client
+from send_email import send_email
 
 # Load environment variables
 load_dotenv()
@@ -22,13 +21,6 @@ if not SUPABASE_URL or not SUPABASE_KEY:
     raise RuntimeError("❌ Missing Supabase credentials. Please check your .env file.")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-
-# SendGrid setup
-SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
-FROM_EMAIL = "prathmeshpatiltoi@gmail.com"  # Your verified sender email
-
-if not SENDGRID_API_KEY:
-    raise RuntimeError("❌ Missing SENDGRID_API_KEY. Please check your .env file.")
 
 
 def get_subscribers_for_source(source: str) -> List[Dict[str, Any]]:
@@ -106,23 +98,20 @@ def send_notification_email(to_email: str, source: str, announcements: List[Dict
         </html>
         """
         
-        # Create and send email
-        message = Mail(
-            from_email=FROM_EMAIL,
-            to_emails=to_email,
-            subject=f"🔔 {announcement_count} New Announcement(s) from {source_name}",
+        # Send email using the email service
+        subject = f"🔔 {announcement_count} New Announcement(s) from {source_name}"
+        success = send_email(
+            to_email=to_email,
+            subject=subject,
             html_content=html_content
         )
         
-        sg = SendGridAPIClient(SENDGRID_API_KEY)
-        response = sg.send(message)
-        
-        if response.status_code == 202:
+        if success:
             logging.info(f"✅ Email sent to {to_email} for {source}")
-            return True
         else:
-            logging.warning(f"⚠️ Email send returned status {response.status_code} for {to_email}")
-            return False
+            logging.warning(f"⚠️ Failed to send email to {to_email} for {source}")
+        
+        return success
             
     except Exception as e:
         logging.error(f"❌ Failed to send email to {to_email}: {e}")

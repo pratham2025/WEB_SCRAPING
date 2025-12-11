@@ -48,12 +48,13 @@ def setup_driver():
 
 # --- SAVE TO SUPABASE ---
 def save_to_db(source_name, results):
-    """Saves announcements directly to Supabase."""
+    """Saves announcements directly to Supabase and notifies subscribers."""
     if not results:
         logging.info(f"No results to process for {source_name}.")
         return 0
 
     new_items_count = 0
+    new_announcements = []
     try:
         for item in results:
             text = item.get("text")
@@ -65,15 +66,30 @@ def save_to_db(source_name, results):
             existing = supabase.table("announcements").select("id").eq("source", source_name).eq("text", text).execute()
 
             if not existing.data:
-                supabase.table("announcements").insert({
+                payload = {
                     "source": source_name,
                     "text": text,
                     "link": link,
                     "scraped_at": time.strftime("%Y-%m-%dT%H:%M:%SZ")
-                }).execute()
+                }
+                supabase.table("announcements").insert(payload).execute()
                 new_items_count += 1
+                # Track new announcements for email notifications
+                new_announcements.append(payload)
 
         logging.info(f"✅ Supabase DB for {source_name}: Processed {len(results)} items, added {new_items_count} new.")
+        
+        # Notify subscribers if there are new announcements
+        if new_announcements:
+            try:
+                from notify_subscribers import notify_subscribers
+                emails_sent = notify_subscribers(source_name, new_announcements)
+                if emails_sent > 0:
+                    logging.info(f"📧 Sent email notifications to {emails_sent} subscribers for {source_name}")
+            except Exception as e:
+                logging.error(f"❌ Failed to notify subscribers for {source_name}: {e}")
+                # Don't fail the entire scrape if email notification fails
+        
         return new_items_count
 
     except Exception as e:

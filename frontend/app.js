@@ -288,9 +288,9 @@ function fmtDate(dt){
 async function getUserSubscriptions() {
   try {
     const user = await getLoggedInUser();
-    if (!user) return [];
+    if (!user || !user.email) return [];
     
-    const {ok, data} = await fetchJSON(`${API_BASE}/subscriptions`);
+    const {ok, data} = await fetchJSON(`${API_BASE}/subscriptions?email=${encodeURIComponent(user.email)}`);
     if (ok && data && Array.isArray(data.subscriptions)) {
       return data.subscriptions.map(s => s.source);
     }

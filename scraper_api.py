@@ -311,6 +311,7 @@ async def get_subscriptions(email: str = None):
     """Get all subscriptions for a user (email)."""
     try:
         if not email:
+            logging.warning("⚠️ /subscriptions called without email parameter")
             raise HTTPException(status_code=400, detail="Email parameter is required")
         
         res = supabase.table("subscriptions") \
@@ -319,6 +320,9 @@ async def get_subscriptions(email: str = None):
             .execute()
         
         return {"subscriptions": res.data or []}
+    except HTTPException:
+        # Re-raise HTTP exceptions (like 400) as-is
+        raise
     except Exception as e:
-        logging.error(f"❌ Failed to fetch subscriptions: {e}")
+        logging.error(f"❌ Failed to fetch subscriptions: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to fetch subscriptions: {e}")
