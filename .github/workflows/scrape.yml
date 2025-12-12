@@ -1,0 +1,27 @@
+name: Scrape Exam Boards
+
+on:
+  schedule:
+    # Run every 6 hours (adjust cron as needed)
+    # Format: minute hour day month weekday
+    # Examples:
+    # '0 */6 * * *' = Every 6 hours
+    # '0 0 * * *' = Once daily at midnight
+    # '0 */3 * * *' = Every 3 hours
+    - cron: '0 */6 * * *'
+  workflow_dispatch:  # Allow manual trigger from GitHub UI
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Trigger Scrape All
+      run: |
+        echo "Triggering scrape on API..."
+        curl -X POST https://api.getnotify.in/scrape_all || echo "API might be spinning up, this is normal for free tier"
+        
+    - name: Check API Health
+      run: |
+        echo "Checking API health..."
+        curl https://api.getnotify.in/health || echo "Health check failed"
