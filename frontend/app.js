@@ -1,7 +1,24 @@
 // Update API_BASE to match your running API
-// Auto-detect hostname: works on localhost and mobile devices via IP
-const hostname = window.location.hostname || '127.0.0.1';
-const API_BASE = `http://${hostname}:8000`;
+// Auto-detect: use environment variable or detect from current host
+function getApiBase() {
+  // Check if API_BASE_URL is set in a meta tag (for production)
+  const metaApiUrl = document.querySelector('meta[name="api-base-url"]');
+  if (metaApiUrl && metaApiUrl.content) {
+    return metaApiUrl.content;
+  }
+  
+  // For production: if on HTTPS, use same host with /api or configured path
+  if (window.location.protocol === 'https:') {
+    // Try to use same origin with /api path
+    return `${window.location.origin}/api`;
+  }
+  
+  // For localhost/development: use hostname:8000
+  const hostname = window.location.hostname || '127.0.0.1';
+  return `http://${hostname}:8000`;
+}
+
+const API_BASE = getApiBase();
 
 const state = {
   sources: [],
@@ -147,9 +164,20 @@ async function selectSource(source) {
   els.sourceSelector.style.display = 'none';
   els.resultsContainer.style.display = 'block';
   
+  // Check subscription status
+  const subscriptions = await getUserSubscriptions();
+  const isSubscribed = subscriptions.includes(source);
+  
   els.tabs.innerHTML = `
       <button class="back-btn" onclick="showSourceSelector()">← All Sources</button>
       <button class="exam-tab active">${escapeHtml(source)}</button>
+      <button class="subscribe-btn ${isSubscribed ? 'subscribed' : ''}" 
+              id="announcementSubscribeBtn"
+              onclick="toggleSubscription('${escapeAttr(source)}', this)"
+              data-source="${escapeAttr(source)}"
+              style="margin-left: auto;">
+          ${isSubscribed ? '✓ Subscribed' : 'Subscribe'}
+      </button>
   `;
 
   await loadAnnouncements(source);
@@ -315,8 +343,19 @@ async function toggleSubscription(source, buttonEl) {
     const isSubscribed = buttonEl.classList.contains('subscribed');
     const action = isSubscribed ? 'unsubscribe' : 'subscribe';
     
-    buttonEl.disabled = true;
-    buttonEl.textContent = isSubscribed ? 'Unsubscribing...' : 'Subscribing...';
+    // Find all subscribe buttons for this source (source cards and announcements page)
+    // Use CSS.escape or manual escaping for the attribute selector
+    const escapedSource = source.replace(/"/g, '\\"');
+    const allButtons = [
+      buttonEl,
+      ...Array.from(document.querySelectorAll(`button[data-source="${escapedSource}"]`))
+    ].filter((btn, index, arr) => arr.indexOf(btn) === index); // Remove duplicates
+    
+    // Disable all buttons for this source
+    allButtons.forEach(btn => {
+      btn.disabled = true;
+      btn.textContent = isSubscribed ? 'Unsubscribing...' : 'Subscribing...';
+    });
     
     const result = await fetchJSON(`${API_BASE}/${action}`, {
       method: 'POST',
@@ -326,25 +365,41 @@ async function toggleSubscription(source, buttonEl) {
     const {ok, data, error} = result;
     
     if (ok) {
-      if (isSubscribed) {
-        buttonEl.classList.remove('subscribed');
-        buttonEl.textContent = 'Subscribe';
-        showNotification(`Unsubscribed from ${source}`);
-      } else {
-        buttonEl.classList.add('subscribed');
-        buttonEl.textContent = '✓ Subscribed';
-        showNotification(`Subscribed to ${source}! You'll receive email notifications for new announcements.`);
-      }
+      // Update all buttons for this source
+      allButtons.forEach(btn => {
+        if (isSubscribed) {
+          btn.classList.remove('subscribed');
+          btn.textContent = 'Subscribe';
+        } else {
+          btn.classList.add('subscribed');
+          btn.textContent = '✓ Subscribed';
+        }
+      });
+      showNotification(isSubscribed 
+        ? `Unsubscribed from ${source}` 
+        : `Subscribed to ${source}! You'll receive email notifications for new announcements.`);
     } else {
       showNotification(error || `Failed to ${action}`, true);
-      buttonEl.textContent = isSubscribed ? '✓ Subscribed' : 'Subscribe';
+      allButtons.forEach(btn => {
+        btn.textContent = isSubscribed ? '✓ Subscribed' : 'Subscribe';
+      });
     }
   } catch (e) {
     console.error('Subscription error:', e);
     showNotification('An error occurred. Please try again.', true);
-    buttonEl.textContent = buttonEl.classList.contains('subscribed') ? '✓ Subscribed' : 'Subscribe';
+    // Find all buttons and reset them
+    const escapedSource = source.replace(/"/g, '\\"');
+    const allButtons = Array.from(document.querySelectorAll(`button[data-source="${escapedSource}"]`));
+    allButtons.forEach(btn => {
+      btn.textContent = btn.classList.contains('subscribed') ? '✓ Subscribed' : 'Subscribe';
+    });
   } finally {
-    buttonEl.disabled = false;
+    // Re-enable all buttons for this source
+    const escapedSource = source.replace(/"/g, '\\"');
+    const allButtons = Array.from(document.querySelectorAll(`button[data-source="${escapedSource}"]`));
+    allButtons.forEach(btn => {
+      btn.disabled = false;
+    });
   }
 }
 

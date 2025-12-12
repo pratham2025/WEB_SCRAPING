@@ -1,9 +1,19 @@
 // home.js — Notice Board Edition
 // Base API URL (avoid redeclaration if app.js already defines it)
 if (typeof API_BASE === 'undefined') {
-    // Auto-detect hostname: works on localhost and mobile devices via IP
-    const hostname = window.location.hostname || '127.0.0.1';
-    window.API_BASE = `http://${hostname}:8000`;
+    // Use same detection logic as app.js
+    function getApiBase() {
+      const metaApiUrl = document.querySelector('meta[name="api-base-url"]');
+      if (metaApiUrl && metaApiUrl.content) {
+        return metaApiUrl.content;
+      }
+      if (window.location.protocol === 'https:') {
+        return `${window.location.origin}/api`;
+      }
+      const hostname = window.location.hostname || '127.0.0.1';
+      return `http://${hostname}:8000`;
+    }
+    window.API_BASE = getApiBase();
 }
 
 // Wait for the DOM to load

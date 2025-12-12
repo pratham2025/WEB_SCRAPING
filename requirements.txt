@@ -13,3 +13,7 @@ transformers
 torch
 sentencepiece
 protobuf
+supabase
+undetected-chromedriver
+python-dotenv
+sendgrid
