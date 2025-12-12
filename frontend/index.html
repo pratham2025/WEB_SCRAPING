@@ -5,12 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <!-- Configure API URL for production -->
   <meta name="api-base-url" content="https://web-scraping-7dzj.onrender.com">
-  <!-- Vercel Analytics (replace data-token with your token from Vercel) -->
-  <script
-    defer
-    src="https://analytics.vercel.com/script.js"
-    data-token="VERCEL_ANALYTICS_TOKEN"
-  ></script>
+  
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-E73LSXS38Q"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-E73LSXS38Q');
+  </script>
+  
   <title>GETNOTIFY — Notifications</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
