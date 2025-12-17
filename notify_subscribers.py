@@ -3,6 +3,7 @@
 import os
 import logging
 from typing import List, Dict, Any
+from urllib.parse import quote_plus
 from dotenv import load_dotenv
 from supabase import create_client, Client
 from send_email import send_email
@@ -16,6 +17,9 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - [%
 # Supabase setup
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
+# Website base URL for CTA links in emails
+WEBSITE_BASE_URL = os.getenv("WEBSITE_BASE_URL", "https://getnotify.in")
 
 if not SUPABASE_URL or not SUPABASE_KEY:
     raise RuntimeError("❌ Missing Supabase credentials. Please check your .env file.")
@@ -37,29 +41,18 @@ def get_subscribers_for_source(source: str) -> List[Dict[str, Any]]:
 
 
 def send_notification_email(to_email: str, source: str, announcements: List[Dict[str, Any]]) -> bool:
-    """Send email notification to a subscriber about new announcements."""
+    """Send a simple email notification to a subscriber about new announcements."""
     try:
         if not announcements:
             return False
         
-        # Build email content
+        # Basic info
         source_name = source
         announcement_count = len(announcements)
-        
-        # Create HTML email content
-        announcements_html = ""
-        for ann in announcements[:10]:  # Limit to 10 most recent
-            text = ann.get("text", "New announcement")
-            link = ann.get("link", "#")
-            announcements_html += f"""
-            <div style="margin-bottom: 16px; padding: 12px; background: #f7fff9; border-left: 3px solid #12b76a; border-radius: 4px;">
-                <p style="margin: 0 0 8px 0; font-weight: 600; color: #1a1a1a;">{text}</p>
-                <a href="{link}" style="color: #12b76a; text-decoration: none; font-size: 14px;">View announcement →</a>
-            </div>
-            """
-        
-        if len(announcements) > 10:
-            announcements_html += f'<p style="color: #666; font-size: 14px; margin-top: 12px;">... and {len(announcements) - 10} more announcements</p>'
+
+        # Build a simple link to your website, optionally including the source
+        source_param = quote_plus(source_name)
+        website_link = f"{WEBSITE_BASE_URL}?source={source_param}"
         
         html_content = f"""
         <!DOCTYPE html>
@@ -72,22 +65,23 @@ def send_notification_email(to_email: str, source: str, announcements: List[Dict
                 .header {{ background: linear-gradient(135deg, #12b76a 0%, #0d9d5a 100%); color: white; padding: 24px; border-radius: 8px 8px 0 0; }}
                 .content {{ background: #fff; padding: 24px; border: 1px solid #e5e5e5; border-top: none; border-radius: 0 0 8px 8px; }}
                 .footer {{ margin-top: 24px; padding-top: 16px; border-top: 1px solid #e5e5e5; font-size: 12px; color: #666; text-align: center; }}
+                .button {{ display: inline-block; padding: 10px 18px; background: #12b76a; color: #fff !important; text-decoration: none; border-radius: 999px; font-weight: 600; font-size: 14px; }}
             </style>
         </head>
         <body>
             <div class="container">
                 <div class="header">
-                    <h1 style="margin: 0; font-size: 24px;">🔔 New Announcements from {source_name}</h1>
+                    <h1 style="margin: 0; font-size: 24px;">🔔 New updates from {source_name}</h1>
                 </div>
                 <div class="content">
-                    <p>Hello,</p>
-                    <p>We found <strong>{announcement_count} new announcement(s)</strong> from <strong>{source_name}</strong>:</p>
-                    {announcements_html}
-                    <div style="margin-top: 24px; padding: 16px; background: #f0f9ff; border-radius: 4px;">
-                        <p style="margin: 0; font-size: 14px; color: #1e40af;">
-                            <strong>💡 Tip:</strong> Visit <a href="http://localhost:8000" style="color: #12b76a;">GETNOTIFY</a> to see all announcements and manage your subscriptions.
-                        </p>
-                    </div>
+                    <p>Hey there,</p>
+                    <p><strong>{source_name}</strong> has <strong>{announcement_count} new announcement(s)</strong>.</p>
+                    <p>Click the button below to see what announcements have been made on GETNOTIFY.</p>
+                    <p style="margin-top: 20px;">
+                        <a href="{website_link}" class="button" target="_blank" rel="noopener noreferrer">
+                            View announcements
+                        </a>
+                    </p>
                 </div>
                 <div class="footer">
                     <p>You're receiving this because you subscribed to {source_name} notifications.</p>
@@ -99,7 +93,7 @@ def send_notification_email(to_email: str, source: str, announcements: List[Dict
         """
         
         # Send email using the email service
-        subject = f"🔔 {announcement_count} New Announcement(s) from {source_name}"
+        subject = f"{announcement_count} new announcement(s) from {source_name}"
         success = send_email(
             to_email=to_email,
             subject=subject,

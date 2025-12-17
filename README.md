@@ -8,21 +8,31 @@
 ![HTML5](https://img.shields.io/badge/Frontend-HTML%2FCSS%2FJS-blue)  
 ![Python](https://img.shields.io/badge/Python-3.10+-yellow)  
 ![Docker](https://img.shields.io/badge/Docker-Supported-2496ED)  
-![Selenium](https://img.shields.io/badge/Selenium-Web%20Scraping-43B02A)
+![Selenium](https://img.shields.io/badge/Selenium-Web%20Scraping-43B02A)  
+![Deployed](https://img.shields.io/badge/Status-Live%20Production-success)
+
+---
+
+## 🌐 Live Production URLs
+
+- **🌍 Website**: [https://getnotify.in](https://getnotify.in)
+- **🔌 API**: [https://api.getnotify.in](https://api.getnotify.in)
+- **📊 Analytics**: Google Analytics integrated
+- **☁️ Database**: Supabase Cloud PostgreSQL
 
 ---
 
 ## 🔎 Overview
 
-**GETNOTIFY** is a comprehensive, production-ready platform that delivers **real-time educational notifications** from official sources across India. The system automatically scrapes announcements from **15+ educational boards and organizations** including NTA, CBSE, NEET, JEE, UPSC, ISRO, KSEAB, KEA, MAHACET, MPSC, RRB boards, GATE, and Indian Express.
+**GETNOTIFY** is a comprehensive, **production-ready** platform that delivers **real-time educational notifications** from official sources across India. The system automatically scrapes announcements from **15+ educational boards and organizations** including NTA, CBSE, NEET, JEE, UPSC, ISRO, KSEAB, KEA, MAHACET, MPSC, RRB boards, GATE, and Indian Express.
 
-The platform combines:
-- **FastAPI backend** with RESTful API endpoints
-- **Background worker** for automated parallel web scraping
-- **Supabase PostgreSQL database** for cloud storage
-- **Modern responsive web UI** with Google OAuth authentication
-- **Email notification system** for subscribed users
-- **Modular scraper architecture** supporting multiple sources
+### Production Stack
+- **Frontend**: Deployed on **Vercel** (https://getnotify.in)
+- **Backend API**: Deployed on **Render** (https://api.getnotify.in)
+- **Database & Auth**: **Supabase** (Cloud PostgreSQL + Authentication)
+- **Worker**: **GitHub Actions** (Automated scraping via cron)
+- **Analytics**: **Google Analytics** (Page views & user tracking)
+- **Email**: **SendGrid** (Email notifications to subscribers)
 
 ---
 
@@ -33,7 +43,7 @@ The platform combines:
 - 🔄 **Parallel Processing** - scrapes multiple sources simultaneously (up to 10 workers)
 - 🛡️ **Anti-Detection** - uses undetected_chromedriver to avoid bot detection
 - 🔍 **Duplicate Detection** - prevents storing duplicate announcements
-- ⏰ **Automated Scheduling** - background worker runs every hour (configurable)
+- ⏰ **Automated Scheduling** - GitHub Actions triggers scraping every 6 hours
 - 📊 **15+ Source Support** - extensible scraper architecture
 
 ### User Features
@@ -44,51 +54,45 @@ The platform combines:
 - 📰 **Latest News Board** - pinned paper-style cards with NEW badges
 - 🔍 **Source Filtering** - browse announcements by educational board
 - 📄 **Pagination** - efficient browsing of large announcement lists
+- 📊 **Analytics** - Google Analytics tracking for page views
 
 ### Technical Features
 - 🧩 **Modular Architecture** - separate scraper modules for each source
 - 🗄️ **Supabase Integration** - cloud database with real-time capabilities
-- 📧 **Email Notifications** - Zoho SMTP integration for sending HTML emails
+- 📧 **Email Notifications** - SendGrid integration for sending HTML emails
 - 🚀 **FastAPI REST API** - high-performance async endpoints
 - 🐳 **Docker Support** - containerized deployment ready
 - 📝 **Comprehensive Logging** - detailed logs for debugging and monitoring
+- 🌐 **Custom Domain** - Professional domain (getnotify.in) with SSL
 
 ---
 
-## 🏗️ System Architecture
+## 🏗️ Production Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    GETNOTIFY Platform                       │
+│                    GETNOTIFY Production                      │
 ├─────────────────────────────────────────────────────────────┤
 │                                                              │
-│  ┌──────────────┐      ┌──────────────┐      ┌──────────┐ │
-│  │   Frontend   │◄────►│  FastAPI     │◄────►│ Supabase │ │
-│  │  (HTML/JS)   │      │   Backend    │      │ Database │ │
-│  └──────────────┘      └──────────────┘      └──────────┘ │
-│         │                      │                    │      │
-│         │                      │                    │      │
-│         │              ┌───────▼────────┐          │      │
-│         │              │  Worker Process │          │      │
-│         │              │ (Background)    │          │      │
-│         │              └───────┬────────┘          │      │
-│         │                      │                    │      │
-│         │         ┌───────────┴──────────┐         │      │
-│         │         │                      │         │      │
-│         │    ┌───▼───┐            ┌────▼────┐    │      │
-│         │    │Scraper│            │Scraper  │    │      │
-│         │    │  #1   │            │  #15+   │    │      │
-│         │    └───────┘            └─────────┘    │      │
-│         │         │                    │         │      │
-│         │    ┌────▼────────────────────▼────┐   │      │
-│         │    │   Educational Websites        │   │      │
-│         │    │ (CBSE, JEE, NEET, UPSC...)   │   │      │
-│         │    └──────────────────────────────┘   │      │
-│         │                                         │      │
-│         │              ┌──────────────┐          │      │
-│         └─────────────►│ Email Service │◄────────┘      │
-│                        │ (Zoho SMTP)  │                 │
-│                        └──────────────┘                 │
+│  Users → https://getnotify.in (Vercel Frontend)            │
+│              │                                               │
+│              │ API Calls                                     │
+│              ▼                                               │
+│  https://api.getnotify.in (Render Backend)                  │
+│              │                                               │
+│              │ Database/Auth                                 │
+│              ▼                                               │
+│  Supabase Cloud (PostgreSQL + Auth)                         │
+│              │                                               │
+│              │ Email Service                                 │
+│              ▼                                               │
+│  SendGrid (Email Notifications)                             │
+│                                                              │
+│  ┌────────────────────────────────────────────┐            │
+│  │ GitHub Actions (Automated Scraping)        │            │
+│  │ Runs every 6 hours → Calls /scrape_all     │            │
+│  └────────────────────────────────────────────┘            │
+│                                                              │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -99,12 +103,12 @@ The platform combines:
 ```
 GETNOTIFY/
 │
-├── frontend/                          # Frontend application
+├── frontend/                          # Frontend application (Vercel)
 │   ├── index.html                     # Main notifications page
 │   ├── home.html                      # Homepage with notice board
 │   ├── syllabus.html                  # Syllabus section
 │   ├── answer_keys.html               # Answer keys section
-│   ├── styles.css                     # Global styles
+│   ├── styles.css                     # Global styles (2567 lines)
 │   ├── app.js                         # Source & announcement logic
 │   ├── home.js                        # Homepage notice board logic
 │   ├── common.js                      # Header/Footer injection
@@ -112,7 +116,7 @@ GETNOTIFY/
 │   ├── secrets.js                     # Supabase configuration
 │   ├── _header.html                   # Reusable header component
 │   ├── _footer.html                   # Reusable footer component
-│   ├── privacy-policy.html            # Privacy policy page
+│   ├── privacy-policy.html           # Privacy policy page
 │   ├── terms-of-use.html              # Terms of use page
 │   ├── disclaimer.html                # Disclaimer page
 │   ├── cookie-notice.html             # Cookie notice
@@ -122,7 +126,7 @@ GETNOTIFY/
 │       ├── images/                    # Image assets
 │       └── logos/                     # Educational board logos
 │
-├── scrapers/                          # Web scraper modules
+├── scrapers/                          # Web scraper modules (15+ sources)
 │   ├── __init__.py
 │   ├── cbse_scraper.py                # CBSE announcements
 │   ├── jee_scraper.py                 # JEE Main/Advanced
@@ -138,27 +142,48 @@ GETNOTIFY/
 │   ├── rrbkolkata_scraper.py          # RRB Kolkata
 │   ├── rrbmumbai_scraper.py           # RRB Mumbai
 │   ├── rrbahmedabad_scraper.py        # RRB Ahmedabad
-│   └── indianexpress_scraper.py      # Indian Express education news
+│   └── indianexpress_scraper.py        # Indian Express education news
 │
-├── scraper_api.py                     # FastAPI REST API server
-├── worker.py                          # Background worker for automated scraping
+├── scraper_api.py                     # FastAPI REST API server (Render)
+├── worker.py                          # Background worker (legacy, use GitHub Actions)
 ├── notify_subscribers.py              # Email notification service
-├── send_email.py                      # Zoho SMTP email service
+├── send_email.py                      # SendGrid email service
 ├── summarizer.py                      # AI text summarization (optional)
-├── init_db.py                         # Database initialization (legacy SQLite)
+├── init_db.py                         # Database initialization (legacy)
 ├── web_scrape.py                      # Standalone scraper test script
 ├── test_mail.py                       # Email service test script
 │
 ├── config.json                        # Source configuration (URLs & names)
 ├── requirements.txt                   # Python dependencies
 ├── docker-compose.yml                 # Docker Compose configuration
-├── dockerfile                         # Docker image definition
+├── dockerfile                         # Docker image definition (production-ready)
 ├── .env                               # Environment variables (not in repo)
 ├── .gitignore                         # Git ignore rules
 │
+├── .github/
+│   └── workflows/
+│       └── scrape.yml                 # GitHub Actions automated scraping
+│
+├── Deployment Documentation/
+│   ├── COMPLETE_DEPLOYMENT_GUIDE.md   # Full deployment guide
+│   ├── DEPLOYMENT_GUIDE.md            # General deployment guide
+│   ├── DEPLOYMENT_QUICK_START.md      # Quick start guide
+│   ├── DEPLOYMENT_COMPARISON.md       # Platform comparison
+│   ├── CUSTOM_DOMAIN_SETUP.md         # Custom domain setup
+│   ├── DOMAIN_QUICK_SETUP.md          # Domain quick setup
+│   ├── VERCEL_DEPLOYMENT_STEPS.md     # Vercel specific guide
+│   ├── WORKER_DEPLOYMENT.md           # Worker deployment options
+│   ├── FIX_LOGIN_ISSUE.md             # Login troubleshooting
+│   └── FIX_GOOGLE_ANALYTICS.md        # Analytics troubleshooting
+│
 ├── create_subscriptions_table.sql     # Supabase subscriptions table schema
 ├── SUBSCRIPTION_SETUP.md              # Subscription feature setup guide
-├── OAUTH_SETUP.md                     # OAuth authentication setup
+├── Procfile                           # Render/Heroku process file
+├── render.yaml                        # Render.com configuration
+├── railway.json                       # Railway.app configuration
+├── vercel.json                        # Vercel configuration
+├── prepare_deployment.sh              # Deployment preparation script
+├── prepare_deployment.bat             # Windows deployment script
 └── README.md                          # This file
 ```
 
@@ -192,13 +217,13 @@ The platform currently monitors **15+ official sources**:
 
 ### Public Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/` | API health check |
-| `GET` | `/sources` | List all supported educational sources |
-| `GET` | `/announcements/{source}` | Get announcements for a specific source |
-| `GET` | `/latest-news` | Get latest educational news (from latest_news table) |
-| `GET` | `/health` | Check API and database connection status |
+| Method | Endpoint | Description | Example |
+|--------|----------|-------------|---------|
+| `GET` | `/` | API health check | `https://api.getnotify.in/` |
+| `GET` | `/sources` | List all supported educational sources | `https://api.getnotify.in/sources` |
+| `GET` | `/announcements/{source}` | Get announcements for a specific source | `https://api.getnotify.in/announcements/CBSE` |
+| `GET` | `/latest-news` | Get latest educational news | `https://api.getnotify.in/latest-news` |
+| `GET` | `/health` | Check API and database connection status | `https://api.getnotify.in/health` |
 
 ### Subscription Endpoints
 
@@ -220,7 +245,7 @@ The platform currently monitors **15+ official sources**:
 **Get Sources:**
 ```json
 {
-  "sources": ["CBSE", "JEE", "NEET", "NTA", "UPSC", ...]
+  "sources": ["CBSE", "JEE", "NEET", "NTA", "UPSC", "GATE", "ISRO", "KSEAB", "KEA", "MAHACET", "MPSC", "RRBKolkata", "RRBMumbai", "RRBAhmedabad", "IndianExpress"]
 }
 ```
 
@@ -240,39 +265,67 @@ The platform currently monitors **15+ official sources**:
 }
 ```
 
-**Get Latest News:**
-```json
-{
-  "news": [
-    {
-      "id": 456,
-      "headline": "JEE Main 2025 Registration Begins",
-      "article_link": "https://jeemain.nta.ac.in",
-      "article_date": "2025-01-10",
-      "scraped_at": "2025-01-10T08:00:00Z"
-    }
-  ]
-}
+---
+
+## 🚀 Quick Start (Production)
+
+### For Users
+Visit **[https://getnotify.in](https://getnotify.in)** to start using the platform!
+
+### For Developers
+
+#### 1️⃣ Clone Repository
+```bash
+git clone https://github.com/pratham2025/WEB_SCRAPING.git
+cd WEB_SCRAPING
 ```
+
+#### 2️⃣ Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+#### 3️⃣ Configure Environment
+Create `.env` file:
+```env
+# Supabase Configuration
+SUPABASE_URL=https://your-project-id.supabase.co
+SUPABASE_KEY=your-supabase-service-role-key
+
+# SendGrid (for email notifications)
+SENDGRID_API_KEY=your-sendgrid-api-key
+```
+
+#### 4️⃣ Run Locally
+```bash
+# Start API
+uvicorn scraper_api:app --reload --host 0.0.0.0 --port 8000
+
+# Frontend (in another terminal)
+cd frontend
+python -m http.server 5500
+```
+
+Visit `http://localhost:5500/home.html`
 
 ---
 
-## 🖥️ Installation & Setup
+## 🖥️ Installation & Setup (Detailed)
 
 ### Prerequisites
 
 - Python 3.10 or higher
 - Chrome/Chromium browser (for Selenium)
-- ChromeDriver (or use webdriver-manager)
 - Supabase account and project
-- Zoho Mail account (for email notifications)
+- SendGrid account (for email notifications)
 - Google Cloud Console project (for OAuth)
+- Domain name (optional, for custom domain)
 
 ### 1️⃣ Clone Repository
 
 ```bash
-git clone https://github.com/pratham2025/GETNOTIFY.git
-cd GETNOTIFY
+git clone https://github.com/pratham2025/WEB_SCRAPING.git
+cd WEB_SCRAPING
 ```
 
 ### 2️⃣ Install Python Dependencies
@@ -283,12 +336,12 @@ pip install -r requirements.txt
 
 **Key Dependencies:**
 - `fastapi` - Web framework
-- `uvicorn` - ASGI server
+- `uvicorn[standard]` - ASGI server
 - `selenium` - Web scraping
-- `undetected_chromedriver` - Anti-detection browser automation
+- `undetected-chromedriver` - Anti-detection browser automation
 - `beautifulsoup4` - HTML parsing
 - `supabase` - Supabase Python client
-- `yagmail` - Email service (Zoho SMTP)
+- `sendgrid` - Email service
 - `requests` - HTTP requests
 - `python-dotenv` - Environment variable management
 
@@ -301,11 +354,8 @@ Create a `.env` file in the root directory:
 SUPABASE_URL=https://your-project-id.supabase.co
 SUPABASE_KEY=your-supabase-service-role-key
 
-# Email Configuration (Zoho SMTP)
-SMTP_EMAIL=alerts@getnotify.in
-SMTP_PASSWORD=your-zoho-app-password
-SMTP_HOST=smtppro.zoho.in
-SMTP_PORT=587
+# SendGrid Configuration (for email notifications)
+SENDGRID_API_KEY=your-sendgrid-api-key
 ```
 
 ### 4️⃣ Setup Supabase Database
@@ -356,7 +406,7 @@ CREATE INDEX idx_latest_news_scraped_at ON latest_news(scraped_at DESC);
 
 #### Enable Row Level Security (RLS)
 
-Configure RLS policies based on your security requirements. For public read access:
+Configure RLS policies based on your security requirements:
 
 ```sql
 -- Allow public read access to announcements
@@ -392,21 +442,11 @@ window.SUPABASE = {
 2. **Google Cloud Console:**
    - Create OAuth 2.0 credentials
    - Add authorized redirect URI: `https://your-project-id.supabase.co/auth/v1/callback`
-   - Add authorized JavaScript origins (your frontend URLs)
+   - Add your frontend URLs to authorized JavaScript origins
 
 See `frontend/OAUTH_SETUP.md` for detailed instructions.
 
-### 7️⃣ Configure ChromeDriver
-
-The worker uses a local ChromeDriver path. Update `worker.py` line 44 with your ChromeDriver path:
-
-```python
-service = ChromeService(r"C:\chromedriver-win64\chromedriver-win64\chromedriver.exe")
-```
-
-Or use `webdriver-manager` for automatic management (modify `setup_driver()` function).
-
-### 8️⃣ Start the Services
+### 7️⃣ Start the Services
 
 #### Start FastAPI Backend
 
@@ -420,40 +460,77 @@ uvicorn scraper_api:app --reload --host 0.0.0.0 --port 8000
 
 The API will be available at `http://localhost:8000`
 
-#### Start Background Worker
-
-In a separate terminal:
-
-```bash
-python worker.py
-```
-
-The worker will:
-- Load sources from `config.json`
-- Scrape all sources in parallel (every hour by default)
-- Save new announcements to Supabase
-- Send email notifications to subscribers
-
-**Configuration:**
-- `SCRAPE_INTERVAL_SECONDS` - Time between scraping cycles (default: 3600 = 1 hour)
-- `MAX_ANNOUNCEMENTS_PER_SOURCE` - Limit announcements per source (default: 60)
-
 #### Launch Frontend
 
 Simply open `frontend/home.html` or `frontend/index.html` in your web browser.
 
-For development with live reload, use a local server:
-
+For development with live reload:
 ```bash
-# Using Python
 cd frontend
 python -m http.server 5500
-
-# Using Node.js (http-server)
-npx http-server -p 5500
 ```
 
 Then visit `http://localhost:5500/home.html`
+
+---
+
+## 🚀 Production Deployment
+
+### Current Production Setup
+
+**Frontend (Vercel):**
+- URL: `https://getnotify.in`
+- Auto-deploys from GitHub
+- Custom domain configured
+- Google Analytics integrated
+
+**Backend (Render):**
+- URL: `https://api.getnotify.in`
+- Python 3.10 environment
+- Environment variables configured
+- Free tier (spins down after inactivity)
+
+**Database (Supabase):**
+- Cloud PostgreSQL
+- Authentication enabled
+- Row Level Security configured
+
+**Worker (GitHub Actions):**
+- Automated scraping every 6 hours
+- Calls `/scrape_all` endpoint
+- Free and reliable
+
+### Deployment Guides
+
+- **📖 Complete Guide**: See `COMPLETE_DEPLOYMENT_GUIDE.md`
+- **⚡ Quick Start**: See `DEPLOYMENT_QUICK_START.md`
+- **🌐 Custom Domain**: See `CUSTOM_DOMAIN_SETUP.md`
+- **🔄 Worker Setup**: See `WORKER_DEPLOYMENT.md`
+- **🔐 Login Issues**: See `FIX_LOGIN_ISSUE.md`
+- **📊 Analytics Setup**: See `FIX_GOOGLE_ANALYTICS.md`
+
+### Quick Deployment Steps
+
+1. **Deploy Backend to Render:**
+   - Connect GitHub repo
+   - Set build command: `pip install -r requirements.txt`
+   - Set start command: `uvicorn scraper_api:app --host 0.0.0.0 --port $PORT`
+   - Add environment variables
+
+2. **Deploy Frontend to Vercel:**
+   - Connect GitHub repo
+   - Set root directory: `frontend`
+   - Deploy!
+
+3. **Setup Custom Domain:**
+   - Add domain in Vercel
+   - Add subdomain in Render (`api.getnotify.in`)
+   - Configure DNS records
+   - Update Supabase redirect URLs
+
+4. **Setup Automated Scraping:**
+   - Push `.github/workflows/scrape.yml` to GitHub
+   - GitHub Actions will run automatically
 
 ---
 
@@ -471,19 +548,13 @@ docker build -t getnotify .
 docker-compose up -d
 ```
 
-This will start:
-- PostgreSQL database (if configured)
-- FastAPI backend
-- Background worker
-
 ### Manual Docker Run
 
 ```bash
 docker run -p 8000:8000 \
   -e SUPABASE_URL=your-url \
   -e SUPABASE_KEY=your-key \
-  -e SMTP_EMAIL=your-email \
-  -e SMTP_PASSWORD=your-password \
+  -e SENDGRID_API_KEY=your-key \
   getnotify
 ```
 
@@ -510,23 +581,28 @@ Add or modify sources in `config.json`:
 }
 ```
 
-### Worker Configuration (`worker.py`)
-
-```python
-SCRAPE_INTERVAL_SECONDS = 3600  # 1 hour
-MAX_ANNOUNCEMENTS_PER_SOURCE = 60
-```
-
 ### API CORS Configuration (`scraper_api.py`)
 
 Update `origins` list to include your frontend domains:
 
 ```python
 origins = [
+    "https://getnotify.in",
+    "https://www.getnotify.in",
     "http://localhost:5500",
-    "https://yourdomain.com",
     "*"  # For development only
 ]
+```
+
+### Frontend API Configuration
+
+The frontend automatically detects the API URL:
+- Production: Uses `https://api.getnotify.in`
+- Development: Uses `http://localhost:8000`
+
+You can override with a meta tag:
+```html
+<meta name="api-base-url" content="https://api.getnotify.in">
 ```
 
 ---
@@ -547,12 +623,36 @@ origins = [
 - **Source Branding:** Includes source name and logo
 - **Unsubscribe Info:** Instructions to manage subscriptions
 
-### Email Service Configuration
+### Email Service
 
-The system uses **Zoho SMTP** via `yagmail`. To use a different provider:
+The system uses **SendGrid** for email delivery. Configure in `.env`:
+```env
+SENDGRID_API_KEY=your-sendgrid-api-key
+```
 
-1. Update `send_email.py` with your SMTP settings
-2. Modify SMTP configuration in `.env` file
+---
+
+## 🔄 Automated Scraping (GitHub Actions)
+
+The project uses **GitHub Actions** for automated scraping:
+
+**Location:** `.github/workflows/scrape.yml`
+
+**Schedule:** Runs every 6 hours (configurable)
+
+**How it works:**
+1. GitHub Actions triggers on schedule
+2. Calls `POST https://api.getnotify.in/scrape_all`
+3. Render API scrapes all sources
+4. Saves to Supabase
+5. Sends email notifications
+
+**To modify schedule:**
+Edit `.github/workflows/scrape.yml` and change the cron expression:
+```yaml
+schedule:
+  - cron: '0 */6 * * *'  # Every 6 hours
+```
 
 ---
 
@@ -575,16 +675,16 @@ python -c "from scrapers.cbse_scraper import scrape; from selenium import webdri
 
 ```bash
 # Health check
-curl http://localhost:8000/health
+curl https://api.getnotify.in/health
 
 # Get sources
-curl http://localhost:8000/sources
+curl https://api.getnotify.in/sources
 
 # Get announcements
-curl http://localhost:8000/announcements/CBSE
+curl https://api.getnotify.in/announcements/CBSE
 
 # Subscribe
-curl -X POST http://localhost:8000/subscribe \
+curl -X POST https://api.getnotify.in/subscribe \
   -H "Content-Type: application/json" \
   -d '{"email": "test@example.com", "source": "CBSE"}'
 ```
@@ -625,7 +725,6 @@ def scrape(driver):
 ```
 
 2. **Add source to `config.json`:**
-
 ```json
 {
   "name": "NewSource",
@@ -634,7 +733,6 @@ def scrape(driver):
 ```
 
 3. **Add to SourceEnum in `scraper_api.py`:**
-
 ```python
 class SourceEnum(str, Enum):
     # ... existing sources
@@ -694,60 +792,6 @@ The API automatically detects which method to use.
 
 ---
 
-## 🚀 Production Deployment
-
-### Recommended Setup
-
-1. **Use Process Manager:**
-   - `systemd` (Linux)
-   - `PM2` (Node.js process manager for Python)
-   - `supervisord`
-
-2. **Reverse Proxy:**
-   - Nginx for frontend static files
-   - Nginx as reverse proxy for FastAPI
-
-3. **Database:**
-   - Use Supabase production instance
-   - Configure connection pooling
-   - Enable backups
-
-4. **Monitoring:**
-   - Set up logging aggregation
-   - Monitor API health endpoints
-   - Track scraper success/failure rates
-
-5. **Security:**
-   - Use environment variables (never commit secrets)
-   - Enable HTTPS
-   - Configure CORS properly
-   - Set up rate limiting
-   - Use Supabase RLS policies
-
-### Example Nginx Configuration
-
-```nginx
-server {
-    listen 80;
-    server_name getnotify.in;
-
-    # Frontend static files
-    location / {
-        root /var/www/getnotify/frontend;
-        try_files $uri $uri/ /index.html;
-    }
-
-    # API proxy
-    location /api {
-        proxy_pass http://127.0.0.1:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-}
-```
-
----
-
 ## 🐛 Troubleshooting
 
 ### Common Issues
@@ -755,6 +799,7 @@ server {
 **1. Scraper fails with "ChromeDriver not found"**
 - Install ChromeDriver or update path in `worker.py`
 - Use `webdriver-manager` for automatic management
+- In production (Render), Chrome is pre-installed in Docker
 
 **2. "Supabase connection failed"**
 - Verify `.env` file has correct `SUPABASE_URL` and `SUPABASE_KEY`
@@ -762,18 +807,18 @@ server {
 - Verify network connectivity
 
 **3. "Email not sending"**
-- Verify Zoho SMTP credentials in `.env`
-- Check Zoho account allows SMTP access
-- Verify sender email is verified in Zoho
+- Verify SendGrid API key in `.env`
+- Check SendGrid account is active
+- Verify sender email is verified in SendGrid
 
 **4. "OAuth login not working"**
 - Check Google Cloud Console redirect URIs
 - Verify Supabase OAuth configuration
-- See `frontend/OAUTH_SETUP.md` for detailed guide
+- See `FIX_LOGIN_ISSUE.md` for detailed guide
 
 **5. "No announcements showing"**
-- Check if worker is running
-- Verify scrapers are working (check logs)
+- Check if GitHub Actions workflow is running
+- Verify scrapers are working (check Render logs)
 - Check Supabase database has data
 - Verify API endpoints are accessible
 
@@ -781,13 +826,33 @@ server {
 - Add your frontend URL to `origins` in `scraper_api.py`
 - Check browser console for specific error
 
+**7. "Google Analytics not detected"**
+- Verify code is deployed to Vercel
+- Check page source for Google Analytics code
+- Wait 15-30 minutes for Google to detect
+- See `FIX_GOOGLE_ANALYTICS.md` for detailed guide
+
 ---
 
 ## 📚 Additional Documentation
 
-- **Subscription Setup:** See `SUBSCRIPTION_SETUP.md`
-- **OAuth Setup:** See `frontend/OAUTH_SETUP.md`
-- **Database Schema:** See `create_subscriptions_table.sql`
+### Deployment Guides
+- **Complete Deployment**: `COMPLETE_DEPLOYMENT_GUIDE.md`
+- **Quick Start**: `DEPLOYMENT_QUICK_START.md`
+- **Platform Comparison**: `DEPLOYMENT_COMPARISON.md`
+- **Custom Domain**: `CUSTOM_DOMAIN_SETUP.md`
+- **Vercel Steps**: `VERCEL_DEPLOYMENT_STEPS.md`
+- **Worker Deployment**: `WORKER_DEPLOYMENT.md`
+
+### Setup Guides
+- **Subscription Setup**: `SUBSCRIPTION_SETUP.md`
+- **OAuth Setup**: `frontend/OAUTH_SETUP.md`
+- **Database Schema**: `create_subscriptions_table.sql`
+
+### Troubleshooting
+- **Login Issues**: `FIX_LOGIN_ISSUE.md`
+- **Analytics Issues**: `FIX_GOOGLE_ANALYTICS.md`
+- **Mobile Access**: `frontend/MOBILE_ACCESS_FIX.md`
 
 ---
 
@@ -838,7 +903,7 @@ See the [LICENSE](LICENSE) file for details.
 **Developed by:** [Pratham Patil (Bosco)](https://github.com/pratham2025)  
 **Role:** Full Stack Developer & Data Engineer  
 **Project:** Educational Notification & Scraping System  
-**Tech Stack:** FastAPI · Supabase · Selenium · HTML/CSS/JS · Docker · PostgreSQL · Zoho SMTP
+**Tech Stack:** FastAPI · Supabase · Selenium · HTML/CSS/JS · Docker · PostgreSQL · SendGrid · Vercel · Render
 
 ---
 
@@ -847,6 +912,8 @@ See the [LICENSE](LICENSE) file for details.
 - **Supabase** - For the amazing backend-as-a-service platform
 - **FastAPI** - For the high-performance web framework
 - **Selenium** - For web automation capabilities
+- **Vercel** - For excellent frontend hosting
+- **Render** - For reliable backend hosting
 - **Educational Boards** - For providing public announcement data
 
 ---
@@ -863,9 +930,11 @@ For issues, questions, or contributions:
 - Open an issue on GitHub
 - Check existing documentation
 - Review troubleshooting section
+- Visit the live site: [https://getnotify.in](https://getnotify.in)
 
 ---
 
 **Last Updated:** January 2025  
 **Version:** 3.0  
-**Status:** Production Ready 🚀
+**Status:** ✅ Production Ready & Live 🚀  
+**Live URL:** [https://getnotify.in](https://getnotify.in)

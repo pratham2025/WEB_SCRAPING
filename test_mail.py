@@ -1,33 +1,29 @@
-import yagmail
-
-sender_email = "alerts@getnotify.in"
-sender_password = "vdVgGctmQ5YS"  # recommended: use App Password
-
-receiver_email = "prathmeshpatiltoi@gmail.com"  # for testing
-
-subject = "New Announcement Alert"
-message = """
-Your tracked source has a new announcement.
-
-Click here to view:
-https://getnotify.in
-"""
-
-# Initialize SMTP connection
-yag = yagmail.SMTP(
-    user=sender_email,
-    password=sender_password,
-    host="smtppro.zoho.in",
-    port=587,
-    smtp_starttls=True,
-    smtp_ssl=False
-)
-
-# Send email
-yag.send(
-    to=receiver_email,
-    subject=subject,
-    contents=message
-)
-
-print("Email sent successfully!")
+import smtplib, ssl
+from email.message import EmailMessage
+port = 587
+smtp_server = "smtp.zeptomail.in"
+username="emailapikey"
+password = "Zoho-enczapikey PHtE6r1ZReHjjGUq+kNT5P+4FZKlYN8p/uNlKQAT5Y5LCPIGH00BqNB9kTHjohgiVfdBHPLNnNpgsLmVuu+HIj2+YzxFCGqyqK3sx/VYSPOZsbq6x00at14SfkzYUoXtddVj3SDWvtbSNA=="
+message = "Test email sent successfully."
+msg = EmailMessage()
+msg['Subject'] = "Test Email"
+msg['From'] = "alerts@getnotify.in"
+msg['To'] = "prathmeshpatiltoi@gmail.com"
+msg.set_content(message)
+try:
+    if port == 465:
+        context = ssl.create_default_context()
+        with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+            server.login(username, password)
+            server.send_message(msg)
+    elif port == 587:
+        with smtplib.SMTP(smtp_server, port) as server:
+            server.starttls()
+            server.login(username, password)
+            server.send_message(msg)
+    else:
+        print ("use 465 / 587 as port value")
+        exit()
+    print ("successfully sent")
+except Exception as e:
+    print (e)
