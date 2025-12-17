@@ -1,5 +1,5 @@
 // Base API URL - Lightsail deployment
-const API_BASE = "http://13.127.177.155:8000";
+const API_BASE = "https://api.getnotify.in";
 
 const state = {
   sources: [],
