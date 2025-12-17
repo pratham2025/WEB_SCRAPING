@@ -71,8 +71,8 @@ document.addEventListener("DOMContentLoaded", async function() {
 });
 
 function setActiveNavLink() {
-  // Use 'home.html' as the default for root paths
-  const currentPage = window.location.pathname.split('/').pop() || 'home.html';
+  // Use 'index.html' as the default for root paths
+  const currentPage = window.location.pathname.split('/').pop() || 'index.html';
   const navLinks = document.querySelectorAll('.actions .link');
   
   navLinks.forEach(link => {
@@ -90,8 +90,8 @@ function handleSearchBar() {
   if (!searchBar) return;
 
   // Hide search bar on pages that don't need it
-  const nonSearchPages = ['home.html', 'syllabus.html'];
-  const currentPage = window.location.pathname.split('/').pop() || 'home.html';
+  const nonSearchPages = ['index.html', 'syllabus.html'];
+  const currentPage = window.location.pathname.split('/').pop() || 'index.html';
 
   if (nonSearchPages.includes(currentPage)) {
       searchBar.style.display = 'none';

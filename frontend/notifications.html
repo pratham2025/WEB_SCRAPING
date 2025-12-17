@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <!-- Configure API URL for production -->
+  <meta name="api-base-url" content="https://web-scraping-7dzj.onrender.com">
+  
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-E73LSXS38Q"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-E73LSXS38Q');
+  </script>
+  
+  <title>GETNOTIFY — Notifications</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css"/>
+  <meta name="description" content="Glassdoor-inspired green UI for exam announcements from CBSE, JEE, MHT-CET, NEET, NTA, etc."/>
+</head>
+<body>
+  <!-- subtle green doodles -->
+  <svg class="doodle doodle-1" viewBox="0 0 200 200" aria-hidden="true">
+    <path d="M100 10 C140 10 190 40 190 100 C190 160 140 190 100 190 C60 190 10 160 10 100 C10 40 60 10 100 10 Z"
+          fill="none" stroke="rgba(0,165,98,0.15)" stroke-width="4"/>
+    <circle cx="140" cy="60" r="8" fill="rgba(0,165,98,0.15)"/>
+  </svg>
+  <svg class="doodle doodle-2" viewBox="0 0 200 200" aria-hidden="true">
+    <path d="M20 100 Q100 10 180 100 Q100 190 20 100 Z"
+          fill="none" stroke="rgba(0,165,98,0.10)" stroke-width="3" stroke-dasharray="6 8"/>
+  </svg>
+
+  <header class="topbar"></header>
+
+  <!-- This container will hold the source cards -->
+  <div id="sourceSelector" class="source-selector-container">
+      <h2>Select an Exam Source</h2>
+      <div id="sourceCardGrid" class="source-grid">
+          <!-- Source cards will be injected here by JS -->
+      </div>
+  </div>
+
+  <!-- This container holds the original results view and will be hidden initially -->
+  <div id="resultsContainer" style="display: none;">
+    <nav class="exam-tabs" id="examTabs" aria-label="Sources">
+        <!-- JS will now add a 'Back' button and the active source here -->
+    </nav>
+    <main class="container">
+        <div class="status" id="connStatus" aria-live="polite" style="display: none;"></div>
+
+        <section class="results" aria-label="Announcements">
+          <div class="results-header">
+            <h2><span id="resultCount">0</span> announcements</h2>
+          </div>
+          <ul id="examList" class="card-list" role="list"></ul>
+          <div class="pagination" id="pagination" aria-label="Pagination"></div>
+        </section>
+
+        <aside class="details" aria-live="polite" aria-atomic="true">
+          <div id="examDetail" class="detail empty">
+            <div class="empty-state">
+                <svg viewBox="0 0 200 200" class="empty-art" aria-hidden="true">
+                    <rect x="20" y="40" width="160" height="100" rx="12" fill="rgba(0,165,98,0.08)"/>
+                    <circle cx="50" cy="70" r="10" fill="rgba(0,165,98,0.20)"/>
+                    <rect x="70" y="62" width="90" height="8" rx="4" fill="rgba(0,165,98,0.20)"/>
+                    <rect x="40" y="90" width="110" height="8" rx="4" fill="rgba(0,165,98,0.12)"/>
+                    <rect x="40" y="108" width="80" height="8" rx="4" fill="rgba(0,165,98,0.12)"/>
+                </svg>
+                <p>Select an announcement to see details</p>
+            </div>
+          </div>
+        </aside>
+    </main>
+  </div>
+
+  <footer class="footer"></footer>
+
+  <!-- Supabase Auth Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="secrets.js"></script>
+  <script src="auth.js"></script>
+
+  <!-- Core site scripts -->
+  <script src="./common.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
