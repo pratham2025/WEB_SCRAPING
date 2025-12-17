@@ -1,24 +1,5 @@
-// Update API_BASE to match your running API
-// Auto-detect: use environment variable or detect from current host
-function getApiBase() {
-  // Check if API_BASE_URL is set in a meta tag (for production)
-  const metaApiUrl = document.querySelector('meta[name="api-base-url"]');
-  if (metaApiUrl && metaApiUrl.content) {
-    return metaApiUrl.content;
-  }
-  
-  // For production: if on HTTPS, use same host with /api or configured path
-  if (window.location.protocol === 'https:') {
-    // Try to use same origin with /api path
-    return `${window.location.origin}/api`;
-  }
-  
-  // For localhost/development: use hostname:8000
-  const hostname = window.location.hostname || '127.0.0.1';
-  return `http://${hostname}:8000`;
-}
-
-const API_BASE = getApiBase();
+// Base API URL - Lightsail deployment
+const API_BASE = "http://13.127.177.155:8000";
 
 const state = {
   sources: [],
