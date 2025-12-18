@@ -48,8 +48,10 @@
 
 ### User Features
 - 🔔 **Email Subscriptions** - users can subscribe to specific sources for email notifications
-- 🔐 **Google OAuth Login** - secure authentication via Supabase Auth
-- 📱 **Responsive Design** - optimized for desktop, tablet, and mobile devices
+- 🔐 **Account Options**  
+  - **Google OAuth Login** via Supabase Auth (recommended)  
+  - **Passwordless Manual Login** using just name + email (no password / verification – for faster onboarding)
+- 📱 **Responsive Design** - optimized for desktop, tablet, and mobile devices (including mobile-friendly login modal)
 - 🎨 **Beautiful UI** - modern glass-inspired design with animations
 - 📰 **Latest News Board** - pinned paper-style cards with NEW badges
 - 🔍 **Source Filtering** - browse announcements by educational board
@@ -104,19 +106,21 @@
 GETNOTIFY/
 │
 ├── frontend/                          # Frontend application (Vercel)
-│   ├── index.html                     # Main notifications page
-│   ├── home.html                      # Homepage with notice board
-│   ├── syllabus.html                  # Syllabus section
-│   ├── answer_keys.html               # Answer keys section
+│   ├── index.html                     # Marketing + hero page + latest news
+│   ├── notifications.html             # Main notifications / exam source browser
+│   ├── syllabus.html                  # Syllabus section (static page)
+│   ├── answer_keys.html               # Answer keys section (static page)
+│   ├── about-us.html                  # About the platform & vision
+│   ├── our-story.html                 # Story of how a missed exam form inspired GETNOTIFY
 │   ├── styles.css                     # Global styles (2567 lines)
 │   ├── app.js                         # Source & announcement logic
 │   ├── home.js                        # Homepage notice board logic
 │   ├── common.js                      # Header/Footer injection
-│   ├── auth.js                        # Google OAuth authentication
+│   ├── auth.js                        # Auth: Supabase Google OAuth + manual (passwordless) login
 │   ├── secrets.js                     # Supabase configuration
 │   ├── _header.html                   # Reusable header component
 │   ├── _footer.html                   # Reusable footer component
-│   ├── privacy-policy.html           # Privacy policy page
+│   ├── privacy-policy.html            # Privacy policy page
 │   ├── terms-of-use.html              # Terms of use page
 │   ├── disclaimer.html                # Disclaimer page
 │   ├── cookie-notice.html             # Cookie notice
@@ -298,15 +302,17 @@ SENDGRID_API_KEY=your-sendgrid-api-key
 
 #### 4️⃣ Run Locally
 ```bash
-# Start API
+# Start API (from project root)
 uvicorn scraper_api:app --reload --host 0.0.0.0 --port 8000
 
-# Frontend (in another terminal)
+# Frontend (in another terminal, from project root)
 cd frontend
 python -m http.server 5500
 ```
 
-Visit `http://localhost:5500/home.html`
+Then open in the browser:
+- `http://localhost:5500/index.html`  → public landing page + latest news  
+- `http://localhost:5500/notifications.html`  → full notifications & sources UI
 
 ---
 
