@@ -41,12 +41,12 @@ body {
   position:sticky; top:0; z-index:100;
   display:flex; gap:20px; justify-content:space-between; align-items:center;
   padding:14px 28px; 
-  background:rgba(255,255,255,.95); 
+  background:rgba(255,255,255,.98); 
   backdrop-filter:blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border-bottom:1px solid rgba(0,0,0,.06);
   width:100%;
-  box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.06);
+  box-shadow: 0 2px 8px rgba(0,0,0,.04), 0 1px 3px rgba(0,0,0,.06);
   transition: all 0.3s ease;
 }
 
@@ -106,59 +106,96 @@ body {
 .actions{
   display:flex; 
   align-items:center; 
-  gap:8px; 
+  gap:4px; 
   position:absolute; 
   left:50%; 
   transform:translateX(-50%);
-  background: rgba(255,255,255,.5);
-  padding: 6px 12px;
+  background: rgba(255,255,255,.8);
+  padding: 4px;
   border-radius: 12px;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  box-shadow: 0 2px 12px rgba(0,0,0,.06), 0 0 0 1px rgba(0,0,0,.04);
+  border: 1px solid rgba(255,255,255,.8);
 }
 
-.actions .link{
+/* Unified styling for all navigation items (links and buttons) */
+.actions .link,
+.actions button.btn {
   color:var(--ink-700); 
   text-decoration:none; 
   font-weight:500;
   font-size: 15px;
-  padding: 6px 14px;
+  padding: 8px 16px;
   border-radius: 8px;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  font-family: inherit;
+  line-height: 1.5;
 }
 
-.actions .link::after {
+/* Underline effect for all nav items */
+.actions .link::after,
+.actions button.btn::after {
   content: '';
   position: absolute;
-  bottom: 2px;
+  bottom: 4px;
   left: 50%;
   transform: translateX(-50%) scaleX(0);
   width: 0;
   height: 2px;
   background: var(--green-500);
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: 2px;
 }
 
-.actions .link:hover {
+/* Hover state - consistent for all */
+.actions .link:hover,
+.actions button.btn:hover {
   color:var(--green-600);
-  background: rgba(18,183,106,.08);
+  background: rgba(18,183,106,.1);
+  transform: translateY(-1px);
 }
 
-.actions .link:hover::after {
-  width: calc(100% - 28px);
+.actions .link:hover::after,
+.actions button.btn:hover::after {
+  width: calc(100% - 32px);
   transform: translateX(-50%) scaleX(1);
 }
 
-.actions .link.active{ 
+/* Active state - consistent for all */
+.actions .link.active,
+.actions button.btn.active { 
   color:var(--green-600); 
   font-weight: 600;
-  background: rgba(18,183,106,.1);
+  background: rgba(18,183,106,.12);
 }
 
-.actions .link.active::after {
-  width: calc(100% - 28px);
+.actions .link.active::after,
+.actions button.btn.active::after {
+  width: calc(100% - 32px);
   transform: translateX(-50%) scaleX(1);
+}
+
+/* Active/pressed state */
+.actions .link:active,
+.actions button.btn:active {
+  transform: translateY(0);
+  background: rgba(18,183,106,.15);
+}
+
+/* Focus state for accessibility */
+.actions .link:focus-visible,
+.actions button.btn:focus-visible {
+  outline: 2px solid var(--green-500);
+  outline-offset: 2px;
 }
 
 /* User Details Section */
@@ -437,6 +474,7 @@ body {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   transform-origin: center;
   display: block;
+  pointer-events: none; /* Prevent interference with button clicks */
 }
 
 .menu-toggle span:nth-child(1) {
@@ -872,28 +910,48 @@ body {
     flex-wrap: nowrap;
     position: relative;
     justify-content: space-between;
+    align-items: center;
     padding: 12px 16px;
+    min-height: 56px; /* Ensure consistent height on mobile */
   }
   
   .brand {
     font-size: 18px;
     flex-shrink: 0;
     order: 1;
+    z-index: 1003; /* Above menu when open */
+    gap: 8px;
   }
   
   .brand span {
     display: none; /* Hide text on very small screens, show only logo */
   }
   
+  .bell-logo {
+    width: 28px;
+    height: 32px;
+  }
+  
   /* Show hamburger menu button on mobile */
   .menu-toggle {
     display: flex !important;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
     flex-shrink: 0;
     order: 2; /* Place it after the brand */
     position: relative;
     z-index: 1002; /* Above menu and overlay */
     margin-left: auto;
     margin-right: 8px;
+    width: 32px; /* Larger touch target */
+    height: 32px;
+    padding: 5px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .menu-toggle:active {
+    transform: scale(0.95);
   }
   
   /* User details on mobile */
@@ -902,13 +960,17 @@ body {
     order: 3; /* Place after hamburger menu */
     margin-left: 0;
     flex-shrink: 0;
+    z-index: 1003; /* Above menu when open */
   }
   
   .user-info {
     gap: 0;
-    padding: 4px;
+    padding: 6px;
     background: rgba(18,183,106,.08);
     border: 1px solid rgba(18,183,106,.15);
+    min-width: 40px; /* Larger touch target */
+    min-height: 40px;
+    justify-content: center;
   }
   
   .user-text {
@@ -931,7 +993,7 @@ body {
   .user-dropdown {
     right: 0;
     left: auto;
-    min-width: 200px;
+    min-width: 240px;
     max-width: calc(100vw - 32px);
   }
   
@@ -940,23 +1002,25 @@ body {
     position: fixed;
     top: 0;
     right: -100%;
-    width: 280px;
+    width: 300px;
     max-width: 85vw;
     height: 100vh;
     background: #fff;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
     justify-content: flex-start;
-    padding: 24px;
-    padding-top: 70px;
-    gap: 20px;
-    box-shadow: -4px 0 24px rgba(9,30,66,.12);
-    transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0;
+    padding-top: 72px; /* Space for topbar */
+    gap: 0;
+    box-shadow: -4px 0 32px rgba(9,30,66,.15);
+    transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1000;
     overflow-y: auto;
+    overflow-x: hidden;
     left: auto;
     transform: none;
-    display: flex !important; /* Ensure it's displayed when open */
+    display: flex !important;
+    border-left: 1px solid rgba(0,0,0,.06);
   }
   
   /* Show navigation when menu is open */
@@ -964,23 +1028,70 @@ body {
     right: 0;
   }
   
-  .actions .link {
+  .actions .link,
+  .actions button.btn {
     width: 100%;
-    padding: 14px 0;
+    padding: 16px 24px;
     font-size: 16px;
+    font-weight: 500;
     border-bottom: 1px solid var(--ink-100);
-    display: block;
+    display: flex;
+    align-items: center;
+    margin-top: 0;
+    justify-content: flex-start;
+    min-height: 56px; /* Touch-friendly height */
+    border-radius: 0;
+    background: transparent;
+    color: var(--ink-700);
+    text-align: left;
+    -webkit-tap-highlight-color: rgba(18,183,106,.1);
+    transition: all 0.2s ease;
+    position: relative;
   }
   
-  .actions .link:last-of-type {
-    border-bottom: none;
+  .actions .link:first-of-type,
+  .actions button.btn:first-of-type {
+    border-top: 1px solid var(--ink-100);
   }
   
-  .actions .btn {
-    width: 100%;
-    justify-content: center;
-    margin-top: 12px;
-    padding: 12px 14px;
+  .actions .link:last-of-type,
+  .actions button.btn:last-of-type {
+    border-bottom: 1px solid var(--ink-100);
+  }
+  
+  /* Remove underline effect on mobile */
+  .actions .link::after,
+  .actions button.btn::after {
+    display: none;
+  }
+  
+  /* Active state indicator on mobile */
+  .actions .link.active,
+  .actions button.btn.active {
+    background: rgba(18,183,106,.08);
+    color: var(--green-600);
+    font-weight: 600;
+    border-left: 4px solid var(--green-500);
+    padding-left: 20px;
+  }
+  
+  /* Hover/touch active state */
+  .actions .link:hover,
+  .actions button.btn:hover,
+  .actions .link:active,
+  .actions button.btn:active {
+    background: rgba(18,183,106,.12);
+    color: var(--green-600);
+    transform: none; /* Remove desktop transform */
+    padding-left: 28px;
+    border-left: 4px solid var(--green-500);
+  }
+  
+  /* Focus state for accessibility */
+  .actions .link:focus-visible,
+  .actions button.btn:focus-visible {
+    outline: 2px solid var(--green-500);
+    outline-offset: -2px;
   }
   
   .searchbar{flex-wrap:wrap}
@@ -1254,19 +1365,26 @@ body {
 /* Overlay when menu is open */
 @media (max-width: 900px) {
   .menu-overlay {
-    display: none;
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(11, 19, 36, 0.5);
+    background: rgba(11, 19, 36, 0.6);
     z-index: 999;
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                visibility 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
   }
   
   .menu-overlay.active {
-    display: block;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: all;
   }
   
   /* Show brand text on slightly larger mobile screens */
@@ -1274,6 +1392,117 @@ body {
     .brand span {
       display: inline;
     }
+  }
+  
+  /* Improve hamburger button visibility */
+  .menu-toggle span {
+    background: var(--ink-900);
+  }
+  
+  /* Ensure hamburger button is visible when menu is open */
+  .actions.menu-open ~ * .menu-toggle span,
+  .menu-toggle[aria-expanded="true"] span {
+    background: var(--ink-900);
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+  .topbar {
+    padding: 10px 12px;
+    min-height: 52px;
+  }
+  
+  .brand {
+    font-size: 16px;
+    gap: 6px;
+  }
+  
+  .bell-logo {
+    width: 24px;
+    height: 28px;
+  }
+  
+  .menu-toggle {
+    width: 28px;
+    height: 28px;
+    margin-right: 4px;
+  }
+  
+  .actions {
+    width: 280px;
+    max-width: 90vw;
+    padding-top: 68px;
+  }
+  
+  .actions .link,
+  .actions button.btn {
+    padding: 14px 20px;
+    min-height: 52px;
+    font-size: 15px;
+  }
+  
+  .user-info {
+    padding: 5px;
+    min-width: 36px;
+    min-height: 36px;
+  }
+  
+  .user-avatar,
+  .avatar-fallback {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+  .topbar {
+    padding: 10px 12px;
+    min-height: 52px;
+  }
+  
+  .brand {
+    font-size: 16px;
+    gap: 6px;
+  }
+  
+  .bell-logo {
+    width: 24px;
+    height: 28px;
+  }
+  
+  .menu-toggle {
+    width: 28px;
+    height: 28px;
+    margin-right: 4px;
+  }
+  
+  .actions {
+    width: 280px;
+    max-width: 90vw;
+    padding-top: 68px;
+  }
+  
+  .actions .link,
+  .actions button.btn {
+    padding: 14px 20px;
+    min-height: 52px;
+    font-size: 15px;
+  }
+  
+  .user-info {
+    padding: 5px;
+    min-width: 36px;
+    min-height: 36px;
+  }
+  
+  .user-avatar,
+  .avatar-fallback {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
   }
 }
 
