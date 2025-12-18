@@ -159,29 +159,10 @@ function setupLoginModal(){
     </div>
   `;
 
-  let modalContent = modal.querySelector('.modal-content');
-  if (!modalContent) {
-    console.warn('Modal content not found, recreating...');
-    modal.innerHTML = buildModalTemplate();
-    modalContent = modal.querySelector('.modal-content');
-  }
-  
-  // Ensure all content elements exist
-  const authTitle = modalContent.querySelector('.auth-title');
-  const authDesc = modalContent.querySelector('.auth-desc');
-  const authButton = modalContent.querySelector('.btn.primary');
-  const authPrivacy = modalContent.querySelector('.auth-privacy');
-  
-  if (!authTitle || !authDesc || !authButton || !authPrivacy) {
-    console.warn('Modal content elements missing! Rebuilding modal content.');
-    modal.innerHTML = buildModalTemplate();
-    modalContent = modal.querySelector('.modal-content');
-    // Re-query after rebuild to ensure references are fresh
-    modalContent.querySelector('.auth-title');
-    modalContent.querySelector('.auth-desc');
-    modalContent.querySelector('.btn.primary');
-    modalContent.querySelector('.auth-privacy');
-  }
+  // Always render the latest modal template so deployments
+  // don't depend on older inline HTML in `_header.html`
+  modal.innerHTML = buildModalTemplate();
+  const modalContent = modal.querySelector('.modal-content');
 
   const closeSelectors = ['[data-close="true"]'];
   const open = () => { 
