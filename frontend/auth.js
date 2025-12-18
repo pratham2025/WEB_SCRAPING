@@ -27,6 +27,11 @@ async function loginWithGoogle() {
   const redirectInfo = `Redirect URL: ${redirectTo}\n\nMake sure this URL is configured in:\n1. Supabase Dashboard → Authentication → URL Configuration\n2. Google Cloud Console → OAuth 2.0 Client → Authorized redirect URIs`;
   console.log(redirectInfo);
 
+  // Clear manual login if exists (user is switching to Google login)
+  if (localStorage.getItem('manual_user')) {
+    localStorage.removeItem('manual_user');
+  }
+  
   try {
     const { data, error } = await window.supabase.auth.signInWithOAuth({
       provider: "google",
@@ -54,8 +59,95 @@ async function loginWithGoogle() {
   // Note: If successful, user will be redirected to Google, then back to redirectTo URL
 }
 
-// Fetch User (on every page load)
+// Manual Login (no password, no verification)
+// Expose globally for inline onclick handler
+window.handleManualLogin = function(event) {
+  event.preventDefault();
+  
+  const nameInput = document.getElementById('manualLoginName');
+  const emailInput = document.getElementById('manualLoginEmail');
+  
+  if (!nameInput || !emailInput) {
+    alert('Form fields not found. Please refresh the page.');
+    return;
+  }
+  
+  const name = nameInput.value.trim();
+  const email = emailInput.value.trim();
+  
+  if (!name || !email) {
+    alert('Please enter both name and email.');
+    return;
+  }
+  
+  // Basic email validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    alert('Please enter a valid email address.');
+    return;
+  }
+  
+  // Clear any existing Supabase session (user is switching to manual login)
+  if (window.supabase) {
+    window.supabase.auth.signOut().catch(() => {
+      // Ignore errors, just try to clear
+    });
+  }
+  
+  // Store user info in localStorage
+  const userData = {
+    id: `manual_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    email: email,
+    user_metadata: {
+      full_name: name,
+      name: name,
+      manual_login: true
+    },
+    created_at: new Date().toISOString()
+  };
+  
+  localStorage.setItem('manual_user', JSON.stringify(userData));
+  
+  // Close modal
+  const modal = document.getElementById('loginModal');
+  if (modal) {
+    modal.setAttribute('aria-hidden', 'true');
+  }
+  
+  // Show success message
+  if (typeof notify === 'function') {
+    notify('Logged in successfully!', 'success');
+  } else {
+    alert('Logged in successfully!');
+  }
+  
+  // Reload to update UI
+  setTimeout(() => {
+    window.location.reload();
+  }, 500);
+}
+
+// Fetch User (on every page load) - checks both Supabase and manual login
 async function getLoggedInUser() {
+  // First check for manual login user
+  const manualUserStr = localStorage.getItem('manual_user');
+  if (manualUserStr) {
+    try {
+      const manualUser = JSON.parse(manualUserStr);
+      // Return in Supabase user format for compatibility
+      return {
+        id: manualUser.id,
+        email: manualUser.email,
+        user_metadata: manualUser.user_metadata || {},
+        created_at: manualUser.created_at
+      };
+    } catch (e) {
+      console.warn('Error parsing manual user:', e);
+      localStorage.removeItem('manual_user');
+    }
+  }
+  
+  // Then check Supabase (Google OAuth)
   if (!window.supabase) {
     console.warn("Supabase client not initialized");
     return null;
@@ -70,6 +162,17 @@ async function getLoggedInUser() {
 
 // Logout
 async function logoutUser() {
+  // Check if it's a manual login user
+  const manualUserStr = localStorage.getItem('manual_user');
+  if (manualUserStr) {
+    // Remove manual user
+    localStorage.removeItem('manual_user');
+    // Reload to update UI
+    window.location.reload();
+    return;
+  }
+  
+  // Otherwise, logout from Supabase
   if (!window.supabase) {
     console.error("Supabase client not initialized");
     return;
@@ -127,6 +230,10 @@ async function handleAuthCallback() {
       } else if (data.session) {
         console.log("✅ Successfully authenticated!");
         console.log("User:", data.session.user?.email);
+        // Clear manual login if exists (user switched to Google login)
+        if (localStorage.getItem('manual_user')) {
+          localStorage.removeItem('manual_user');
+        }
         // Clean up URL hash
         window.history.replaceState({}, document.title, window.location.pathname);
         // Reload to update UI

@@ -113,18 +113,47 @@ function setupLoginModal(){
     <div class="modal-content auth-modal" role="document">
       <button class="modal-close" type="button" aria-label="Close" data-close="true">×</button>
       <div class="auth-hero">
-        <img src="src/images/bell_icon.png" alt="GETNOTIFY" class="bell-logo" width="44" height="44"/>
+        <img src="src/images/bell_icon.png" alt="GETNOTIFY" class="bell-logo" width="44" height="44" style="flex-shrink: 0;"/>
         <h3 class="auth-title">GETNOTIFY</h3>
       </div>
-      <p class="auth-desc">Log in with Google to sync your preferences across devices, subscribe to exam notifications, and get faster access to your saved sources. We never post on your behalf.</p>
-      <button onclick="loginWithGoogle()" class="btn primary" style="width: 100%; max-width: 320px; margin: 0 auto; display: flex; align-items: center; justify-content: center; gap: 8px;">
+      
+      <!-- Manual Login Form -->
+      <div id="manualLoginForm" style="margin-bottom: 1.5rem;">
+        <p class="auth-desc" style="margin-bottom: 1rem;">Enter your details to get started (no password required)</p>
+        <form id="manualLoginFormElement" onsubmit="handleManualLogin(event)" style="display: flex; flex-direction: column; gap: 0.75rem; max-width: 320px; margin: 0 auto;">
+          <input 
+            type="text" 
+            id="manualLoginName" 
+            placeholder="Your Name" 
+            required 
+            style="padding: 12px; border: 1px solid var(--ink-300); border-radius: 8px; font-size: 14px; font-family: inherit;"
+          />
+          <input 
+            type="email" 
+            id="manualLoginEmail" 
+            placeholder="Your Email" 
+            required 
+            style="padding: 12px; border: 1px solid var(--ink-300); border-radius: 8px; font-size: 14px; font-family: inherit;"
+          />
+          <button type="submit" class="btn primary" style="width: 100%; margin-top: 0.5rem;">
+            Continue
+          </button>
+        </form>
+        <div style="text-align: center; margin: 1rem 0; position: relative;">
+          <div style="position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: var(--ink-300);"></div>
+          <span style="background: white; padding: 0 12px; color: var(--ink-500); font-size: 14px; position: relative;">or</span>
+        </div>
+      </div>
+      
+      <p class="auth-desc" style="margin-bottom: 1rem;">Log in with Google to sync your preferences across devices</p>
+      <button onclick="loginWithGoogle()" class="btn secondary google-signin-btn" style="width: 100%; max-width: 320px; margin: 0 auto;">
         <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
           <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
           <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/>
           <path fill="#FBBC05" d="M3.964 10.712c-.18-.54-.282-1.117-.282-1.712 0-.595.102-1.172.282-1.712V4.956H.957C.348 6.175 0 7.55 0 9c0 1.45.348 2.825.957 4.044l3.007-2.332z"/>
           <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.956L3.964 7.288C4.672 5.163 6.656 3.58 9 3.58z"/>
         </svg>
-        Sign in with Google
+        <span>Sign in with Google</span>
       </button>
       <p class="auth-privacy">By continuing, you agree to receive notifications from time to time. You can unsubscribe anytime.</p>
     </div>
@@ -168,6 +197,11 @@ function setupLoginModal(){
 
   loginBtn.addEventListener('click', () => {
       open();
+      // Reset form when opening
+      const form = document.getElementById('manualLoginFormElement');
+      if (form) {
+        form.reset();
+      }
       // Google Sign-In is now handled by Supabase OAuth (auth.js)
       // The button in the modal will call loginWithGoogle() directly
   });
@@ -351,7 +385,7 @@ async function updateUserDetails() {
       const userEmailEl = document.getElementById('userEmail');
       const userAvatarEl = document.getElementById('userAvatar');
       
-      // Get user metadata (from Google OAuth)
+      // Get user metadata (from Google OAuth or manual login)
       const displayName = user.user_metadata?.full_name || 
                          user.user_metadata?.name || 
                          user.email?.split('@')[0] || 
@@ -360,18 +394,49 @@ async function updateUserDetails() {
       const avatarUrl = user.user_metadata?.avatar_url || 
                        user.user_metadata?.picture || 
                        '';
+      const isManualLogin = user.user_metadata?.manual_login || false;
       
       if (userNameEl) userNameEl.textContent = displayName;
       if (userEmailEl) userEmailEl.textContent = email;
-      // Update main avatar
+      // Update main avatar (only if not manual login, otherwise use initials)
       if (userAvatarEl) {
-        updateAvatar(userAvatarEl, avatarUrl, displayName);
+        if (isManualLogin || !avatarUrl) {
+          // For manual login, show initials
+          const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+          userAvatarEl.style.display = 'none';
+          // Create or update fallback
+          let fallback = userAvatarEl.parentNode.querySelector('.avatar-fallback');
+          if (!fallback) {
+            fallback = document.createElement('div');
+            fallback.className = 'avatar-fallback';
+            fallback.style.cssText = 'width: 32px; height: 32px; border-radius: 50%; background: var(--green-500); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px;';
+            userAvatarEl.parentNode.insertBefore(fallback, userAvatarEl);
+          }
+          fallback.textContent = initials;
+        } else {
+          updateAvatar(userAvatarEl, avatarUrl, displayName);
+        }
       }
       
       // Update dropdown avatar
       const userAvatarLarge = document.getElementById('userAvatarLarge');
       if (userAvatarLarge) {
-        updateAvatar(userAvatarLarge, avatarUrl, displayName);
+        if (isManualLogin || !avatarUrl) {
+          // For manual login, show initials
+          const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+          userAvatarLarge.style.display = 'none';
+          // Create or update fallback
+          let fallback = userAvatarLarge.parentNode.querySelector('.avatar-fallback');
+          if (!fallback) {
+            fallback = document.createElement('div');
+            fallback.className = 'avatar-fallback';
+            fallback.style.cssText = 'width: 64px; height: 64px; border-radius: 50%; background: var(--green-500); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 24px;';
+            userAvatarLarge.parentNode.insertBefore(fallback, userAvatarLarge);
+          }
+          fallback.textContent = initials;
+        } else {
+          updateAvatar(userAvatarLarge, avatarUrl, displayName);
+        }
       }
       
       // Update dropdown text

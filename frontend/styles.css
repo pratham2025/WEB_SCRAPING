@@ -470,7 +470,16 @@ body {
 }
 
 /* modal */
-.modal{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:1000 }
+.modal{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:1000;
+  padding:16px;
+  box-sizing:border-box;
+}
 .modal[aria-hidden="false"]{ display:flex }
 .modal-backdrop{ position:absolute; inset:0; background:rgba(11,19,36,.35) }
 .modal-content{
@@ -479,6 +488,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  max-height: calc(100vh - 32px);
+  overflow-y:auto;
 }
 .auth-modal{ 
   text-align:center;
@@ -486,12 +497,12 @@ body {
   flex-direction: column;
   gap: 16px;
 }
-.auth-hero{ 
-  display:flex; 
-  flex-direction:column; 
-  align-items:center; 
-  justify-content:center; 
-  gap:8px; 
+.auth-hero{
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
   margin-bottom: 0;
 }
 .auth-title{ 
@@ -538,6 +549,37 @@ body {
   margin: 0 auto !important;
 }
 
+/* Google Sign-in Button Alignment */
+.google-signin-btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  padding: 10px 14px !important;
+  line-height: 1 !important;
+}
+
+.google-signin-btn svg {
+  display: inline-block !important;
+  margin: 0 !important;
+  vertical-align: middle !important;
+  flex-shrink: 0 !important;
+  width: 18px !important;
+  height: 18px !important;
+  position: relative !important;
+  top: 0 !important;
+}
+
+.google-signin-btn span {
+  display: inline-block !important;
+  vertical-align: middle !important;
+  line-height: 1.4 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: relative !important;
+  top: 0 !important;
+}
+
 /* Ensure all modal content is visible */
 .modal-content * {
   visibility: visible !important;
@@ -551,7 +593,75 @@ body {
   visibility: visible !important;
   opacity: 1 !important;
 }
+
+/* Manual Login Form Styles */
+#manualLoginForm input[type="text"],
+#manualLoginForm input[type="email"] {
+  padding: 12px 16px !important;
+  border: 1px solid var(--ink-300) !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-family: inherit !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  transition: all 0.2s ease !important;
+  background: white !important;
+  color: var(--ink-900) !important;
+}
+
+#manualLoginForm input[type="text"]:focus,
+#manualLoginForm input[type="email"]:focus {
+  outline: none !important;
+  border-color: var(--green-500) !important;
+  box-shadow: 0 0 0 3px var(--ring) !important;
+}
+
+#manualLoginForm input[type="text"]::placeholder,
+#manualLoginForm input[type="email"]::placeholder {
+  color: var(--ink-400) !important;
+}
+
+#manualLoginForm .btn.primary {
+  margin-top: 0.5rem !important;
+}
+
 .modal-close{ position:absolute; right:10px; top:10px; border:none; background:transparent; font-size:20px; cursor:pointer; color:var(--ink-500) }
+
+/* Mobile tweaks for auth modal */
+@media (max-width: 640px) {
+  .modal{
+    padding:12px;
+  }
+
+  .modal-content{
+    width:100%;
+    max-width:100%;
+    padding:20px 16px;
+    border-radius:14px;
+  }
+
+  .auth-hero{
+    gap:6px;
+  }
+
+  .auth-title{
+    font-size:18px;
+  }
+
+  .auth-desc{
+    font-size:13px;
+    padding:12px 12px;
+  }
+
+  #manualLoginForm{
+    margin-bottom:1.25rem;
+  }
+
+  .google-signin-btn{
+    font-size:14px;
+    padding:10px 12px !important;
+  }
+}
 
 /* tabs */
 .exam-tabs{

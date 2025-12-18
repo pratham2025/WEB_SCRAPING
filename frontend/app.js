@@ -385,7 +385,27 @@ async function toggleSubscription(source, buttonEl) {
 }
 
 // Helper function to get logged in user (from auth.js)
+// This function is now in auth.js and handles both manual and Google login
+// Keeping this for backward compatibility, but it will use the one from auth.js
 async function getLoggedInUser() {
+  // Check for manual login first
+  const manualUserStr = localStorage.getItem('manual_user');
+  if (manualUserStr) {
+    try {
+      const manualUser = JSON.parse(manualUserStr);
+      return {
+        id: manualUser.id,
+        email: manualUser.email,
+        user_metadata: manualUser.user_metadata || {},
+        created_at: manualUser.created_at
+      };
+    } catch (e) {
+      console.warn('Error parsing manual user:', e);
+      localStorage.removeItem('manual_user');
+    }
+  }
+  
+  // Then check Supabase
   if (!window.supabase) return null;
   try {
     const { data: { user } } = await window.supabase.auth.getUser();
