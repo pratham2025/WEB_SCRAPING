@@ -186,18 +186,17 @@ async def get_sources():
     """Return all supported sources"""
     return {"sources": [s.value for s in SourceEnum]}
 
-# ✅ FIXED: Fetch announcements in same order as ID (ascending)
 @app.get("/announcements/{source}")
 async def get_announcements(source: SourceEnum):
-    """Fetch announcements directly from Supabase in ID ASC order (same as dashboard)."""
+    """Fetch all announcements directly from Supabase for the given source."""
     try:
         # Build the query in one expression to avoid accidental line-continuation issues.
+        # No limit - fetch all announcements to ensure new ones are included
         res = (
             supabase.table("announcements")
             .select("*")
             .eq("source", source.value)
-            .order("scraped_at", desc=False)  # ASC order by ID
-            .limit(100)
+            .order("scraped_at", desc=False)
             .execute()
         )
 
