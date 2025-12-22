@@ -191,17 +191,20 @@ async def get_announcements(source: SourceEnum):
     """Fetch all announcements directly from Supabase for the given source."""
     try:
         # Build the query in one expression to avoid accidental line-continuation issues.
-        # No limit - fetch all announcements to ensure new ones are included
+        # Set a high limit to fetch all announcements (Supabase default is 1000, but we set 10000 to be safe)
         res = (
             supabase.table("announcements")
             .select("*")
             .eq("source", source.value)
             .order("scraped_at", desc=False)
+            .limit(10000)
             .execute()
         )
 
+        logging.info(f"Fetched {len(res.data or [])} announcements for {source.value}")
         return {"source": source.value, "data": res.data}
     except Exception as e:
+        logging.error(f"Failed to fetch announcements for {source.value}: {e}")
         raise HTTPException(status_code=500, detail=f"Supabase fetch failed: {e}")
 
 @app.get("/latest-news")

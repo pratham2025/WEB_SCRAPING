@@ -2,13 +2,9 @@ name: Scrape Exam Boards
 
 on:
   schedule:
-    # Run every 6 hours (adjust cron as needed)
+    # Run every 4 hours
     # Format: minute hour day month weekday
-    # Examples:
-    # '0 */6 * * *' = Every 6 hours
-    # '0 0 * * *' = Once daily at midnight
-    # '0 */3 * * *' = Every 3 hours
-    - cron: '0 */6 * * *'
+    - cron: '0 */4 * * *'
   workflow_dispatch:  # Allow manual trigger from GitHub UI
 
 jobs:
@@ -16,12 +12,58 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Trigger Scrape All
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install system dependencies
       run: |
-        echo "Triggering scrape on API..."
-        curl -X POST https://api.getnotify.in/scrape_all || echo "API might be spinning up, this is normal for free tier"
-        
-    - name: Check API Health
+        sudo apt-get update
+        sudo apt-get install -y \
+          wget \
+          gnupg \
+          unzip \
+          curl
+    
+    - name: Install Google Chrome
       run: |
-        echo "Checking API health..."
-        curl https://api.getnotify.in/health || echo "Health check failed"
+        wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+        echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+        sudo apt-get update
+        sudo apt-get install -y google-chrome-stable
+    
+    - name: Verify Chrome installation
+      run: |
+        google-chrome --version
+        which google-chrome
+    
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Run worker (single cycle)
+      env:
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        SMTP_EMAIL: ${{ secrets.SMTP_EMAIL }}
+        SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+        SMTP_HOST: ${{ secrets.SMTP_HOST }}
+        SMTP_PORT: ${{ secrets.SMTP_PORT }}
+        FROM_EMAIL: ${{ secrets.FROM_EMAIL }}
+        WEBSITE_BASE_URL: ${{ secrets.WEBSITE_BASE_URL }}
+      run: |
+        python worker_linux.py
+    
+    - name: Upload logs on failure
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: worker-logs
+        path: |
+          *.log
+        if-no-files-found: ignore
