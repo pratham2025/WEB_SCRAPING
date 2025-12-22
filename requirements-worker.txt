@@ -1,0 +1,8 @@
+# requirements-worker.txt - Minimal dependencies for worker_linux.py
+# Only includes packages needed for the GitHub Actions worker
+
+selenium
+undetected-chromedriver
+supabase
+python-dotenv
+
