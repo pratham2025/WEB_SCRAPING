@@ -38,8 +38,9 @@ def setup_driver():
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-software-rasterizer")
     options.add_argument("--disable-extensions")
-    options.add_argument("start-maximized")
-    options.add_experimental_option('excludeSwitches', ['enable-logging'])
+    options.add_argument("--start-maximized")
+    options.add_argument("--disable-logging")
+    options.add_argument("--log-level=3")
     
     # Use undetected_chromedriver for Linux (auto-detects ChromeDriver)
     try:
