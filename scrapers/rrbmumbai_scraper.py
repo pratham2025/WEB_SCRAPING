@@ -21,7 +21,7 @@ def scrape(driver):
         soup = BeautifulSoup(driver.page_source, 'html.parser')
 
         # Find the table and then all the rows in its body
-        announcement_table = soup.find('table', class_='table-bordered table-hover')
+        announcement_table = soup.find('table', class_='table-bordered')
         table_rows = announcement_table.find('tbody').find_all('tr')
 
         if not table_rows:
