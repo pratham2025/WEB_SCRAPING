@@ -15,12 +15,13 @@ def scrape(driver):
     results = []
 
     try:
-        wait = WebDriverWait(driver, 20)
+        # Increased wait time to 60 seconds for slow page loads and connection issues
+        wait = WebDriverWait(driver, 60)
 
         # 1. Wait for the parent div with class 'card-body pt-6' to be visible.
         parent_div_selector = (By.CSS_SELECTOR, "div.card-body.pt-6")
         wait.until(EC.visibility_of_element_located(parent_div_selector))
-        time.sleep(1) # Pause to ensure content inside is stable
+        time.sleep(2) # Pause to ensure content inside is stable
 
         soup = BeautifulSoup(driver.page_source, 'html.parser')
 

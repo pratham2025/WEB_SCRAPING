@@ -12,11 +12,12 @@ def scrape(driver):
     results = []
 
     try:
-        wait = WebDriverWait(driver, 20)
+        # Increased wait time to 60 seconds for slow page loads and connection issues
+        wait = WebDriverWait(driver, 60)
 
         # Wait for the tbody with class='list', as you identified.
         wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, "tbody.list")))
-        time.sleep(1)
+        time.sleep(2) # Increased sleep time for page stability
 
         soup = BeautifulSoup(driver.page_source, 'html.parser')
         

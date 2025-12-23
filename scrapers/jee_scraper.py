@@ -10,7 +10,8 @@ from selenium.webdriver.support import expected_conditions as EC
 def scrape_jee_selenium(driver):
     logging.warning("JEE: Requests method failed, falling back to Selenium.")
     try:
-        wait = WebDriverWait(driver, 25)
+        # Increased wait time to 60 seconds for slow page loads and connection issues
+        wait = WebDriverWait(driver, 60)
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".wpb_wrapper .gen-list ul li a")))
         time.sleep(2)
         soup = BeautifulSoup(driver.page_source, "html.parser")

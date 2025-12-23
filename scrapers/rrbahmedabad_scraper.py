@@ -17,7 +17,8 @@ def scrape(driver):
     results = []
 
     try:
-        wait = WebDriverWait(driver, 20)
+        # Increased wait time to 60 seconds for slow page loads and connection issues
+        wait = WebDriverWait(driver, 60)
         # Wait for the first announcement block to be visible on the page
         wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, "div.news-update-block")))
         time.sleep(2) # Pause to ensure all elements render

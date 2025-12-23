@@ -12,7 +12,8 @@ def scrape(driver):
     logging.info("Scraping GATE website.")
     results = []
     try:
-        wait = WebDriverWait(driver, 20)
+        # Increased wait time to 60 seconds for slow page loads and connection issues
+        wait = WebDriverWait(driver, 60)
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "table.table-bordered")))
         time.sleep(2)
         soup = BeautifulSoup(driver.page_source, 'html.parser')

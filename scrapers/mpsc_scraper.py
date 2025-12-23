@@ -10,7 +10,8 @@ def scrape(driver):
     logging.info("Scraping MPSC advertisements page.")
     results = []
     try:
-        wait = WebDriverWait(driver, 20)
+        # Increased wait time to 60 seconds for slow page loads and connection issues
+        wait = WebDriverWait(driver, 60)
         wait.until(EC.presence_of_element_located((By.ID, "datatable")))
         time.sleep(2)
         rows = driver.find_elements(By.CSS_SELECTOR, "#datatable tbody tr")

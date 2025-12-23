@@ -1,4 +1,5 @@
 import logging
+import time
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
@@ -8,8 +9,10 @@ from selenium.webdriver.support import expected_conditions as EC
 def scrape(driver):
     """Scrapes the NTA website."""
     logging.info("Scraping NTA website.")
-    wait = WebDriverWait(driver, 15)
+    # Increased wait time to 60 seconds for slow page loads and connection issues
+    wait = WebDriverWait(driver, 60)
     wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'latestPart')))
+    time.sleep(2)  # Pause to ensure page is stable
     soup = BeautifulSoup(driver.page_source, 'html.parser')
     results = []
     notice_box = soup.find('marquee', class_='latestPart')

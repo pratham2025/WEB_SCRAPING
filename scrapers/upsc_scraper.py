@@ -12,7 +12,8 @@ def scrape(driver):
     logging.info("Scraping UPSC website.")
     results = []
     try:
-        wait = WebDriverWait(driver, 20)
+        # Increased wait time to 60 seconds for slow page loads and connection issues
+        wait = WebDriverWait(driver, 60)
         target_div_selector = (By.CSS_SELECTOR, "div.scroll-content")
         wait.until(EC.presence_of_element_located(target_div_selector))
         time.sleep(3)

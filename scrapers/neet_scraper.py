@@ -12,7 +12,8 @@ def scrape_neet_selenium(driver):
     """Scrapes NEET website using Selenium."""
     logging.info("NEET: Attempting to scrape using Selenium.")
     try:
-        wait = WebDriverWait(driver, 25)
+        # Increased wait time to 60 seconds for slow page loads and connection issues
+        wait = WebDriverWait(driver, 60)
         # Wait for the gen-list div to be present (as shown in screenshot)
         # Try multiple selectors to ensure we find the elements
         selectors = [

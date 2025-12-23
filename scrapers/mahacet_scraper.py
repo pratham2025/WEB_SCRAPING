@@ -9,7 +9,8 @@ from selenium.webdriver.support import expected_conditions as EC
 def scrape(driver):
     """Scrapes the MAHACET website."""
     logging.info("Scraping MAHACET website.")
-    wait = WebDriverWait(driver, 20)
+    # Increased wait time to 60 seconds for slow page loads and connection issues
+    wait = WebDriverWait(driver, 60)
     wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'educms-download-marquee-content-items')))
     time.sleep(2)
     soup = BeautifulSoup(driver.page_source, 'html.parser')

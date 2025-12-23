@@ -24,11 +24,11 @@ def scrape(driver):
     results = []
 
     try:
-        # Wait until articles appear
-        WebDriverWait(driver, 25).until(
+        # Increased wait time from 25 to 60 seconds for slow page loads
+        WebDriverWait(driver, 60).until(
             EC.visibility_of_element_located((By.CSS_SELECTOR, "div.articles"))
         )
-        time.sleep(1)
+        time.sleep(3)  # Increased from 1 to 3 seconds for page stability
 
         soup = BeautifulSoup(driver.page_source, "html.parser")
 

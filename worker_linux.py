@@ -41,10 +41,26 @@ def setup_driver():
     options.add_argument("--start-maximized")
     options.add_argument("--disable-logging")
     options.add_argument("--log-level=3")
+    # Additional stability options for GitHub Actions
+    options.add_argument("--disable-background-networking")
+    options.add_argument("--disable-background-timer-throttling")
+    options.add_argument("--disable-renderer-backgrounding")
+    options.add_argument("--disable-features=TranslateUI")
+    options.add_argument("--disable-ipc-flooding-protection")
     
     # Use undetected_chromedriver for Linux (auto-detects ChromeDriver)
     try:
         driver = uc.Chrome(options=options, version_main=None)
+        
+        # Set explicit timeouts to handle slow connections and page loads
+        # Page load timeout: 180 seconds (3 minutes) - increased for slow pages
+        driver.set_page_load_timeout(180)
+        # Script timeout: 60 seconds - for JavaScript execution
+        driver.set_script_timeout(60)
+        # Implicit wait: 10 seconds - for element finding
+        driver.implicitly_wait(10)
+        
+        logging.info("Chrome driver initialized with extended timeouts (page_load: 180s, script: 60s, implicit: 10s)")
         return driver
     except Exception as e:
         logging.error(f"Failed to initialize Chrome driver: {e}")
@@ -101,35 +117,65 @@ def save_to_db(source_name, results):
         return 0
 
 # --- TASK FOR PARALLEL EXECUTION ---
-def run_scraper_task(source_config):
-    """Manages the scraping process for a single source."""
+def run_scraper_task(source_config, max_retries=2):
+    """Manages the scraping process for a single source with retry logic."""
     source_name = source_config['name']
     url = source_config['url']
     logging.info(f"Starting task for: '{source_name}'")
 
     driver = None
+    last_error = None
+    
     try:
-        driver = setup_driver()
-        module_name = f"scrapers.{source_name.lower()}_scraper"
-        scraper_module = importlib.import_module(module_name)
+        for attempt in range(max_retries + 1):
+            try:
+                driver = setup_driver()
+                module_name = f"scrapers.{source_name.lower()}_scraper"
+                scraper_module = importlib.import_module(module_name)
 
-        if source_name not in ["CBSE", "JEE"]:
-            driver.get(url)
+                if source_name not in ["CBSE", "JEE"]:
+                    logging.info(f"Loading URL for {source_name}: {url}")
+                    driver.get(url)
+                    # Give page a moment to stabilize after load
+                    time.sleep(2)
 
-        scraped_data = scraper_module.scrape(driver)
+                scraped_data = scraper_module.scrape(driver)
 
-        # Limit announcements
-        if scraped_data and len(scraped_data) > MAX_ANNOUNCEMENTS_PER_SOURCE:
-            logging.info(f"Source '{source_name}' has {len(scraped_data)} items. Limiting to {MAX_ANNOUNCEMENTS_PER_SOURCE}.")
-            scraped_data = scraped_data[:MAX_ANNOUNCEMENTS_PER_SOURCE]
+                # Limit announcements
+                if scraped_data and len(scraped_data) > MAX_ANNOUNCEMENTS_PER_SOURCE:
+                    logging.info(f"Source '{source_name}' has {len(scraped_data)} items. Limiting to {MAX_ANNOUNCEMENTS_PER_SOURCE}.")
+                    scraped_data = scraped_data[:MAX_ANNOUNCEMENTS_PER_SOURCE]
 
-        return {"source": source_name, "data": scraped_data, "status": "Success"}
+                # Success - return result
+                result = {"source": source_name, "data": scraped_data, "status": "Success"}
+                return result
 
-    except Exception as e:
-        logging.error(f"Task for '{source_name}' failed: {e}", exc_info=False)
-        return {"source": source_name, "data": [], "status": f"Failed: {e}"}
+            except Exception as e:
+                last_error = e
+                error_msg = str(e)
+                logging.warning(f"Task for '{source_name}' failed (attempt {attempt + 1}/{max_retries + 1}): {error_msg}")
+                
+                # Clean up driver on error
+                if driver:
+                    try:
+                        driver.quit()
+                    except Exception:
+                        pass
+                    driver = None
+                
+                # If not the last attempt, wait before retrying
+                if attempt < max_retries:
+                    wait_time = (attempt + 1) * 5  # Exponential backoff: 5s, 10s
+                    logging.info(f"Retrying {source_name} in {wait_time} seconds...")
+                    time.sleep(wait_time)
+                else:
+                    logging.error(f"Task for '{source_name}' failed after {max_retries + 1} attempts: {error_msg}", exc_info=True)
 
+        # All retries exhausted
+        return {"source": source_name, "data": [], "status": f"Failed: {last_error}"}
+    
     finally:
+        # Always clean up driver if it still exists
         if driver:
             try:
                 driver.quit()

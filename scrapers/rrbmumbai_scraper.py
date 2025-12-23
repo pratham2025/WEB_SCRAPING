@@ -12,10 +12,11 @@ def scrape(driver):
     results = []
 
     try:
-        wait = WebDriverWait(driver, 20)
+        # Increased wait time from 20 to 60 seconds for slow page loads and connection issues
+        wait = WebDriverWait(driver, 60)
         # Wait for the table to be present on the page. This is our reliable target.
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "table.table-bordered")))
-        time.sleep(1)
+        time.sleep(2)  # Increased from 1 to 2 seconds for page stability
 
         soup = BeautifulSoup(driver.page_source, 'html.parser')
 
