@@ -90,7 +90,7 @@ function handleSearchBar() {
   if (!searchBar) return;
 
   // Hide search bar on pages that don't need it
-  const nonSearchPages = ['index.html', 'syllabus.html'];
+  const nonSearchPages = ['index.html'];
   const currentPage = window.location.pathname.split('/').pop() || 'index.html';
 
   if (nonSearchPages.includes(currentPage)) {
