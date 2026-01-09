@@ -151,6 +151,47 @@
       color: var(--green-700);
       text-decoration: underline;
     }
+
+    /* Button theme styling for green */
+    .final-cta .btn,
+    a.btn {
+      background: linear-gradient(180deg, var(--green-500), var(--green-600));
+      color: #fff;
+      border: 1px solid rgba(0,0,0,.15);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: .18s transform ease, .18s background ease, .18s box-shadow ease;
+      box-shadow: 0 2px 8px rgba(18, 183, 106, 0.2);
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    a.btn:hover,
+    .final-cta .btn:hover {
+      background: var(--green-600);
+      color: #fff;
+      border-color: var(--green-600);
+      box-shadow: 0 4px 16px rgba(18, 183, 106, 0.3);
+      transform: translateY(-1px);
+    }
+
+    a.btn.secondary,
+    .final-cta .btn.secondary {
+      background: #fff;
+      color: var(--green-600);
+      border: 2px solid var(--green-600);
+    }
+
+    a.btn.secondary:hover,
+    .final-cta .btn.secondary:hover {
+      background: linear-gradient(180deg, var(--green-500), var(--green-600));
+      color: #fff;
+      border-color: var(--green-600);
+      box-shadow: 0 4px 16px rgba(18, 183, 106, 0.3);
+      transform: translateY(-1px);
+    }
     
     /* Responsive styles for mobile and tablet */
     @media (max-width: 1024px) {
@@ -713,5 +754,6 @@
 
   <!-- Core site scripts -->
   <script src="./common.js"></script>
+  <script src="./app.js"></script>
 </body>
 </html>
