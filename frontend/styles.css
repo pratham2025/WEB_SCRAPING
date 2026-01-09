@@ -1741,6 +1741,115 @@ body {
     font-size: 0.95rem;
 }
 
+/* 2.5 "Exam Preparation Guidelines" Section (New) */
+.guidelines-section {
+    background: transparent;
+}
+
+.guidelines-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.guideline-card {
+    background: var(--card);
+    border: 1px solid var(--ink-100);
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 2px 8px rgba(9,30,66,.06);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    text-decoration: none;
+    color: inherit;
+    overflow: hidden;
+    /* Improve touch interaction on mobile */
+    -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
+}
+
+.guideline-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--green-500), var(--green-600));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+}
+
+.guideline-card:hover::before {
+    transform: scaleX(1);
+}
+
+.guideline-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 32px rgba(9,30,66,.15);
+    border-color: var(--green-300);
+}
+
+.guideline-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--green-50), var(--green-100));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.guideline-icon svg {
+    color: var(--green-600);
+    transition: all 0.3s ease;
+}
+
+.guideline-card:hover .guideline-icon {
+    background: linear-gradient(135deg, var(--green-100), var(--green-200));
+    transform: translateY(-4px) rotate(-3deg);
+}
+
+.guideline-card:hover .guideline-icon svg {
+    color: var(--green-700);
+}
+
+.guideline-card h3 {
+    color: var(--ink-900);
+    margin: 0 0 0.75rem 0;
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.guideline-card p {
+    color: var(--ink-700);
+    margin: 0;
+    line-height: 1.7;
+    font-size: 0.95rem;
+    flex-grow: 1;
+}
+
+.guideline-arrow {
+    display: inline-block;
+    margin-top: 1rem;
+    font-size: 1.5rem;
+    color: var(--green-600);
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.guideline-card:hover .guideline-arrow {
+    transform: translateX(6px);
+    color: var(--green-700);
+}
+
 /* 3. "Featured Sources" Section (New) */
 .featured-sources { background: transparent; border: none; box-shadow: none; margin: 0; border-radius: 0; }
 .source-logo-grid {
@@ -2694,8 +2803,64 @@ body {
     }
     
     .why-card p {
+      font-size: 0.875rem;
+    }
+    
+    /* Guidelines grid responsive */
+    .guidelines-grid {
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+    
+    .guideline-card {
+      padding: 24px;
+    }
+    
+    .guideline-card h3 {
+      font-size: 1.25rem;
+    }
+    
+    .guideline-card p {
+      font-size: 0.9rem;
+    }
+    
+    .guideline-icon {
+      width: 44px;
+      height: 44px;
+    }
+    
+    .why-card p {
       font-size: 0.9rem;
       line-height: 1.5;
+    }
+}
+
+/* Tablet devices (landscape and portrait) */
+@media (max-width: 1024px) and (min-width: 769px) {
+    /* Guidelines grid for tablet - 2 columns */
+    .guidelines-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+    
+    .guideline-card {
+      padding: 26px;
+    }
+    
+    .guideline-card h3 {
+      font-size: 1.3rem;
+    }
+    
+    .guideline-card p {
+      font-size: 0.95rem;
+    }
+    
+    /* Make the third card span both columns if there are only 3 cards */
+    .guideline-card:nth-child(3):last-child {
+      grid-column: 1 / -1;
+      max-width: 600px;
+      margin: 0 auto;
+      width: 100%;
     }
 }
 
@@ -2713,6 +2878,28 @@ body {
     
     .why-card h3 {
       font-size: 1rem;
+    }
+    
+    .why-card p {
+      font-size: 0.8125rem;
+    }
+    
+    /* Guidelines cards on extra small screens */
+    .guideline-card {
+      padding: 20px;
+    }
+    
+    .guideline-card h3 {
+      font-size: 1.125rem;
+    }
+    
+    .guideline-card p {
+      font-size: 0.875rem;
+    }
+    
+    .guideline-icon {
+      width: 40px;
+      height: 40px;
     }
     
     .why-card p {
@@ -2981,23 +3168,90 @@ body {
 }
 
 @media (max-width: 768px) {
+    .legal-page {
+        margin: 1rem auto;
+        padding: 0 16px;
+    }
+    
     .legal-container {
         padding: 1.5rem;
+        border-radius: 12px;
     }
     
     .legal-container h1 {
-        font-size: 2rem;
+        font-size: 1.75rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .legal-updated {
+        font-size: 0.85rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.25rem;
+    }
+    
+    .legal-section {
+        margin-bottom: 1.75rem;
     }
     
     .legal-section h2 {
-        font-size: 1.3rem;
+        font-size: 1.25rem;
+        margin-bottom: 0.875rem;
+    }
+    
+    .legal-section h3 {
+        font-size: 1.1rem;
+        margin-top: 1.25rem;
+    }
+    
+    .legal-section p {
+        font-size: 0.95rem;
+        line-height: 1.65;
+    }
+    
+    .legal-section ul {
+        margin: 0.5rem 0 1rem 1.25rem;
     }
     
     .legal-nav {
         flex-direction: column;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
     }
     
     .legal-nav a {
         text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .legal-page {
+        margin: 0.75rem auto;
+        padding: 0 12px;
+    }
+    
+    .legal-container {
+        padding: 1.25rem;
+        border-radius: 10px;
+    }
+    
+    .legal-container h1 {
+        font-size: 1.5rem;
+        line-height: 1.25;
+    }
+    
+    .legal-updated {
+        font-size: 0.8rem;
+    }
+    
+    .legal-section h2 {
+        font-size: 1.15rem;
+    }
+    
+    .legal-section h3 {
+        font-size: 1rem;
+    }
+    
+    .legal-section p {
+        font-size: 0.9rem;
     }
 }

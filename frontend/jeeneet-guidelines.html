@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>JEE & NEET Preparation Guidelines — GETNOTIFY</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="src/images/favicon/favicon.ico">
+  <link rel="icon" type="image/svg+xml" href="src/images/favicon/favicon.svg">
+  <link rel="apple-touch-icon" sizes="180x180" href="src/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="src/images/favicon/favicon-96x96.png">
+  <link rel="manifest" href="src/images/favicon/site.webmanifest">
+  
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-E73LSXS38Q"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-E73LSXS38Q');
+  </script>
+  
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3154443776197450"
+     crossorigin="anonymous"></script>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css"/>
+  <meta name="description" content="Comprehensive JEE & NEET 2026 preparation guidelines, study strategies, shortcuts, mnemonics, and tips for competitive exam success."/>
+  
+  <style>
+    .guide-section {
+      margin-bottom: 3rem;
+    }
+    .guide-section h2 {
+      color: var(--ink-900);
+      font-size: 1.75rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--green-200);
+    }
+    .guide-section h3 {
+      color: var(--ink-700);
+      font-size: 1.4rem;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+    }
+    .guide-section h4 {
+      color: var(--ink-700);
+      font-size: 1.15rem;
+      margin-top: 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .guide-section p {
+      line-height: 1.8;
+      margin-bottom: 1.25rem;
+      color: var(--ink-700);
+    }
+    .guide-section ul, .guide-section ol {
+      margin: 1.25rem 0;
+      padding-left: 2rem;
+    }
+    .guide-section li {
+      margin-bottom: 0.75rem;
+      line-height: 1.7;
+      color: var(--ink-700);
+    }
+    .highlight-box {
+      background: var(--green-50);
+      border-left: 4px solid var(--green-500);
+      padding: 1.5rem;
+      margin: 2rem 0;
+      border-radius: 8px;
+    }
+    .highlight-box p {
+      margin: 0;
+      color: var(--ink-700);
+      font-weight: 500;
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .data-table th {
+      background: var(--green-500);
+      color: white;
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 600;
+    }
+    .data-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--ink-100);
+    }
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+    .data-table tr:nth-child(even) {
+      background: var(--green-50);
+    }
+    code {
+      background: var(--ink-100);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+      color: var(--green-700);
+    }
+    .formula-box {
+      background: #f8f9fa;
+      border: 1px solid var(--ink-200);
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 6px;
+      font-family: 'Courier New', monospace;
+      text-align: center;
+    }
+    .toc {
+      background: var(--bg);
+      border: 1px solid var(--ink-200);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+    }
+    .toc h3 {
+      margin-top: 0;
+      color: var(--ink-900);
+      font-size: 1.25rem;
+    }
+    .toc ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    .toc li {
+      margin-bottom: 0.5rem;
+    }
+    .toc a {
+      color: var(--green-600);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .toc a:hover {
+      color: var(--green-700);
+      text-decoration: underline;
+    }
+    
+    /* Responsive styles for mobile and tablet */
+    @media (max-width: 1024px) {
+      .legal-container {
+        padding: 1.5rem;
+      }
+      
+      .guide-section h2 {
+        font-size: 1.5rem;
+      }
+      
+      .guide-section h3 {
+        font-size: 1.25rem;
+      }
+      
+      .guide-section h4 {
+        font-size: 1.05rem;
+      }
+      
+      .data-table {
+        font-size: 0.9rem;
+      }
+      
+      .data-table th,
+      .data-table td {
+        padding: 10px 12px;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .legal-container {
+        padding: 1rem;
+      }
+      
+      .legal-page h1 {
+        font-size: 1.75rem;
+        line-height: 1.3;
+      }
+      
+      .legal-updated {
+        font-size: 0.9rem;
+      }
+      
+      .guide-section {
+        margin-bottom: 2rem;
+      }
+      
+      .guide-section h2 {
+        font-size: 1.35rem;
+        margin-bottom: 0.875rem;
+      }
+      
+      .guide-section h3 {
+        font-size: 1.15rem;
+        margin-top: 1.5rem;
+      }
+      
+      .guide-section h4 {
+        font-size: 1rem;
+        margin-top: 1.25rem;
+      }
+      
+      .guide-section p {
+        font-size: 0.95rem;
+        line-height: 1.7;
+      }
+      
+      .guide-section ul,
+      .guide-section ol {
+        padding-left: 1.5rem;
+      }
+      
+      .guide-section li {
+        font-size: 0.95rem;
+      }
+      
+      .highlight-box,
+      .warning-box {
+        padding: 1.25rem;
+        margin: 1.5rem 0;
+      }
+      
+      .toc {
+        padding: 1.25rem;
+        margin: 1.5rem 0;
+      }
+      
+      .toc h3 {
+        font-size: 1.1rem;
+      }
+      
+      .toc a {
+        font-size: 0.95rem;
+      }
+      
+      /* Make tables scroll horizontally on mobile */
+      .data-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        font-size: 0.85rem;
+      }
+      
+      .data-table th,
+      .data-table td {
+        padding: 8px 10px;
+      }
+      
+      code {
+        font-size: 0.85em;
+        word-break: break-word;
+      }
+      
+      .formula-box {
+        padding: 0.875rem;
+        font-size: 0.9rem;
+        overflow-x: auto;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .legal-container {
+        padding: 0.875rem;
+      }
+      
+      .legal-page h1 {
+        font-size: 1.5rem;
+        margin-bottom: 0.75rem;
+      }
+      
+      .legal-updated {
+        font-size: 0.85rem;
+      }
+      
+      .guide-section h2 {
+        font-size: 1.25rem;
+      }
+      
+      .guide-section h3 {
+        font-size: 1.05rem;
+      }
+      
+      .guide-section h4 {
+        font-size: 0.95rem;
+      }
+      
+      .guide-section p,
+      .guide-section li {
+        font-size: 0.9rem;
+        line-height: 1.65;
+      }
+      
+      .highlight-box,
+      .warning-box {
+        padding: 1rem;
+        margin: 1.25rem 0;
+      }
+      
+      .toc {
+        padding: 1rem;
+      }
+      
+      .data-table {
+        font-size: 0.8rem;
+      }
+      
+      .data-table th,
+      .data-table td {
+        padding: 6px 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar"></header>
+
+  <main class="legal-page">
+    <div class="legal-container">
+      <h1>Strategic Framework for JEE & NEET Excellence</h1>
+      <p class="legal-updated">Comprehensive Preparation Methodologies (2025-2026 Cycle)</p>
+
+      <div class="toc">
+        <h3>Table of Contents</h3>
+        <ul>
+          <li><a href="#introduction">1. Introduction: The Competitive Landscape</a></li>
+          <li><a href="#time-management">2. Time Management and Planning</a></li>
+          <li><a href="#physics">3. Physics: Heuristics & Shortcuts</a></li>
+          <li><a href="#chemistry">4. Chemistry: Mnemonics & Maps</a></li>
+          <li><a href="#mathematics">5. Mathematics: Algorithms for Speed</a></li>
+          <li><a href="#biology">6. Biology: Precision of Recall</a></li>
+          <li><a href="#exam-strategy">7. Exam Strategy & Error Analysis</a></li>
+        </ul>
+      </div>
+
+      <section id="introduction" class="legal-section guide-section">
+        <h2>1. Introduction: The Competitive Landscape and the Digital Shift</h2>
+        <p>The ecosystem of Indian competitive examinations, particularly the Joint Entrance Examination (JEE) for engineering and the National Eligibility cum Entrance Test (NEET) for medical aspirants, represents a paradigm of high-stakes academic selection. With millions of candidates vying for limited seats in premier institutions, the margin for error has compressed significantly.</p>
+        
+        <p>Success in these examinations is no longer merely a function of raw intelligence or the sheer volume of hours dedicated to study. Instead, it has evolved into a complex optimization problem requiring strategic resource management, psychological fortitude, and the mastery of algorithmic problem-solving techniques.</p>
+
+        <h3>1.1 The Philosophy of "Smart Study"</h3>
+        <p>The term "smart study" has a precise definition in the context of JEE and NEET: the <strong>maximization of mark-yield per unit of time invested</strong>. This involves:</p>
+        <ul>
+          <li>Identifying high-weightage topics</li>
+          <li>Utilizing heuristic shortcuts to solve problems faster than traditional methods</li>
+          <li>Employing active recall techniques to ensure retention</li>
+          <li>Understanding the 2026 syllabus rationalization by NMC and NTA</li>
+        </ul>
+      </section>
+
+      <section id="time-management" class="legal-section guide-section">
+        <h2>2. The Architecture of Preparation: Time Management and Planning</h2>
+        <p>A robust preparation strategy is built upon the foundation of effective time management. The vast syllabus demands a structured approach that aligns with human cognitive cycles.</p>
+
+        <h3>2.1 Chronobiology and the Study Schedule</h3>
+        <p>Research into circadian rhythms suggests that the timing of study sessions significantly impacts retention and problem-solving ability.</p>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Time Slot</th>
+              <th>Cognitive State</th>
+              <th>Recommended Subject/Activity</th>
+              <th>Rationale</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>05:00 - 09:00</td>
+              <td>High Alpha Wave Activity</td>
+              <td>Biology (Botany/Zoology) or Inorganic Chemistry</td>
+              <td>The brain is most receptive to memorization after sleep</td>
+            </tr>
+            <tr>
+              <td>10:00 - 13:00</td>
+              <td>Active Alertness</td>
+              <td>Physics or Maths Mock Test</td>
+              <td>Aligns with actual exam timing for conditioning</td>
+            </tr>
+            <tr>
+              <td>14:00 - 17:00</td>
+              <td>Post-Prandial Dip</td>
+              <td>Physics Problem Solving</td>
+              <td>Active engagement combats natural energy dip</td>
+            </tr>
+            <tr>
+              <td>18:00 - 21:00</td>
+              <td>Synthesis & Integration</td>
+              <td>Organic/Physical Chemistry</td>
+              <td>Mix of conceptual understanding and application</td>
+            </tr>
+            <tr>
+              <td>21:30 - 23:00</td>
+              <td>Consolidation</td>
+              <td>Revision & Short Notes</td>
+              <td>Transfer from short-term to long-term memory</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>2.2 The Pomodoro Technique and Its Adaptations</h3>
+        <p>While the standard Pomodoro technique suggests 25-minute intervals, JEE and NEET require adaptation. A <strong>"Double Pomodoro" or "50/10" rule</strong> is often more effective, allowing for deep work states necessary to solve complex problems without breaking flow. The goal is to build stamina gradually to match the 3-hour duration of the final exam.</p>
+
+        <h3>2.3 Syllabus Rationalization for 2026</h3>
+        <div class="highlight-box">
+          <p><strong>Critical Update:</strong> The NTA and NMC have streamlined the curriculum for 2026 to focus on core concepts, removing topics considered repetitive or less relevant.</p>
+        </div>
+        
+        <ul>
+          <li><strong>Biology:</strong> Significant portions of <em>Strategies for Enhancement in Food Production</em>, <em>Environmental Issues</em>, and specific details in <em>Transport in Plants</em> have been rationalized.</li>
+          <li><strong>Chemistry:</strong> Removal of chapters like <em>Solid State</em>, <em>Surface Chemistry</em>, and <em>Polymers</em>. Focus intensified on <em>Thermodynamics</em>, <em>Equilibrium</em>, and <em>Chemical Bonding</em>.</li>
+          <li><strong>Physics:</strong> Peripheral topics in <em>Communication Systems</em> and complex derivations in <em>Modern Physics</em> have been simplified.</li>
+        </ul>
+        
+        <p><strong>Strategic Implication:</strong> The reduction in breadth often signals an increase in depth. Aspirants must anticipate that questions from remaining chapters may test deeper conceptual clarity and inter-topic linkages.</p>
+      </section>
+
+      <section id="physics" class="legal-section guide-section">
+        <h2>3. Physics: Heuristics, Shortcuts, and Visual Methods</h2>
+        <p>Physics is often the gatekeeper subject, distinguishing top rankers from the rest. The key is to transition from "derivation-based" learning to "application-based" heuristics.</p>
+
+        <h3>3.1 The Power of Dimensional Analysis</h3>
+        <p>Dimensional Analysis is frequently underutilized as a high-power problem-solving tool. It can eliminate options in complex MCQs without performing the full calculation.</p>
+
+        <h4>The "Option Elimination" Algorithm:</h4>
+        <ol>
+          <li><strong>Identify the Target Dimension:</strong> Determine the physical quantity asked (e.g., Time Period, Force)</li>
+          <li><strong>Analyze the Options:</strong> Quickly check the dimensional consistency of the given choices</li>
+          <li><strong>Eliminate:</strong> Any option that doesn't match the target dimension is mathematically impossible</li>
+        </ol>
+
+        <h3>3.2 Mechanics: The "Effective Acceleration" Shortcuts</h3>
+        <p>For complex Atwood machines or connected blocks, use this single-step formula:</p>
+        <div class="formula-box">
+          a = (Unbalanced Load / Total Mass of System)
+        </div>
+
+        <h4>Inclined Plane Heuristics:</h4>
+        <ul>
+          <li><strong>Sliding Down:</strong> Acceleration = <code>g(sin θ - μ cos θ)</code></li>
+          <li><strong>Stopping Distance:</strong> <code>s = v² / 2g(sin θ + μ cos θ)</code></li>
+        </ul>
+
+        <h3>3.3 Electrodynamics and Circuit Theory</h3>
+        <h4>Capacitor Dielectric Insertion:</h4>
+        <ul>
+          <li><strong>Battery Connected:</strong> V is constant. C becomes KC. Charge Q becomes KQ. Energy U becomes KU.</li>
+          <li><strong>Battery Disconnected:</strong> Q is constant. C becomes KC. Potential V becomes V/K. Energy U becomes U/K.</li>
+        </ul>
+        <p><strong>Mnemonic:</strong> "Q-Constant Disconnected"</p>
+      </section>
+
+      <section id="chemistry" class="legal-section guide-section">
+        <h2>4. Chemistry: Mnemonics, Maps, and Stoichiometric Hacks</h2>
+        <p>Chemistry divides into three distinct pillars: Inorganic (Memory), Organic (Logic/Mechanism), and Physical (Calculation).</p>
+
+        <h3>4.1 Inorganic Chemistry: The Mnemonics Ecosystem</h3>
+        <p>Essential mnemonics for high-yield retention:</p>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Topic</th>
+              <th>Mnemonic Phrase</th>
+              <th>Application</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Activity Series</td>
+              <td>"Please Stop Calling Me A Careless Zebra Instead Try Learning How Copper Saves Gold"</td>
+              <td>K, Na, Ca, Mg, Al, C, Zn, Fe, Sn, Pb, H, Cu, Ag, Au - for displacement reactions</td>
+            </tr>
+            <tr>
+              <td>Group 2 Elements</td>
+              <td>"Beta Mange Car Scooter Baap Razi"</td>
+              <td>Be, Mg, Ca, Sr, Ba, Ra</td>
+            </tr>
+            <tr>
+              <td>Halogens (Group 17)</td>
+              <td>"First Class Biryani In Australia"</td>
+              <td>F, Cl, Br, I, At</td>
+            </tr>
+            <tr>
+              <td>Redox Electrodes</td>
+              <td>"LOAN"</td>
+              <td>Left side, Oxidation, Anode, Negative</td>
+            </tr>
+            <tr>
+              <td>Electrochemical Cell</td>
+              <td>"Red Cat An Ox"</td>
+              <td>Reduction at Cathode; Oxidation at Anode</td>
+            </tr>
+            <tr>
+              <td>Dicarboxylic Acids</td>
+              <td>"Oh My Such Good Apple Pie"</td>
+              <td>Oxalic (C₂), Malonic (C₃), Succinic (C₄), Glutaric (C₅), Adipic (C₆), Pimelic (C₇)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>4.2 Physical Chemistry: The "n-Factor" Revolution</h3>
+        <p>The <strong>n-Factor</strong> (Valency Factor) method bypasses tedious balancing using the Law of Equivalence:</p>
+        <div class="formula-box">
+          n₁ M₁ V₁ = n₂ M₂ V₂
+        </div>
+
+        <h4>Calculating n-Factor Shortcuts:</h4>
+        <ul>
+          <li><strong>Permanganate (KMnO₄):</strong> Mnemonic: <strong>BAN-153</strong>
+            <ul>
+              <li>Basic medium: n = 1</li>
+              <li>Acidic medium: n = 5</li>
+              <li>Neutral medium: n = 3</li>
+            </ul>
+          </li>
+          <li><strong>Dichromate (K₂Cr₂O₇):</strong> In acidic medium, always changes from +6 to +3. Since 2 Chromium atoms, total change is 2×(6-3) = 6. n-factor is always <strong>6</strong>.</li>
+        </ul>
+
+        <h3>4.3 Organic Chemistry: Reaction Maps and Reagents</h3>
+        <h4>Grignard Reagent (RMgX) Rules:</h4>
+        <ul>
+          <li><strong>Rule 1:</strong> If substrate has Acidic Hydrogen (alcohol, amine, alkyne), Acid-Base reaction occurs fastest. Product is Alkane (R-H).</li>
+          <li><strong>Rule 2:</strong> If no Acidic H, it attacks the electrophilic center (Nucleophilic Addition/Substitution).</li>
+        </ul>
+
+        <h4>Ozonolysis Trick:</h4>
+        <p>"Break the double bond, give an Oxygen to each side" - This visual trick avoids drawing the intermediate ozonoid structure.</p>
+      </section>
+
+      <section id="mathematics" class="legal-section guide-section">
+        <h2>5. Mathematics: Algorithms for Speed (JEE Focus)</h2>
+        <p>Mathematics in JEE is synonymous with speed. Problems are designed to be lengthy if solved via board-exam methods.</p>
+
+        <h3>5.1 The Wavy Curve Method (Method of Intervals)</h3>
+        <p>Universal shortcut for solving inequalities, finding domains, and intervals of monotonicity.</p>
+
+        <h4>Step-by-Step Algorithm:</h4>
+        <ol>
+          <li><strong>Factorization:</strong> Express inequality as f(x) = [(x-a)^p₁ (x-b)^p₂ ...] / [(x-c)^q₁ ...] ≷ 0</li>
+          <li><strong>Roots Identification:</strong> Identify all roots a, b, c...</li>
+          <li><strong>Plotting:</strong> Mark roots on the real number line</li>
+          <li><strong>Sign Convention:</strong> Start from extreme right (infinity) - sign is always POSITIVE</li>
+          <li><strong>Traversal Rule:</strong> Move left across roots:
+            <ul>
+              <li>If exponent is ODD: sign CHANGES (+ → -)</li>
+              <li>If exponent is EVEN: sign REPEATS (+ → +) - "bounce" effect</li>
+            </ul>
+          </li>
+          <li><strong>Selection:</strong> Select intervals based on inequality sign</li>
+        </ol>
+
+        <h3>5.2 The DI Method for Integration by Parts</h3>
+        <p>The <strong>DI (Differentiate-Integrate)</strong> or Tabular Method is a rapid shortcut for integration by parts, especially for multiple iterations.</p>
+
+        <h4>Execution Protocol:</h4>
+        <p>Create a 3-column table: Sign | D (Deriv) | I (Integ)</p>
+        <ol>
+          <li><strong>Sign Column:</strong> Alternate signs: +, -, +, -, ...</li>
+          <li><strong>D Column:</strong> Choose algebraic part (e.g., x³), differentiate successively</li>
+          <li><strong>I Column:</strong> Choose transcendental part (e.g., e^(2x), sin x), integrate successively</li>
+          <li><strong>Stop:</strong> When D column reaches 0</li>
+          <li><strong>Result:</strong> Multiply diagonally (Row i D × Row i+1 I) with sign from Row i, sum products</li>
+        </ol>
+
+        <h3>5.3 Complex Numbers and Coordinate Geometry Hacks</h3>
+        <ul>
+          <li><strong>Square Root Shortcut:</strong> To find √z in MCQs, never solve algebraically. Square the options - the correct option when squared must yield the original number.</li>
+          <li><strong>Rotation Theorem:</strong> Use vector rotation formula for problems involving equilateral or isosceles triangles in the Argand plane</li>
+        </ul>
+      </section>
+
+      <section id="biology" class="legal-section guide-section">
+        <h2>6. Biology: The Precision of Recall (NEET Focus)</h2>
+        <p>For NEET aspirants, Biology constitutes 50% of total marks (360/720). The strategy is high-fidelity retention of NCERT text.</p>
+
+        <h3>6.1 Morphology and Anatomy Mnemonics</h3>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Concept</th>
+              <th>Mnemonic</th>
+              <th>Decoding</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Aestivation (Twisted)</td>
+              <td>"Lady uses China Cotton"</td>
+              <td>Ladyfinger, China Rose, Cotton</td>
+            </tr>
+            <tr>
+              <td>Aestivation (Vexillary)</td>
+              <td>"Pea Bean"</td>
+              <td>Characteristic of Fabaceae</td>
+            </tr>
+            <tr>
+              <td>Placentation (Marginal)</td>
+              <td>"Pea"</td>
+              <td>Ridge forms along ventral suture</td>
+            </tr>
+            <tr>
+              <td>Placentation (Axile)</td>
+              <td>"China's Tomato Lemon"</td>
+              <td>China Rose, Tomato, Lemon</td>
+            </tr>
+            <tr>
+              <td>Placentation (Parietal)</td>
+              <td>"MAP"</td>
+              <td>Mustard, Argemone, Parietal</td>
+            </tr>
+            <tr>
+              <td>Evolution Evidence</td>
+              <td>"HD & AC"</td>
+              <td>Homologous = Divergent, Analogous = Convergent</td>
+            </tr>
+            <tr>
+              <td>Genetic Disorders</td>
+              <td>"Alka Sick Thi Phenyl Pine Ce"</td>
+              <td>Alkaptonuria, Sickle cell, Thalassemia, Phenylketonuria, Cystic fibrosis</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>6.2 The NCERT "Filter" and "Hidden Label" Technique</h3>
+        <div class="highlight-box">
+          <p><strong>Pro Tip:</strong> NTA often picks questions from diagram captions or chapter summaries in NCERT.</p>
+        </div>
+        <ul>
+          <li>Create a dedicated "Data Sheet" with numerical values from NCERT (e.g., length of E. coli DNA, years of environmental acts)</li>
+          <li>Pay attention to "unlabeled" parts of diagrams - these become label identification questions</li>
+          <li>Focus specifically on Morphology and Anatomy diagrams</li>
+        </ul>
+      </section>
+
+      <section id="exam-strategy" class="legal-section guide-section">
+        <h2>7. Exam Strategy and Error Analysis: The Final Mile</h2>
+        <p>Preparation is only half the battle; execution is the other half. The transition from "knowing" to "scoring" requires strategic exam-taking.</p>
+
+        <h3>7.1 The "3-Round" Attempt Strategy</h3>
+        <ul>
+          <li><strong>Round 1 (Sprints):</strong> Go through entire paper. Attempt only questions solvable in under 45 seconds (direct theory, formula substitution). Skip lengthy problems.
+            <ul>
+              <li><em>Psychological Benefit:</em> Secures easy marks early, builds confidence</li>
+            </ul>
+          </li>
+          <li><strong>Round 2 (Heavy Lifting):</strong> Return to start and attempt standard problems requiring calculation or logic</li>
+          <li><strong>Round 3 (Battles):</strong> Tackle challenge problems marked for review</li>
+        </ul>
+
+        <div class="highlight-box">
+          <p><strong>NEET Specific Order:</strong> Biology (45-50 mins) → Chemistry (50-60 mins) → Physics (remaining time). This maximizes score by clearing high-volume Biology section first.</p>
+        </div>
+
+        <h3>7.2 The "Mistake Notebook" Protocol</h3>
+        <p>The most significant differentiator in rank improvement is rigorous Mock Test analysis.</p>
+
+        <h4>For Every Wrong Answer, Record:</h4>
+        <ol>
+          <li><strong>Question Source:</strong> (Test ID, Question Number)</li>
+          <li><strong>Error Type:</strong>
+            <ul>
+              <li><strong>C (Conceptual):</strong> "Didn't know the theory" → Action: Re-read chapter</li>
+              <li><strong>S (Silly/Calculation):</strong> "Knew method, calculation error" → Action: Practice accuracy drills</li>
+              <li><strong>R (Reading):</strong> "Missed keyword NOT" → Action: Highlight keywords in next test</li>
+            </ul>
+          </li>
+          <li><strong>Correction:</strong> Correct solution and the key insight that was missed</li>
+        </ol>
+
+        <p>Reviewing this notebook weekly ensures you don't repeat the same class of errors - the fastest way to improve scores.</p>
+      </section>
+
+      <section class="legal-section guide-section">
+        <h2>Conclusion</h2>
+        <p>The journey to cracking JEE or NEET in 2026 is an exercise in disciplined optimization. It requires you to be a "smart operator" - using:</p>
+        <ul>
+          <li><strong>Dimensional Analysis</strong> to hack Physics options</li>
+          <li><strong>Mnemonics</strong> to encode Inorganic Chemistry</li>
+          <li><strong>Wavy Curve</strong> methods to slice through Calculus</li>
+          <li><strong>Mistake Analysis</strong> to plug performance leaks</li>
+        </ul>
+
+        <p>By integrating these resources and strategies - moving from comprehensive NCERT texts to agile Topper Notes and Handbooks - students can construct a preparation architecture that is robust, efficient, and ultimately successful.</p>
+
+        <div class="highlight-box">
+          <p><strong>Remember:</strong> Focus on the quality of the process - understanding the <em>why</em> behind concepts and the <em>how</em> behind shortcuts. Success is not just hard work, but smart, directed effort.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer"></footer>
+
+  <!-- Supabase Auth Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="secrets.js"></script>
+  <script src="auth.js"></script>
+
+  <!-- Core site scripts -->
+  <script src="./common.js"></script>
+</body>
+</html>
