@@ -1,4 +1,17 @@
 User-agent: *
 Allow: /
+Disallow: /auth.js
+Disallow: /secrets.js
+Disallow: /app.js
+Disallow: /*.js$
 
+# Important pages for crawling
+Allow: /*.html$
+Allow: /sitemap.xml
+Allow: /robots.txt
+
+# Sitemap location
 Sitemap: https://www.getnotify.in/sitemap.xml
+
+# Crawl-delay for polite crawling
+Crawl-delay: 1
