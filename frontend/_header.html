@@ -13,10 +13,23 @@
   
   <nav class="actions" id="mainNav">
       <a class="link" href="index.html">Home</a>
+      <a class="link" href="index.html#latest-news">Latest News</a>
+      <div class="nav-dropdown">
+        <button class="link dropdown-toggle" type="button" aria-expanded="false">Resources
+          <span class="chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="dropdown-menu" role="menu">
+          <a class="dropdown-item" href="jeeneet-guidelines.html" role="menuitem">JEE/NEET Guidelines</a>
+          <a class="dropdown-item" href="upsc-guidelines.html" role="menuitem">UPSC Guidelines</a>
+          <a class="dropdown-item" href="mpsc-guidelines.html" role="menuitem">MPSC Guidelines</a>
+        </div>
+      </div>
       <a class="link" href="how-to-use.html">How to Use</a>
-      <button class="btn primary login-btn-nav" id="loginBtn" type="button">Log in</button>
       <a class="link" href="notifications.html">Notifications</a>
+      <!-- Login button also in mobile drawer for accessibility -->
+      <button class="btn primary login-btn-nav mobile-only" id="loginBtnMobile" type="button">Log in</button>
   </nav>
+
   
   <!-- User Details Section (Top Right) -->
   <div class="user-details" id="userDetails" style="display: none;">

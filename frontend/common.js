@@ -23,6 +23,10 @@ document.addEventListener("DOMContentLoaded", async function() {
                   injectedModal.innerHTML = modalContent;
               }
           }
+          
+          // Setup mobile menu immediately after header is injected
+          console.log('Header injected, calling setupMobileMenu');
+          setupMobileMenu();
       }
       
       if (footerRes.ok && footerPlaceholder) {
@@ -41,11 +45,16 @@ document.addEventListener("DOMContentLoaded", async function() {
         setupLoginModal();
       }, 50);
       
-      // Ensure login button is visible initially (will be hidden if user is logged in)
+      // Ensure login buttons are visible initially (will be hidden if user is logged in)
       const loginBtn = document.getElementById('loginBtn');
+      const loginBtnMobile = document.getElementById('loginBtnMobile');
       if (loginBtn) {
-        loginBtn.style.display = 'inline-block';
+        loginBtn.style.display = 'inline-flex';
         loginBtn.style.visibility = 'visible';
+      }
+      if (loginBtnMobile) {
+        loginBtnMobile.style.display = 'flex';
+        loginBtnMobile.style.visibility = 'visible';
       }
       
       // Check and display user details if logged in
@@ -56,11 +65,6 @@ document.addEventListener("DOMContentLoaded", async function() {
       
       // Listen for auth state changes
       setupAuthStateListener();
-      
-      // Mobile menu toggle - use setTimeout to ensure DOM is ready
-      setTimeout(() => {
-        setupMobileMenu();
-      }, 100);
 
       // Google Sign-In is now handled by Supabase OAuth (auth.js)
       // No need to initialize the old Google Sign-In library
@@ -71,18 +75,24 @@ document.addEventListener("DOMContentLoaded", async function() {
 });
 
 function setActiveNavLink() {
-  // Use 'index.html' as the default for root paths
-  const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-  const navLinks = document.querySelectorAll('.actions .link');
-  
-  navLinks.forEach(link => {
-      const linkPage = link.getAttribute('href').split('/').pop();
-      if (linkPage === currentPage) {
-          link.classList.add('active');
-      } else {
-          link.classList.remove('active');
-      }
-  });
+  try {
+    // Use 'index.html' as the default for root paths
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    const navLinks = document.querySelectorAll('.actions .link');
+    
+    navLinks.forEach(link => {
+        const href = link.getAttribute('href');
+        if (!href) return;
+        const linkPage = href.split('/').pop().split('#')[0] || 'index.html';
+        if (linkPage === currentPage) {
+            link.classList.add('active');
+        } else {
+            link.classList.remove('active');
+        }
+    });
+  } catch (error) {
+    console.error('Error setting active nav link:', error);
+  }
 }
 
 function handleSearchBar() {
@@ -101,8 +111,9 @@ function handleSearchBar() {
 // --- Auth modal and Google Sign-In ---
 function setupLoginModal(){
   const loginBtn = document.getElementById('loginBtn');
+  const loginBtnMobile = document.getElementById('loginBtnMobile');
   const modal = document.getElementById('loginModal');
-  if(!loginBtn || !modal) {
+  if((!loginBtn && !loginBtnMobile) || !modal) {
     console.warn('Login button or modal not found');
     return;
   }
@@ -176,16 +187,29 @@ function setupLoginModal(){
   };
   const close = () => { modal.setAttribute('aria-hidden','true'); };
 
-  loginBtn.addEventListener('click', () => {
-      open();
-      // Reset form when opening
-      const form = document.getElementById('manualLoginFormElement');
-      if (form) {
-        form.reset();
-      }
-      // Google Sign-In is now handled by Supabase OAuth (auth.js)
-      // The button in the modal will call loginWithGoogle() directly
-  });
+  // Attach event listeners to both login buttons
+  if (loginBtn) {
+    loginBtn.addEventListener('click', () => {
+        open();
+        // Reset form when opening
+        const form = document.getElementById('manualLoginFormElement');
+        if (form) {
+          form.reset();
+        }
+    });
+  }
+  
+  if (loginBtnMobile) {
+    loginBtnMobile.addEventListener('click', () => {
+        open();
+        // Reset form when opening
+        const form = document.getElementById('manualLoginFormElement');
+        if (form) {
+          form.reset();
+        }
+    });
+  }
+  
   closeSelectors.forEach(sel => {
       modal.querySelectorAll(sel).forEach(el => el.addEventListener('click', close));
   });
@@ -273,13 +297,17 @@ async function initGoogleSignIn(){
 function setupMobileMenu() {
   const menuToggle = document.getElementById('menuToggle');
   const mainNav = document.getElementById('mainNav');
+  
   if (!menuToggle || !mainNav) {
-    console.warn('Mobile menu elements not found');
+    console.warn('Mobile menu elements not found', { menuToggle: !!menuToggle, mainNav: !!mainNav });
     return;
   }
   
+  console.log('Setting up mobile menu', { menuToggle, mainNav });
+  
   // Prevent duplicate event listeners
   if (menuToggle.dataset.initialized === 'true') {
+    console.log('Mobile menu already initialized');
     return;
   }
   menuToggle.dataset.initialized = 'true';
@@ -292,22 +320,32 @@ function setupMobileMenu() {
     document.body.appendChild(overlay);
   }
 
-  const toggleMenu = () => {
+  const toggleMenu = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    console.log('Toggle menu clicked');
     const isOpen = mainNav.classList.contains('menu-open');
+    console.log('Menu is currently', isOpen ? 'open' : 'closed');
+    
     if (isOpen) {
       mainNav.classList.remove('menu-open');
       overlay.classList.remove('active');
       menuToggle.setAttribute('aria-expanded', 'false');
       document.body.style.overflow = '';
+      console.log('Menu closed');
     } else {
       mainNav.classList.add('menu-open');
       overlay.classList.add('active');
       menuToggle.setAttribute('aria-expanded', 'true');
       document.body.style.overflow = 'hidden';
+      console.log('Menu opened');
     }
   };
 
-  menuToggle.addEventListener('click', toggleMenu);
+  menuToggle.addEventListener('click', toggleMenu, true);
+  console.log('Click listener attached to menu toggle');
   
   // Close menu when clicking overlay
   overlay.addEventListener('click', () => {
@@ -317,7 +355,7 @@ function setupMobileMenu() {
   });
 
   // Close menu when clicking a link (mobile)
-  const navLinks = mainNav.querySelectorAll('.link, .btn');
+  const navLinks = mainNav.querySelectorAll('.link, .btn, .dropdown-item');
   navLinks.forEach(link => {
     link.addEventListener('click', () => {
       if (window.innerWidth <= 900 && mainNav.classList.contains('menu-open')) {
@@ -341,6 +379,7 @@ function setupMobileMenu() {
 async function updateUserDetails() {
   const userDetails = document.getElementById('userDetails');
   const loginBtn = document.getElementById('loginBtn');
+  const loginBtnMobile = document.getElementById('loginBtnMobile');
   const topbar = document.querySelector('.topbar');
   
   if (!userDetails) return;
@@ -356,9 +395,10 @@ async function updateUserDetails() {
     const user = await getLoggedInUser();
     
     if (user) {
-      // User is logged in - show user details
+      // User is logged in - show user details, hide login buttons
       userDetails.style.display = 'flex';
       if (loginBtn) loginBtn.style.display = 'none';
+      if (loginBtnMobile) loginBtnMobile.style.display = 'none';
       if (topbar) topbar.classList.add('user-logged-in');
       
       // Populate user info
@@ -426,21 +466,29 @@ async function updateUserDetails() {
       if (userNameLarge) userNameLarge.textContent = displayName;
       if (userEmailLarge) userEmailLarge.textContent = email;
     } else {
-      // User is not logged in - hide user details and show login button
+      // User is not logged in - hide user details and show login buttons
       userDetails.style.display = 'none';
       if (loginBtn) {
-        loginBtn.style.display = 'inline-block';
+        loginBtn.style.display = 'inline-flex';
         loginBtn.style.visibility = 'visible';
+      }
+      if (loginBtnMobile) {
+        loginBtnMobile.style.display = 'flex';
+        loginBtnMobile.style.visibility = 'visible';
       }
       if (topbar) topbar.classList.remove('user-logged-in');
     }
   } catch (error) {
     console.error('Error updating user details:', error);
-    // On error, hide user details and show login button
+    // On error, hide user details and show login buttons
     userDetails.style.display = 'none';
     if (loginBtn) {
-      loginBtn.style.display = 'inline-block';
+      loginBtn.style.display = 'inline-flex';
       loginBtn.style.visibility = 'visible';
+    }
+    if (loginBtnMobile) {
+      loginBtnMobile.style.display = 'flex';
+      loginBtnMobile.style.visibility = 'visible';
     }
     if (topbar) topbar.classList.remove('user-logged-in');
   }
