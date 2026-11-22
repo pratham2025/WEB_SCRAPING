@@ -11,7 +11,7 @@ This error occurs when Google OAuth is not properly configured. Follow these ste
 3. Enable **Google** provider
 4. Enter your Google OAuth credentials:
    - **Client ID**: `688906729987-opjalg044vu4f7u7obk3rkgi4cr345sl.apps.googleusercontent.com`
-   - **Client Secret**: `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`
+   - **Client Secret**: `YOUR_GOOGLE_CLIENT_SECRET`
 5. Go to **Authentication** → **URL Configuration**
 6. Set **Site URL** to your frontend URL:
    - For local development: `http://localhost:5500` (or your port)
